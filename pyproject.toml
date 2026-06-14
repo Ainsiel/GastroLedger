@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["apps/api", "apps/worker"]
+testpaths = ["apps/api/tests", "apps/worker/tests", "tests/integration"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["apps/api", "apps/worker", "tests/integration"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+

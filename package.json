@@ -1,0 +1,30 @@
+{
+  "name": "gastroledger",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GastroLedger modular-monolith monorepo scaffold",
+  "workspaces": [
+    "apps/web",
+    "packages/api-contract"
+  ],
+  "engines": {
+    "node": ">=22 <23",
+    "npm": ">=10 <11"
+  },
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "bootstrap": "npm install && npm run bootstrap:python",
+    "bootstrap:python": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.develop.yaml build api worker",
+    "lint": "npm --workspace @gastroledger/api-contract run lint && npm --workspace @gastroledger/web run lint && npm run lint:python",
+    "lint:python": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.develop.yaml run --build --rm --no-deps api ruff check apps/api apps/worker tests/integration",
+    "test": "npm --workspace @gastroledger/web run test && npm run test:python",
+    "test:python": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.develop.yaml run --build --rm --no-deps api pytest",
+    "build": "npm --workspace @gastroledger/api-contract run build && npm --workspace @gastroledger/web run build && npm run build:containers",
+    "build:containers": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml build web api worker",
+    "dev": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.develop.yaml up --build",
+    "start": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.production-like.yaml up --build",
+    "compose:config": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.develop.yaml config --quiet",
+    "compose:config:qa": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.qa.yaml config --quiet",
+    "compose:config:production-like": "docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.production-like.yaml config --quiet"
+  }
+}

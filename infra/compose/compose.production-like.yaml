@@ -1,0 +1,19 @@
+services:
+  postgres:
+    restart: unless-stopped
+
+  api:
+    environment:
+      GL_ENVIRONMENT: production-like
+    restart: unless-stopped
+
+  worker:
+    environment:
+      GL_ENVIRONMENT: production-like
+    restart: unless-stopped
+
+  web:
+    environment:
+      GL_ENVIRONMENT: production-like
+    restart: unless-stopped
+

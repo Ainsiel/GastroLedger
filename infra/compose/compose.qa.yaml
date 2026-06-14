@@ -1,0 +1,13 @@
+services:
+  api:
+    environment:
+      GL_ENVIRONMENT: qa
+
+  worker:
+    environment:
+      GL_ENVIRONMENT: qa
+
+  web:
+    environment:
+      GL_ENVIRONMENT: qa
+

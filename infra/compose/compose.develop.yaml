@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      target: development
+    command: uvicorn gastroledger_api.app:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      GL_ENVIRONMENT: development
+    volumes:
+      - ../..:/workspace
+
+  worker:
+    build:
+      target: development
+    environment:
+      GL_ENVIRONMENT: development
+    volumes:
+      - ../..:/workspace
+
+  web:
+    build:
+      target: development
+    environment:
+      GL_ENVIRONMENT: development
+    volumes:
+      - ../..:/workspace
+      - web-node-modules:/workspace/node_modules
+      - web-next-cache:/workspace/apps/web/.next
+
+volumes:
+  web-node-modules:
+  web-next-cache:
+
