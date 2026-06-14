@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS control_audit_events (
 );
 
 GRANT USAGE ON SCHEMA public TO gastroledger_app;
-GRANT SELECT ON platform_tenants TO gastroledger_app;
+GRANT SELECT ON platform_tenants, platform_tenant_settings TO gastroledger_app;
 GRANT INSERT ON control_audit_events TO gastroledger_app;
 GRANT USAGE ON SCHEMA public TO gastroledger_registration;
 GRANT INSERT ON
