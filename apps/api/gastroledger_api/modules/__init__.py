@@ -1,0 +1,2 @@
+"""Confirmed bounded-context modules."""
+

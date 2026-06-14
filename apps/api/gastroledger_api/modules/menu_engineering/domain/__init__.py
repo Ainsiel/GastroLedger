@@ -1,0 +1,2 @@
+"""Menu Engineering domain boundary."""
+

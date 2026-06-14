@@ -1,0 +1,2 @@
+"""Store Operations domain boundary."""
+

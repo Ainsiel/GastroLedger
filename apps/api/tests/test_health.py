@@ -1,4 +1,4 @@
-from gastroledger_api.app import health
+from gastroledger_api.technical.health import health
 
 
 def test_api_health() -> None:
