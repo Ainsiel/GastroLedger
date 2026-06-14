@@ -15,3 +15,11 @@ def postgres_connection() -> Iterator[psycopg.Connection[tuple[object, ...]]]:
         yield connection
         connection.rollback()
 
+
+@pytest.fixture
+def database_url() -> str:
+    value = os.getenv("TEST_DATABASE_URL")
+    if not value:
+        pytest.skip("TEST_DATABASE_URL is required for the PostgreSQL integration harness")
+    return value
+

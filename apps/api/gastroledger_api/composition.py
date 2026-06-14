@@ -14,6 +14,7 @@ from gastroledger_api.modules.procurement.public import MODULE_ID as PROCUREMENT
 from gastroledger_api.modules.store_operations.public import MODULE_ID as STORE_OPERATIONS
 from gastroledger_api.runtime import configure_logging
 from gastroledger_api.technical.health import router as health_router
+from gastroledger_api.technical.platform_routes import create_platform_router
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ def create_application() -> FastAPI:
     configure_logging()
     application = FastAPI(title="GastroLedger API", version="0.0.0")
     application.include_router(health_router)
+    application.include_router(create_platform_router())
     application.state.module_boundaries = MODULE_BOUNDARIES
     return application
 

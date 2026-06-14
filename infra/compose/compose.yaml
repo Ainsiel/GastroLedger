@@ -27,14 +27,7 @@ services:
       PGHOST: postgres
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGUSER: ${POSTGRES_USER}
-    command:
-      [
-        "psql",
-        "--set",
-        "ON_ERROR_STOP=1",
-        "--file",
-        "/migrations/0000-foundation.sql",
-      ]
+    command: ["sh", "-c", "for migration in /migrations/*.sql; do psql --set ON_ERROR_STOP=1 --file \"$${migration}\"; done"]
     restart: "no"
     volumes:
       - ../migrations:/migrations:ro
@@ -93,6 +86,7 @@ services:
       api:
         condition: service_healthy
     environment:
+      API_BASE_URL: http://api:8000
       GL_ENVIRONMENT: base
     healthcheck:
       test:
