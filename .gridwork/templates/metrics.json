@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "<run-id>",
+  "workflow": "<workflow-id>",
+  "agent": "<agent-id>",
+  "counts": {
+    "events": 0,
+    "questions": 0,
+    "gates": 0,
+    "commands": 0,
+    "testsRun": 0,
+    "findings": 0
+  }
+}
+

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "<run-id>",
+  "workflow": "<workflow-id>",
+  "agent": "<agent-id>",
+  "status": "created",
+  "startedAt": "<iso-8601>",
+  "updatedAt": "<iso-8601>",
+  "workOrderId": null,
+  "github": {
+    "issue": null,
+    "pullRequest": null
+  },
+  "metrics": {
+    "events": 0,
+    "gates": 0,
+    "commands": 0
+  }
+}
+

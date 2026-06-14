@@ -1,0 +1,43 @@
+{
+  "kind": "gridwork.skill",
+  "id": "integration-test-design",
+  "name": "Integration Test Design",
+  "version": "0.1.0",
+  "description": "Designs technology-agnostic integration test boundaries, scenarios, environments and evidence plans.",
+  "category": "testing",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "behavior_or_contract",
+    "candidate_integration_boundaries",
+    "known_environment_constraints"
+  ],
+  "producedOutputs": [
+    "integration_test_strategy",
+    "integration_test_case_design",
+    "integration_environment_plan"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/testing/integration/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/tool-allowlist.md",
+    "../../policies/security-policy.md"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "shared_environment_access",
+    "secret_value_needed"
+  ],
+  "permissionsInheritedOnly": true
+}

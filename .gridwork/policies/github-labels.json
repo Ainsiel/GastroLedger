@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "1.0",
+  "status": "active",
+  "labels": [
+    {
+      "name": "gridwork",
+      "color": "5319e7",
+      "description": "Gridwork factory work.",
+      "category": "product",
+      "required": true
+    },
+    {
+      "name": "type:feature",
+      "color": "0e8a16",
+      "description": "Feature or enabling capability.",
+      "category": "type",
+      "required": false
+    },
+    {
+      "name": "type:bug",
+      "color": "d73a4a",
+      "description": "Bug or regression.",
+      "category": "type",
+      "required": false
+    },
+    {
+      "name": "type:docs",
+      "color": "0075ca",
+      "description": "Documentation work.",
+      "category": "type",
+      "required": false
+    },
+    {
+      "name": "slice:vertical",
+      "color": "1d76db",
+      "description": "End-to-end vertical slice.",
+      "category": "slice",
+      "required": false
+    },
+    {
+      "name": "slice:enabling",
+      "color": "1d76db",
+      "description": "Enabling implementation slice.",
+      "category": "slice",
+      "required": false
+    },
+    {
+      "name": "phase:6",
+      "color": "c5def5",
+      "description": "Full-v1 factory expansion.",
+      "category": "phase",
+      "required": false
+    },
+    {
+      "name": "area:agents",
+      "color": "bfdadc",
+      "description": "Agent contract work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:workflows",
+      "color": "bfdadc",
+      "description": "Workflow playbook work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:skills",
+      "color": "bfdadc",
+      "description": "Skill contract work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:stack-pack",
+      "color": "bfdadc",
+      "description": "Stack guidance work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:policies",
+      "color": "bfdadc",
+      "description": "Policy and governance work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:templates",
+      "color": "bfdadc",
+      "description": "Template work.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "area:observability",
+      "color": "bfdadc",
+      "description": "Local traces, logs, metrics and reports.",
+      "category": "area",
+      "required": false
+    },
+    {
+      "name": "status:needs-refinement",
+      "color": "fbca04",
+      "description": "Needs refinement before execution.",
+      "category": "status",
+      "required": false
+    },
+    {
+      "name": "status:ready",
+      "color": "0e8a16",
+      "description": "Ready for execution.",
+      "category": "status",
+      "required": false
+    },
+    {
+      "name": "mode:hitl",
+      "color": "d4c5f9",
+      "description": "Human-in-the-loop work.",
+      "category": "mode",
+      "required": false
+    },
+    {
+      "name": "mode:assisted",
+      "color": "d4c5f9",
+      "description": "Assisted agent work.",
+      "category": "mode",
+      "required": false
+    },
+    {
+      "name": "mode:afk",
+      "color": "d4c5f9",
+      "description": "AFK delegated work.",
+      "category": "mode",
+      "required": false
+    },
+    {
+      "name": "agent:implementer",
+      "color": "f9d0c4",
+      "description": "Implementer agent.",
+      "category": "agent",
+      "required": false
+    },
+    {
+      "name": "agent:backlog-manager",
+      "color": "f9d0c4",
+      "description": "Backlog manager agent.",
+      "category": "agent",
+      "required": false
+    },
+    {
+      "name": "agent:verifier",
+      "color": "f9d0c4",
+      "description": "Verifier agent.",
+      "category": "agent",
+      "required": false
+    },
+    {
+      "name": "workflow:tdd-implementation",
+      "color": "fef2c0",
+      "description": "TDD implementation workflow.",
+      "category": "workflow",
+      "required": false
+    },
+    {
+      "name": "workflow:backlog-management",
+      "color": "fef2c0",
+      "description": "Backlog management workflow.",
+      "category": "workflow",
+      "required": false
+    },
+    {
+      "name": "workflow:verification-pr",
+      "color": "fef2c0",
+      "description": "PR verification workflow.",
+      "category": "workflow",
+      "required": false
+    }
+  ],
+  "rules": [
+    "Agents must not invent labels.",
+    "Creating missing labels in GitHub requires approval.",
+    "Issue drafts must reference this catalog before publishing."
+  ]
+}

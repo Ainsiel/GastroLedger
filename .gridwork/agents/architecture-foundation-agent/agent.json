@@ -1,0 +1,56 @@
+{
+  "kind": "gridwork.agent",
+  "id": "architecture-foundation-agent",
+  "name": "Gridwork Architecture Foundation Agent",
+  "version": "0.1.0",
+  "description": "Materializes an approved architecture as a minimal executable foundation without implementing business behavior.",
+  "mode": "hybrid",
+  "contract": "AGENT.md",
+  "allowedWorkflows": [
+    "architecture-foundation"
+  ],
+  "allowedSkills": [
+    "architecture-foundation-planning",
+    "project-scaffolding",
+    "module-boundary-enforcement",
+    "contract-first-boundaries",
+    "composition-root-wiring",
+    "architecture-conformance-verification",
+    "integration-test-design",
+    "integration-testing",
+    "backlog-planning",
+    "frontend-architecture-design",
+    "frontend-api-contract-consumption",
+    "nextjs-frontend-guidance",
+    "nextjs-app-router-architecture",
+    "nextjs-auth-session-guidance",
+    "springboot-backend-guidance",
+    "fastapi-backend-guidance",
+    "postgresql-persistence-guidance",
+    "dockerfile-authoring",
+    "docker-compose-local-guidance",
+    "handoff"
+  ],
+  "permissionProfile": "architecture-foundation-hybrid",
+  "pathScopes": [
+    "gridwork_factory_read",
+    "factory_runtime_write",
+    "approved_architecture_foundation_write",
+    "test_code_scoped_write",
+    "project_context_readonly"
+  ],
+  "policyRefs": [
+    "../../policies/security-policy.md",
+    "../../policies/logging-policy.md",
+    "../../policies/path-scopes.md",
+    "../../policies/agent-permissions.md",
+    "../../policies/workspace-domains.md",
+    "../../policies/human-gates.md",
+    "../../policies/policy-precedence.md",
+    "../../policies/architecture-design-policy.md",
+    "../../policies/architecture-foundation-policy.md",
+    "../../policies/tool-allowlist.md",
+    "../../policies/stack-skill-policy.md"
+  ],
+  "handoffPolicy": "required_on_agent_or_session_transfer"
+}

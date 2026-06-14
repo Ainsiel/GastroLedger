@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "pull-request-lifecycle",
+  "name": "Pull Request Lifecycle",
+  "version": "0.1.0",
+  "description": "Creates, tracks and governs feature and release pull requests through merge without bypassing checks.",
+  "category": "github",
+  "allowedAgents": ["orchestrator", "verifier-agent", "release-manager-agent"],
+  "allowedWorkflows": ["feature-pr-delivery", "verification-pr", "release-promotion"],
+  "requiredInputs": ["head_branch", "base_branch", "delivery_scope", "required_checks"],
+  "producedOutputs": ["pull_request_plan", "pull_request_record", "merge_record"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/github/pull-requests/"],
+  "toolPolicyRefs": ["../../policies/github-cli-policy.md", "../../policies/delivery-lifecycle-policy.md"],
+  "humanGates": ["create_pr", "github_pr_review", "merge_to_develop", "merge_to_main"],
+  "permissionsInheritedOnly": true
+}

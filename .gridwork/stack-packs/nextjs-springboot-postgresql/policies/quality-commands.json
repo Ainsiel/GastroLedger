@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "commands": [
+    {
+      "id": "frontend_typecheck",
+      "commandHint": "npm run typecheck",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "backend_format_check",
+      "commandHint": "./mvnw spotless:check",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "backend_static_checks",
+      "commandHint": "./mvnw verify -DskipTests",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "fastapi_lint",
+      "commandHint": "ruff check .",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "fastapi_typecheck",
+      "commandHint": "mypy .",
+      "requiresPathConfirmation": true
+    }
+  ],
+  "rules": [
+    "Quality commands must be project-confirmed before AFK use.",
+    "Missing commands are skipped and reported, not invented."
+  ]
+}

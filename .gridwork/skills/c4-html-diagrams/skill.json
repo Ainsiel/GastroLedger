@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "c4-html-diagrams",
+  "name": "C4 HTML Diagrams",
+  "version": "0.1.0",
+  "description": "Creates optional self-contained HTML C4 context, container and component diagrams from approved architecture models.",
+  "category": "architecture-diagram",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["diagram_goal", "approved_architecture_model", "c4_level"],
+  "producedOutputs": ["c4_html_diagram", "diagram_notes"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/diagrams/", "docs/architecture/diagrams/"],
+  "toolPolicyRefs": ["../../policies/diagram-html-policy.md"],
+  "humanGates": ["approved_architecture_publish"],
+  "permissionsInheritedOnly": true
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridwork.local/schemas/factory.schema.json",
+  "title": "Gridwork Factory Manifest",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "schemaVersion",
+    "factoryProfile",
+    "generatedProductCode",
+    "activation",
+    "agents",
+    "workflows",
+    "skills",
+    "policies",
+    "schemas",
+    "templates"
+  ],
+  "properties": {
+    "kind": {
+      "const": "gridwork.factory"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "string"
+    },
+    "factoryProfile": {
+      "enum": [
+        "minimal-mvp",
+        "full-v1"
+      ]
+    },
+    "generatedProductCode": {
+      "type": "boolean"
+    },
+    "activation": {
+      "type": "object"
+    },
+    "agents": {
+      "type": "array"
+    },
+    "workflows": {
+      "type": "array"
+    },
+    "skills": {
+      "type": "array"
+    },
+    "policies": {
+      "type": "array"
+    },
+    "schemas": {
+      "type": "array"
+    },
+    "templates": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-auth-session-guidance",
+  "name": "Next.js Auth Session Guidance",
+  "version": "0.1.0",
+  "description": "Designs and verifies secure Next.js session consumption, protected navigation and backend authorization boundaries.",
+  "category": "stack-frontend-security",
+  "allowedAgents": ["software-architect", "architecture-foundation-agent", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "architecture-foundation", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["approved_auth_contract", "confirmed_nextjs_project", "backend_authorization_model"],
+  "producedOutputs": ["nextjs_session_strategy", "protected_route_plan", "session_failure_behavior"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack/nextjs/auth/"],
+  "toolPolicyRefs": ["../../../../policies/security-policy.md", "../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["auth_architecture_decision", "secret_value_needed", "public_contract_decision"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

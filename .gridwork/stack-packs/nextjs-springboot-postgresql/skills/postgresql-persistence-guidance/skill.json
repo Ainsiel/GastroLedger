@@ -1,0 +1,38 @@
+{
+  "kind": "gridwork.skill",
+  "id": "postgresql-persistence-guidance",
+  "name": "PostgreSQL Persistence Guidance",
+  "version": "0.1.0",
+  "description": "Guidance for PostgreSQL migrations, constraints, indexes and persistence tests.",
+  "category": "stack-guidance",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "confirmed_persistence_path",
+    "work_order_or_architecture_question"
+  ],
+  "producedOutputs": [
+    "persistence_guidance"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/stack-guidance/"
+  ],
+  "toolPolicyRefs": [
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "path_confirmation"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

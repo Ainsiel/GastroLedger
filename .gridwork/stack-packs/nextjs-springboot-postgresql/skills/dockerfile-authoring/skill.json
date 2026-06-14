@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "dockerfile-authoring",
+  "name": "Dockerfile Authoring",
+  "version": "0.1.0",
+  "description": "Creates or reviews secure, reproducible and cache-efficient Dockerfiles for confirmed project services.",
+  "category": "stack-infrastructure",
+  "allowedAgents": ["software-architect", "architecture-foundation-agent", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "architecture-foundation", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_service_path", "build_and_runtime_contract", "approved_base_image_policy"],
+  "producedOutputs": ["dockerfile_plan", "dockerfile_or_review", "image_validation_plan"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/docker/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "infra_file_write", "base_image_change", "dependency_change"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

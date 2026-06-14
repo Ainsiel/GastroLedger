@@ -1,0 +1,40 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-issue-discovery",
+  "name": "GitHub Issue Discovery",
+  "version": "0.1.0",
+  "description": "Finds and normalizes GitHub issues for planning, implementation or verification without creating work orders automatically.",
+  "category": "github",
+  "allowedAgents": [
+    "orchestrator",
+    "planner-agent",
+    "backlog-manager-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "intake-existing-code",
+    "backlog-management",
+    "backlog-task-delivery",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "repo",
+    "filters"
+  ],
+  "producedOutputs": [
+    "normalized_issue_summary",
+    "ready_issue_candidates"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/github/issue-discovery/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md"
+  ],
+  "humanGates": [
+    "afk_delegation"
+  ],
+  "permissionsInheritedOnly": true
+}

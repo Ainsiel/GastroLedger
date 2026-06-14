@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "clean-architecture",
+  "name": "Clean Architecture",
+  "version": "0.1.0",
+  "description": "Designs dependency direction, use-case boundaries, ports and adapters while preserving domain independence.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["bounded_contexts", "architecture_drivers", "existing_structure_optional"],
+  "producedOutputs": ["dependency_rules", "port_adapter_map", "use_case_boundaries"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/structure/", "docs/architecture/structure/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["dependency_boundary_decision"],
+  "permissionsInheritedOnly": true
+}

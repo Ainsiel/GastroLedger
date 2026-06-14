@@ -1,0 +1,80 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "architecture-foundation",
+  "name": "Architecture Foundation",
+  "version": "0.1.0",
+  "description": "Materializes approved architecture into a minimal executable structure, required contracts and conformance tests.",
+  "mode": "hybrid",
+  "primaryAgent": "architecture-foundation-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "software-architect",
+    "architecture-foundation-agent",
+    "planner-agent",
+    "verifier-agent"
+  ],
+  "allowedSkills": [
+    "architecture-foundation-planning",
+    "project-scaffolding",
+    "module-boundary-enforcement",
+    "contract-first-boundaries",
+    "composition-root-wiring",
+    "architecture-conformance-verification",
+    "integration-test-design",
+    "integration-testing",
+    "backlog-planning",
+    "frontend-architecture-design",
+    "frontend-api-contract-consumption",
+    "nextjs-frontend-guidance",
+    "nextjs-app-router-architecture",
+    "nextjs-auth-session-guidance",
+    "springboot-backend-guidance",
+    "fastapi-backend-guidance",
+    "postgresql-persistence-guidance",
+    "dockerfile-authoring",
+    "docker-compose-local-guidance",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "approved_architecture",
+    "approved_adrs",
+    "confirmed_stack",
+    "confirmed_foundation_paths",
+    "approved_foundation_plan",
+    "command_allowlist"
+  ],
+  "producedOutputs": [
+    "foundation_plan",
+    "minimal_executable_structure",
+    "required_boundary_contracts",
+    "composition_root",
+    "architecture_tests",
+    "frontend_foundation",
+    "frontend_boundary_tests",
+    "conformance_report",
+    "first_slice_backlog_inputs",
+    "implementation_handoff"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/architecture-foundation/",
+    ".factory/runs/<run-id>/artifacts/testing/architecture/",
+    ".factory/runs/<run-id>/handoffs/"
+  ],
+  "humanGates": [
+    "foundation_plan_approval",
+    "product_structure_write",
+    "dependency_change",
+    "architecture_decision",
+    "scope_change",
+    "unknown_command",
+    "infra_file_write",
+    "create_local_branch",
+    "create_commit",
+    "push_branch",
+    "create_pr",
+    "github_write",
+    "secret_value_needed",
+    "destructive_action"
+  ],
+  "requiresWorkOrder": false
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-frontend-guidance",
+  "name": "Next.js Frontend Guidance",
+  "version": "0.1.0",
+  "description": "Guidance for Next.js frontend structure, routes, UI behavior and tests.",
+  "category": "stack-guidance",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "confirmed_frontend_path",
+    "work_order_or_architecture_question"
+  ],
+  "producedOutputs": [
+    "frontend_guidance"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/stack-guidance/"
+  ],
+  "toolPolicyRefs": [
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "path_confirmation"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

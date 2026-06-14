@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "design-pattern-selection",
+  "name": "Design Pattern Selection",
+  "version": "0.1.0",
+  "description": "Selects local design patterns only when a concrete recurring design force justifies their complexity.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["local_design_problem", "forces", "existing_conventions"],
+  "producedOutputs": ["design_pattern_decision", "rejection_criteria"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/decisions/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["design_pattern_decision"],
+  "permissionsInheritedOnly": true
+}

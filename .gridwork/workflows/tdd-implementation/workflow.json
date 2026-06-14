@@ -1,0 +1,81 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "tdd-implementation",
+  "name": "TDD Implementation",
+  "version": "0.1.0",
+  "description": "Implements an approved work order with TDD, evidence and allowlisted commands.",
+  "mode": "afk",
+  "primaryAgent": "implementer-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "implementer-agent"
+  ],
+  "allowedSkills": [
+    "github-issue-discovery",
+    "diagnose-bug",
+    "tdd",
+    "integration-test-design",
+    "integration-testing",
+    "frontend-state-strategy",
+    "frontend-api-contract-consumption",
+    "frontend-testing-strategy",
+    "git-branch-management",
+    "work-order-branch-lifecycle",
+    "ci-status-evaluation",
+    "quality-command-contract",
+    "nextjs-e2e-testing",
+    "springboot-migration-testing",
+    "springboot-integration-testing",
+    "fastapi-migration-testing",
+    "fastapi-integration-testing",
+    "postgres-test-environment",
+    "database-migration-verification",
+    "nextjs-frontend-guidance",
+    "nextjs-app-router-architecture",
+    "nextjs-auth-session-guidance",
+    "nextjs-data-fetching-and-cache",
+    "nextjs-ui-design",
+    "nextjs-performance",
+    "springboot-backend-guidance",
+    "springboot-performance",
+    "fastapi-backend-guidance",
+    "fastapi-performance",
+    "postgresql-persistence-guidance",
+    "postgresql-performance",
+    "dockerfile-authoring",
+    "docker-compose-local-guidance",
+    "docker-compose-optimization",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "approved_work_order",
+    "acceptance_criteria",
+    "path_scopes",
+    "test_command_allowlist"
+  ],
+  "producedOutputs": [
+    "red_phase_evidence",
+    "green_phase_evidence",
+    "refactor_summary",
+    "implementation_summary",
+    "verification_handoff",
+    "feature_pr_delivery_handoff"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/",
+    ".factory/runs/<run-id>/artifacts/tdd/"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "scope_change",
+    "unknown_command",
+    "create_local_branch",
+    "create_commit",
+    "push_branch",
+    "create_pr",
+    "github_write",
+    "secret_value_needed",
+    "destructive_action"
+  ],
+  "requiresWorkOrder": true
+}

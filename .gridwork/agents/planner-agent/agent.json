@@ -1,0 +1,39 @@
+{
+  "kind": "gridwork.agent",
+  "id": "planner-agent",
+  "name": "Gridwork Planner Agent",
+  "version": "0.1.0",
+  "description": "Turns approved requirements and architecture into local backlog drafts, vertical slices and publish plans.",
+  "mode": "hybrid",
+  "contract": "AGENT.md",
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "intake-existing-code",
+    "backlog-management"
+  ],
+  "allowedSkills": [
+    "backlog-planning",
+    "github-issue-publisher",
+    "github-label-manager",
+    "github-issue-discovery",
+    "github-cli",
+    "handoff"
+  ],
+  "permissionProfile": "planner-assisted",
+  "pathScopes": [
+    "gridwork_factory_read",
+    "factory_runtime_write",
+    "docs_backlog_write",
+    "project_context_readonly"
+  ],
+  "policyRefs": [
+    "../../policies/security-policy.md",
+    "../../policies/logging-policy.md",
+    "../../policies/github-cli-policy.md",
+    "../../policies/github-labels.json",
+    "../../policies/path-scopes.md",
+    "../../policies/agent-permissions.md",
+    "../../policies/human-gates.md"
+  ],
+  "handoffPolicy": "required_on_agent_or_session_transfer"
+}

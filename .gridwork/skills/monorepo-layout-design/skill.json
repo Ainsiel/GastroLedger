@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "monorepo-layout-design",
+  "name": "Monorepo Layout Design",
+  "version": "0.2.0",
+  "description": "Defines explicit component, integration-test and infrastructure boundaries for a monorepo.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect", "platform-engineer-agent"],
+  "allowedWorkflows": ["architecture-ddd", "repository-bootstrap"],
+  "requiredInputs": ["approved_architecture", "selected_stack"],
+  "producedOutputs": ["approved_repository_layout", "component_ownership_map"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/platform/", "docs/architecture/"],
+  "humanGates": ["architecture_decision"],
+  "permissionsInheritedOnly": true
+}

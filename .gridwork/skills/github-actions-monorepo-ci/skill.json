@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-actions-monorepo-ci",
+  "name": "GitHub Actions Monorepo CI",
+  "version": "0.2.0",
+  "description": "Designs branch-aware monorepo CI gates for feature, develop, release and production flows.",
+  "category": "cicd",
+  "allowedAgents": ["platform-engineer-agent"],
+  "allowedWorkflows": ["delivery-infrastructure"],
+  "requiredInputs": ["root_quality_command_contract", "branch_delivery_policy"],
+  "producedOutputs": ["github_actions_workflows", "required_checks_plan"],
+  "artifactPaths": [".github/workflows/", ".factory/runs/<run-id>/artifacts/platform/"],
+  "humanGates": ["github_workflow_file_write", "deploy_enabled"],
+  "permissionsInheritedOnly": true
+}

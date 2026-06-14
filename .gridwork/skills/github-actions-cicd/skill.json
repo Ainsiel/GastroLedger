@@ -1,0 +1,41 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-actions-cicd",
+  "name": "GitHub Actions CI/CD",
+  "version": "0.1.0",
+  "description": "Helps draft GitHub Actions workflows without deploying by default.",
+  "category": "cicd",
+  "allowedAgents": [
+    "software-architect",
+    "planner-agent",
+    "release-manager-agent",
+    "platform-engineer-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "release-promotion",
+    "delivery-infrastructure"
+  ],
+  "requiredInputs": [
+    "project_stack",
+    "quality_commands",
+    "deployment_policy"
+  ],
+  "producedOutputs": [
+    "pipeline_design",
+    "github_actions_yaml_draft",
+    "cicd_review_notes"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/cicd/",
+    ".github/workflows/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/human-gates.md"
+  ],
+  "humanGates": [
+    "github_workflow_file_write",
+    "deploy_enabled"
+  ],
+  "permissionsInheritedOnly": true
+}

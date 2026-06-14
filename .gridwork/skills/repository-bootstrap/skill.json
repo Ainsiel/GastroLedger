@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "repository-bootstrap",
+  "name": "Repository Bootstrap",
+  "version": "0.2.0",
+  "description": "Creates approved stack scaffolds and technical boundaries without implementing business behavior.",
+  "category": "platform",
+  "allowedAgents": ["platform-engineer-agent"],
+  "allowedWorkflows": ["repository-bootstrap"],
+  "requiredInputs": ["approved_repository_layout", "selected_stack"],
+  "producedOutputs": ["repository_bootstrap_report"],
+  "artifactPaths": ["frontend/", "backend/", "tests/", "infra/", ".factory/runs/<run-id>/artifacts/platform/"],
+  "humanGates": ["dependency_change", "product_scaffold_write", "unknown_command"],
+  "permissionsInheritedOnly": true
+}

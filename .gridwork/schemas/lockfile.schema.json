@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridwork.local/schemas/lockfile.schema.json",
+  "title": "Gridwork Lockfile",
+  "type": "object",
+  "required": [
+    "kind",
+    "schemaVersion",
+    "factorySource",
+    "factoryVersion",
+    "factoryProfile",
+    "installedAt",
+    "files"
+  ],
+  "properties": {
+    "kind": {
+      "const": "gridwork.lockfile"
+    },
+    "schemaVersion": {
+      "type": "string"
+    },
+    "factorySource": {
+      "type": "string"
+    },
+    "factoryVersion": {
+      "type": "string"
+    },
+    "factoryProfile": {
+      "type": "string"
+    },
+    "installedAt": {
+      "type": "string"
+    },
+    "files": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

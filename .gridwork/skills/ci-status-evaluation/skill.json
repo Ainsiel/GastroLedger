@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "ci-status-evaluation",
+  "name": "CI Status Evaluation",
+  "version": "0.1.0",
+  "description": "Evaluates required GitHub Actions checks for an exact PR head SHA and prepares actionable failure handoffs.",
+  "category": "cicd",
+  "allowedAgents": ["orchestrator", "implementer-agent", "verifier-agent", "release-manager-agent", "platform-engineer-agent"],
+  "allowedWorkflows": ["feature-pr-delivery", "tdd-implementation", "verification-pr", "release-promotion", "ci-failure-repair"],
+  "requiredInputs": ["pull_request", "head_sha", "required_checks"],
+  "producedOutputs": ["ci_status", "ci_evidence", "ci_failure_handoff"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/cicd/checks/"],
+  "toolPolicyRefs": ["../../policies/github-cli-policy.md", "../../policies/delivery-lifecycle-policy.md"],
+  "humanGates": ["rerun_workflow", "unknown_check", "github_write"],
+  "permissionsInheritedOnly": true
+}

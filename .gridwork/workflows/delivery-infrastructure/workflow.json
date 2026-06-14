@@ -1,0 +1,61 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "delivery-infrastructure",
+  "name": "Delivery Infrastructure",
+  "version": "0.2.0",
+  "description": "Creates and verifies monorepo GitHub Actions, required-check plans, environments and deployment safeguards.",
+  "mode": "hybrid",
+  "primaryAgent": "platform-engineer-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "platform-engineer-agent",
+    "verifier-agent"
+  ],
+  "allowedSkills": [
+    "github-actions-cicd",
+    "github-actions-monorepo-ci",
+    "github-actions-reusable-workflows",
+    "changed-scope-detection",
+    "quality-command-contract",
+    "container-build-and-verification",
+    "github-rulesets-management",
+    "github-environments-management",
+    "deployment-verification",
+    "rollback-planning",
+    "nextjs-ci-quality-gates",
+    "nextjs-container-build",
+    "springboot-ci-quality-gates",
+    "springboot-container-build",
+    "fastapi-ci-quality-gates",
+    "fastapi-container-build",
+    "github-cli",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "repository_bootstrap_report",
+    "root_quality_command_contract",
+    "branch_delivery_policy",
+    "deployment_policy"
+  ],
+  "producedOutputs": [
+    "github_actions_workflows",
+    "required_checks_plan",
+    "github_rulesets_plan",
+    "github_environments_plan",
+    "delivery_validation_report"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/platform/",
+    ".github/workflows/",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md"
+  ],
+  "humanGates": [
+    "github_workflow_file_write",
+    "github_write",
+    "strong_remote_action",
+    "deploy_enabled",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}

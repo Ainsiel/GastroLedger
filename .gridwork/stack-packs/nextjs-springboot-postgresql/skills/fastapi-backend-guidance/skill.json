@@ -1,0 +1,44 @@
+{
+  "kind": "gridwork.skill",
+  "id": "fastapi-backend-guidance",
+  "name": "FastAPI Backend Guidance",
+  "version": "0.1.0",
+  "description": "Guides architecture, implementation and verification for an existing FastAPI backend.",
+  "category": "stack-guidance",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "confirmed_fastapi_project",
+    "confirmed_backend_paths",
+    "detected_python_and_fastapi_versions"
+  ],
+  "producedOutputs": [
+    "fastapi_backend_guidance",
+    "fastapi_implementation_or_review"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/stack/fastapi/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/test-commands.json",
+    "../../policies/quality-commands.json",
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "unknown_command",
+    "secret_value_needed"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "gridwork.agent",
+  "id": "release-manager-agent",
+  "name": "Gridwork Release Manager Agent",
+  "version": "0.1.0",
+  "description": "Coordinates governed promotion from develop to main and verifies production deployment without implementing code.",
+  "mode": "hybrid",
+  "contract": "AGENT.md",
+  "allowedWorkflows": ["release-promotion"],
+  "allowedSkills": [
+    "release-promotion",
+    "deployment-verification",
+    "pull-request-lifecycle",
+    "ci-status-evaluation",
+    "github-actions-cicd",
+    "github-cli",
+    "git-branch-management",
+    "handoff"
+  ],
+  "permissionProfile": "release-manager-hybrid",
+  "pathScopes": [
+    "gridwork_factory_read",
+    "factory_runtime_write",
+    "project_context_readonly",
+    "reports_write"
+  ],
+  "policyRefs": [
+    "../../policies/security-policy.md",
+    "../../policies/logging-policy.md",
+    "../../policies/github-cli-policy.md",
+    "../../policies/git-policy.md",
+    "../../policies/delivery-lifecycle-policy.md",
+    "../../policies/human-gates.md",
+    "../../policies/policy-precedence.md",
+    "../../policies/tool-allowlist.md"
+  ],
+  "handoffPolicy": "required_on_agent_or_session_transfer"
+}

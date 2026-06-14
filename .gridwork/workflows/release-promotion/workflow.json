@@ -1,0 +1,50 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "release-promotion",
+  "name": "Release Promotion",
+  "version": "0.1.0",
+  "description": "Promotes verified develop state to main, then observes the production deployment.",
+  "mode": "hybrid",
+  "primaryAgent": "release-manager-agent",
+  "participatingAgents": ["orchestrator", "release-manager-agent", "verifier-agent"],
+  "allowedSkills": [
+    "release-promotion",
+    "deployment-verification",
+    "pull-request-lifecycle",
+    "ci-status-evaluation",
+    "github-actions-cicd",
+    "github-cli",
+    "git-branch-management",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "develop_sha",
+    "release_scope",
+    "required_release_checks",
+    "production_environment"
+  ],
+  "producedOutputs": [
+    "release_pr_record",
+    "full_regression_evidence",
+    "release_decision",
+    "merge_to_main_record",
+    "deployment_verification",
+    "release_promotion_report"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/release/",
+    ".factory/runs/<run-id>/artifacts/cicd/",
+    ".factory/runs/<run-id>/artifacts/deployment/"
+  ],
+  "humanGates": [
+    "create_release_pr",
+    "github_pr_review",
+    "merge_to_main",
+    "production_approval",
+    "deploy",
+    "rollback",
+    "github_write",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}

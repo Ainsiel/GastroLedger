@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "quality-command-contract",
+  "name": "Quality Command Contract",
+  "version": "0.2.0",
+  "description": "Defines stable repository-root commands shared by local development, agents and CI.",
+  "category": "testing",
+  "allowedAgents": ["platform-engineer-agent", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["repository-bootstrap", "delivery-infrastructure", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["selected_stack", "quality_expectations"],
+  "producedOutputs": ["root_quality_command_contract"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/platform/"],
+  "humanGates": ["unknown_command"],
+  "permissionsInheritedOnly": true
+}

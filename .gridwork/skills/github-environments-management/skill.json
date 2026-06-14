@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-environments-management",
+  "name": "GitHub Environments Management",
+  "version": "0.2.0",
+  "description": "Plans and optionally applies approved GitHub deployment environments and protection rules.",
+  "category": "github",
+  "allowedAgents": ["platform-engineer-agent"],
+  "allowedWorkflows": ["delivery-infrastructure"],
+  "requiredInputs": ["deployment_policy"],
+  "producedOutputs": ["github_environments_plan", "github_environments_result"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/github/"],
+  "toolPolicyRefs": ["../../policies/github-cli-policy.md"],
+  "humanGates": ["github_write", "strong_remote_action", "secret_value_needed"],
+  "permissionsInheritedOnly": true
+}

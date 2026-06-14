@@ -1,0 +1,37 @@
+{
+  "kind": "gridwork.skill",
+  "id": "sdd-requirements",
+  "name": "SDD Requirements",
+  "version": "0.1.0",
+  "description": "Converts ideation outputs into an SDD focused on requirements, use cases and test cases.",
+  "category": "requirements",
+  "allowedAgents": [
+    "intake-agent"
+  ],
+  "allowedWorkflows": [
+    "ideation-from-zero"
+  ],
+  "requiredInputs": [
+    "ideation_notes",
+    "user_answers"
+  ],
+  "producedOutputs": [
+    "sdd_draft",
+    "functional_requirements",
+    "quality_attributes",
+    "use_cases",
+    "test_cases",
+    "traceability_matrix",
+    "open_questions"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/sdd/",
+    "docs/sdd/"
+  ],
+  "toolPolicyRefs": [],
+  "humanGates": [
+    "sdd_approval",
+    "scope_commitment"
+  ],
+  "permissionsInheritedOnly": true
+}

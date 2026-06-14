@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "architecture-decision-records",
+  "name": "Architecture Decision Records",
+  "version": "0.1.0",
+  "description": "Creates concise ADRs for consequential architecture decisions, alternatives and review triggers.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["decision", "context", "options", "consequences"],
+  "producedOutputs": ["adr_draft"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/adrs/", "docs/adr/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["adr_approval"],
+  "permissionsInheritedOnly": true
+}

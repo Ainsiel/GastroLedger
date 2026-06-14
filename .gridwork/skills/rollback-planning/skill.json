@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "rollback-planning",
+  "name": "Rollback Planning",
+  "version": "0.2.0",
+  "description": "Creates provider-neutral rollback criteria and procedures for application and database changes.",
+  "category": "deployment",
+  "allowedAgents": ["software-architect", "platform-engineer-agent"],
+  "allowedWorkflows": ["architecture-ddd", "delivery-infrastructure"],
+  "requiredInputs": ["deployment_policy", "migration_strategy"],
+  "producedOutputs": ["rollback_plan"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/deployment/", "docs/architecture/"],
+  "humanGates": ["architecture_decision", "deploy"],
+  "permissionsInheritedOnly": true
+}

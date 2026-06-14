@@ -1,0 +1,15 @@
+name: Develop CI
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  integration:
+    uses: ./.github/workflows/_integration-ci.yml
+  integration-gate:
+    name: develop / integration-gate
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Develop integration checks passed."

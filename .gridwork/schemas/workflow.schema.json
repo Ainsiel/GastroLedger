@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridwork.local/schemas/workflow.schema.json",
+  "title": "Gridwork Workflow Manifest",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "mode",
+    "primaryAgent",
+    "participatingAgents",
+    "allowedSkills",
+    "requiredInputs",
+    "producedOutputs",
+    "artifactPaths",
+    "humanGates",
+    "requiresWorkOrder"
+  ],
+  "properties": {
+    "kind": {
+      "const": "gridwork.workflow"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "interactive",
+        "afk",
+        "hybrid"
+      ]
+    },
+    "primaryAgent": {
+      "type": "string"
+    },
+    "participatingAgents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedSkills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiredInputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "producedOutputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artifactPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "humanGates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiresWorkOrder": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

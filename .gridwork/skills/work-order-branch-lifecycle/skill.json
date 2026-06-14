@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "work-order-branch-lifecycle",
+  "name": "Work Order Branch Lifecycle",
+  "version": "0.1.0",
+  "description": "Binds one approved work order to one governed feature branch created from develop.",
+  "category": "git",
+  "allowedAgents": ["orchestrator", "backlog-manager-agent", "implementer-agent"],
+  "allowedWorkflows": ["backlog-management", "tdd-implementation", "feature-pr-delivery"],
+  "requiredInputs": ["approved_work_order", "develop_ref", "branch_naming_policy"],
+  "producedOutputs": ["feature_branch_plan", "feature_branch_record", "duplicate_work_check"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/git/branches/"],
+  "toolPolicyRefs": ["../../policies/git-policy.md", "../../policies/delivery-lifecycle-policy.md"],
+  "humanGates": ["create_local_branch", "delete_feature_branch", "scope_change"],
+  "permissionsInheritedOnly": true
+}

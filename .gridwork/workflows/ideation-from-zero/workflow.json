@@ -1,0 +1,39 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "ideation-from-zero",
+  "name": "Ideation From Zero",
+  "version": "0.1.0",
+  "description": "Turns an early product idea into structured requirement notes and an SDD using a specialized grill-me.",
+  "mode": "interactive",
+  "primaryAgent": "intake-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "intake-agent"
+  ],
+  "allowedSkills": [
+    "sdd-requirements",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "initial_product_idea",
+    "user_answers"
+  ],
+  "producedOutputs": [
+    "ideation_notes",
+    "normalized_requirements",
+    "sdd_draft",
+    "use_cases",
+    "test_cases"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/",
+    "docs/sdd/"
+  ],
+  "humanGates": [
+    "sdd_approval",
+    "scope_commitment",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}
+

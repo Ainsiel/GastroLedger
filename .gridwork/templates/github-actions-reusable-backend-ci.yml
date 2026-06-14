@@ -1,0 +1,12 @@
+name: _backend-ci
+
+on:
+  workflow_call:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run backend quality contract
+        run: make backend-ci

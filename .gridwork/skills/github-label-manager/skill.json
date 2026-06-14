@@ -1,0 +1,40 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-label-manager",
+  "name": "GitHub Label Manager",
+  "version": "0.1.0",
+  "description": "Compares the local label catalog with GitHub and prepares approved plans for creating missing predefined labels.",
+  "category": "github",
+  "allowedAgents": [
+    "planner-agent",
+    "backlog-manager-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "intake-existing-code",
+    "backlog-management"
+  ],
+  "requiredInputs": [
+    "repo",
+    "label_catalog",
+    "required_labels"
+  ],
+  "producedOutputs": [
+    "label_audit",
+    "missing_label_plan",
+    "label_apply_report"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/github-labels/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md",
+    "../../policies/github-labels.json"
+  ],
+  "humanGates": [
+    "gh_label_create",
+    "gh_label_edit",
+    "gh_label_delete"
+  ],
+  "permissionsInheritedOnly": true
+}

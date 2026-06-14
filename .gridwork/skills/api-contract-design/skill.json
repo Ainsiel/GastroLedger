@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "api-contract-design",
+  "name": "API Contract Design",
+  "version": "0.1.0",
+  "description": "Designs stable synchronous or asynchronous API contracts aligned to use cases and bounded-context ownership.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["use_cases", "bounded_contexts", "consumers", "quality_attributes"],
+  "producedOutputs": ["api_design", "error_contract", "contract_test_plan"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/api/", "docs/architecture/api/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["public_contract_decision", "compatibility_decision"],
+  "permissionsInheritedOnly": true
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "domain-driven-design",
+  "name": "Domain Driven Design",
+  "version": "0.1.0",
+  "description": "Designs DDD strategic and tactical boundaries from confirmed domain rules without forcing unnecessary complexity.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["approved_sdd", "ubiquitous_language", "architecture_drivers"],
+  "producedOutputs": ["subdomain_map", "bounded_contexts", "context_map", "aggregate_design", "domain_events"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/domain/", "docs/architecture/domain/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["bounded_context_decision", "data_ownership_decision", "consistency_decision"],
+  "permissionsInheritedOnly": true
+}

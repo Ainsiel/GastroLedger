@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "postgresql-performance",
+  "name": "PostgreSQL Performance",
+  "version": "0.1.0",
+  "description": "Measures and improves PostgreSQL query, index, connection and locking efficiency from representative evidence.",
+  "category": "stack-performance",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_persistence_path", "query_scenario", "representative_measurement"],
+  "producedOutputs": ["query_baseline", "query_plan_analysis", "database_optimization_evidence"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/postgresql-performance/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "index_or_schema_change", "production_data_access"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

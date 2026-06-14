@@ -1,0 +1,17 @@
+name: feature-pr-ci
+
+on:
+  pull_request:
+    branches: [develop]
+
+concurrency:
+  group: feature-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  regression-gate:
+    name: feature / regression-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure confirmed regression commands
+        run: echo "Replace through an approved github-actions-cicd plan"

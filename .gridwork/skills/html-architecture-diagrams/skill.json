@@ -1,0 +1,35 @@
+{
+  "kind": "gridwork.skill",
+  "id": "html-architecture-diagrams",
+  "name": "HTML Architecture Diagrams",
+  "version": "0.1.0",
+  "description": "Creates self-contained HTML diagrams for architecture decisions and domain models.",
+  "category": "architecture",
+  "allowedAgents": [
+    "software-architect"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd"
+  ],
+  "requiredInputs": [
+    "diagram_goal",
+    "architecture_model"
+  ],
+  "producedOutputs": [
+    "html_diagram",
+    "diagram_notes",
+    "element_inventory",
+    "relationship_inventory"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/architecture/diagrams/",
+    "docs/architecture/diagrams/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/diagram-html-policy.md"
+  ],
+  "humanGates": [
+    "approved_architecture_publish"
+  ],
+  "permissionsInheritedOnly": true
+}

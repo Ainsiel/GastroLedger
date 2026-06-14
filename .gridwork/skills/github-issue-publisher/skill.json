@@ -1,0 +1,40 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-issue-publisher",
+  "name": "GitHub Issue Publisher",
+  "version": "0.1.0",
+  "description": "Publishes approved local issue drafts to GitHub in small batches using governed `gh` commands.",
+  "category": "github",
+  "allowedAgents": [
+    "planner-agent",
+    "backlog-manager-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "intake-existing-code",
+    "backlog-management"
+  ],
+  "requiredInputs": [
+    "approved_issue_drafts",
+    "publish_plan",
+    "repo",
+    "label_catalog"
+  ],
+  "producedOutputs": [
+    "github_issue_urls",
+    "publish_report"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/github/issues/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md",
+    "../../policies/github-labels.json"
+  ],
+  "humanGates": [
+    "gh_issue_create",
+    "gh_issue_edit",
+    "gh_issue_comment"
+  ],
+  "permissionsInheritedOnly": true
+}

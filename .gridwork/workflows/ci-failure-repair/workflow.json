@@ -1,0 +1,44 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "ci-failure-repair",
+  "name": "CI Failure Repair",
+  "version": "0.2.0",
+  "description": "Diagnoses failed GitHub Actions checks for the current PR SHA and routes a scoped repair to the owning implementer.",
+  "mode": "hybrid",
+  "primaryAgent": "platform-engineer-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "platform-engineer-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedSkills": [
+    "github-cli",
+    "ci-status-evaluation",
+    "ci-failure-diagnosis",
+    "changed-scope-detection",
+    "diagnose-bug",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "pull_request",
+    "current_head_sha",
+    "failed_checks"
+  ],
+  "producedOutputs": [
+    "ci_failure_classification",
+    "ci_failure_handoff",
+    "repair_scope",
+    "current_sha_ci_decision"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/ci/"
+  ],
+  "humanGates": [
+    "github_write",
+    "dependency_change",
+    "scope_change",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": true
+}
