@@ -4,8 +4,8 @@ title: Receive a supplier delivery into the inventory ledger
 status: draft
 readiness: blocked
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-003, GL-004, GL-005]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-005]
 requirements: [FR-013, FR-020, FR-027]
 use_cases: [UC-013]
 test_cases: [TC-013-S, TC-013-A, TC-013-F, IT-008, IT-009, IT-010]

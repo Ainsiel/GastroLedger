@@ -4,8 +4,8 @@ title: Import sales and resolve allocation exceptions
 status: draft
 readiness: blocked
 primary_context: Store Operations
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-007, GL-008, GL-009]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-008, GL-009]
 requirements: [FR-021, FR-022, FR-030, FR-020]
 use_cases: [UC-021]
 test_cases: [TC-021-S, TC-021-A, TC-021-F, IT-016, IT-017]

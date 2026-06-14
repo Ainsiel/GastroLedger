@@ -4,7 +4,7 @@ title: Manage local users, invitations and scoped roles
 status: draft
 readiness: blocked
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-001]
 requirements: [FR-003, FR-027, FR-028]
 use_cases: [UC-003]

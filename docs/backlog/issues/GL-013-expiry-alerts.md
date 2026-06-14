@@ -4,7 +4,7 @@ title: Create and acknowledge expiry alerts
 status: draft
 readiness: blocked
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-008, GL-009]
 requirements: [FR-018, FR-029]
 use_cases: [UC-019]

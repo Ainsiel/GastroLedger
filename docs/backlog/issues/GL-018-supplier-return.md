@@ -4,7 +4,7 @@ title: Record supplier return and expected adjustment
 status: draft
 readiness: blocked
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-009]
 requirements: [FR-014, FR-020, FR-027]
 use_cases: [UC-014]

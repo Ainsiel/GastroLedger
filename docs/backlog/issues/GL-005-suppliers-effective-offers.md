@@ -4,7 +4,7 @@ title: Manage suppliers and effective-dated offers
 status: draft
 readiness: blocked
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-004]
 requirements: [FR-011]
 use_cases: [UC-007]

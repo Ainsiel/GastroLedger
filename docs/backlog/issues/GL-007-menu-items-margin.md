@@ -4,8 +4,8 @@ title: Approve menu items and branch margin
 status: draft
 readiness: blocked
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-003, GL-006]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-006]
 requirements: [FR-008, FR-009, FR-031]
 use_cases: [UC-009]
 test_cases: [TC-009-S, TC-009-A, TC-009-F]

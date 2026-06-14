@@ -4,7 +4,7 @@ title: Register a tenant and prove isolation
 status: draft
 readiness: ready
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, status:ready, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [repository-bootstrap, architecture-foundation, delivery-infrastructure]
 requirements: [FR-001, FR-028]
 use_cases: [UC-001]

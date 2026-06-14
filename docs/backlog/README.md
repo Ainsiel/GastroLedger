@@ -1,15 +1,15 @@
 # GastroLedger Backlog Drafts
 
 ```text
-status = local drafts only
-github_issues_published = false
+status = published and locally reconciled
+github_issues_published = true
 generated_on = 2026-06-14
 workflow = backlog-management
 ```
 
 This backlog translates the approved SDD and architecture into observable vertical
 slices suitable for TDD delivery. It is grounded in the current repository
-foundation and contains no GitHub writes.
+foundation and was published to GitHub after explicit approval.
 
 ## Outputs
 
@@ -17,6 +17,10 @@ foundation and contains no GitHub writes.
 - `dependencies.md`: dependency graph and sequencing constraints.
 - `implementation-order.md`: recommended delivery order.
 - `work-order-candidates.md`: proposed implementation work orders.
+- `architecture-traceability.md`: approved architecture evidence per draft.
+- `pre-publication-review.md`: validation evidence and resolved findings.
+- `publication-manifest.md`: stable local draft to GitHub issue linkage.
+- `publication-commands.ps1`: exact GitHub CLI write commands, not yet executed.
 - `publication-plan.md`: governed GitHub label and issue publication plan.
 - `issues/`: one local GitHub issue draft per vertical slice.
 

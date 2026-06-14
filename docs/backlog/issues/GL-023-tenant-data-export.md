@@ -4,8 +4,8 @@ title: Export tenant data in open formats
 status: draft
 readiness: blocked
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-001, GL-008, GL-011, GL-015, GL-018, GL-020, GL-021, GL-022]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-010, GL-011, GL-012, GL-013, GL-017, GL-018, GL-019, GL-020, GL-021, GL-022]
 requirements: [FR-032]
 use_cases: []
 test_cases: [IT-025]

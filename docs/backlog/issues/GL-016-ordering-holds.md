@@ -4,11 +4,12 @@ title: Apply manual ordering holds
 status: draft
 readiness: blocked
 primary_context: Control & Insights
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-002, GL-003]
 requirements: [FR-025, FR-027]
-use_cases: [UC-024-A, UC-024-F]
-test_cases: [TC-024-A, TC-024-F, IT-021]
+use_cases: [UC-024]
+flows: [UC-024-A, UC-024-F]
+test_cases: [TC-024-A, TC-024-F]
 quality_attributes: [QA-009, QA-010, QA-012]
 ---
 
@@ -38,7 +39,7 @@ purchase approval can query the resulting public decision.
 
 ## Definition Of Done
 
-- [ ] TC-024-A/F and IT-021 pass.
+- [ ] TC-024-A/F and the public ordering-hold decision contract pass.
 - [ ] Cross-context dependency uses the existing public contract.
 - [ ] No payment, debt or collection behavior is introduced.
 - [ ] Required root quality commands and `regression-gate` pass.

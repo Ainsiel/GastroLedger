@@ -4,7 +4,7 @@ title: Perform a blind count and reconcile variance
 status: draft
 readiness: blocked
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-002, GL-009]
 requirements: [FR-019, FR-020, FR-027]
 use_cases: [UC-020]

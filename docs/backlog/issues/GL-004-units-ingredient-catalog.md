@@ -4,8 +4,8 @@ title: Manage units and ingredient catalog
 status: draft
 readiness: blocked
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-001, GL-003]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-003]
 requirements: [FR-005, FR-006]
 use_cases: [UC-005, UC-006]
 test_cases: [TC-005-S, TC-005-A, TC-005-F, TC-006-S, TC-006-A, TC-006-F, IT-005]

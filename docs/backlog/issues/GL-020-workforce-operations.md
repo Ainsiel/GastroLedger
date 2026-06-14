@@ -4,7 +4,7 @@ title: Plan shifts and record attendance
 status: draft
 readiness: blocked
 primary_context: Store Operations
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-002, GL-003]
 requirements: [FR-024, FR-027]
 use_cases: [UC-023]

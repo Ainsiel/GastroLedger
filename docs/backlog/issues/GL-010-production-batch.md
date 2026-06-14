@@ -4,7 +4,7 @@ title: Post a production batch and prepared lot
 status: draft
 readiness: blocked
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-006, GL-009]
 requirements: [FR-015, FR-020, FR-031]
 use_cases: [UC-011]

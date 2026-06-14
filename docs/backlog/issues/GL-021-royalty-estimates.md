@@ -4,11 +4,12 @@ title: Calculate non-financial royalty estimates
 status: draft
 readiness: blocked
 primary_context: Control & Insights
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-008, GL-015]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-015]
 requirements: [FR-025]
-use_cases: [UC-024-S]
-test_cases: [TC-024-S]
+use_cases: [UC-024]
+flows: [UC-024-S]
+test_cases: [TC-024-S, TC-024-F]
 quality_attributes: [QA-003, QA-010, QA-013]
 ---
 

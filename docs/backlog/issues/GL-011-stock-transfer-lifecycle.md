@@ -4,8 +4,8 @@ title: Complete a stock transfer lifecycle
 status: draft
 readiness: blocked
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-003, GL-009]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-009]
 requirements: [FR-016, FR-020, FR-027]
 use_cases: [UC-015, UC-016, UC-017]
 test_cases: [TC-015-S, TC-015-A, TC-015-F, TC-016-S, TC-016-A, TC-016-F, TC-017-S, TC-017-A, TC-017-F, IT-012, IT-013]

@@ -4,7 +4,7 @@ title: Configure tenant settings, branches and warehouses
 status: draft
 readiness: blocked
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-001]
 requirements: [FR-002, FR-004, FR-027]
 use_cases: [UC-002, UC-004]

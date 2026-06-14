@@ -4,8 +4,8 @@ title: Analyze cost variance and menu profitability
 status: draft
 readiness: blocked
 primary_context: Control & Insights
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
-dependencies: [GL-008, GL-009, GL-014, GL-015, GL-021]
+labels: [gridwork, type:feature, slice:vertical]
+dependencies: [GL-014, GL-015]
 requirements: [FR-026]
 use_cases: [UC-025]
 test_cases: [TC-025-S, TC-025-A, TC-025-F, IT-024]

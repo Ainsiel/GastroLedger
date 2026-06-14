@@ -4,7 +4,7 @@ title: Record operational waste with approval evidence
 status: draft
 readiness: blocked
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, mode:afk, agent:implementer, workflow:tdd-implementation]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-009]
 requirements: [FR-017, FR-020, FR-027]
 use_cases: [UC-018]
