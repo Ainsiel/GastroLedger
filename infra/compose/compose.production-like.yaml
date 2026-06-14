@@ -17,3 +17,6 @@ services:
       GL_ENVIRONMENT: production-like
     restart: unless-stopped
 
+  migrate:
+    environment:
+      GL_ENVIRONMENT: production-like

@@ -13,18 +13,41 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  migrate:
+    image: postgres:17-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGDATABASE: ${POSTGRES_DB}
+      PGHOST: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGUSER: ${POSTGRES_USER}
+    command:
+      [
+        "psql",
+        "--set",
+        "ON_ERROR_STOP=1",
+        "--file",
+        "/migrations/0000-foundation.sql",
+      ]
+    restart: "no"
+    volumes:
+      - ../migrations:/migrations:ro
+
   api:
+    image: gastroledger/api:local
     build:
       context: ../..
       dockerfile: infra/containers/api.Dockerfile
       target: runtime
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       GL_ENVIRONMENT: base
@@ -40,16 +63,17 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - "${API_PORT}:8000"
+      - "127.0.0.1:${API_PORT}:8000"
 
   worker:
+    image: gastroledger/worker:local
     build:
       context: ../..
       dockerfile: infra/containers/worker.Dockerfile
       target: runtime
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       GL_ENVIRONMENT: base
@@ -60,6 +84,7 @@ services:
       retries: 10
 
   web:
+    image: gastroledger/web:local
     build:
       context: ../..
       dockerfile: infra/containers/web.Dockerfile
@@ -81,8 +106,7 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - "${WEB_PORT}:3000"
+      - "127.0.0.1:${WEB_PORT}:3000"
 
 volumes:
   postgres-data:
-

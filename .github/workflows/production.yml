@@ -1,0 +1,37 @@
+name: production
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  artifact-smoke:
+    uses: ./.github/workflows/reusable-integration.yml
+    with:
+      build_containers: true
+      run_e2e: true
+      run_migrations: true
+
+  smoke-gate:
+    name: smoke-gate
+    if: ${{ always() }}
+    needs:
+      - artifact-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enforce safe production contract
+        env:
+          ARTIFACT_SMOKE_RESULT: ${{ needs.artifact-smoke.result }}
+        run: |
+          test "$ARTIFACT_SMOKE_RESULT" = "success"
+          echo "No deployment provider is configured; this workflow performs no deploy."
+

@@ -29,11 +29,18 @@ not required.
 npm run bootstrap
 npm run lint
 npm test
+npm run test:migrations
+npm run test:e2e:critical
 npm run build
 npm run dev
 npm start
 npm run compose:config
+npm run compose:config:integration
 ```
 
 All Compose-backed commands use `infra/compose/.env.example`, which contains local
-placeholder values only. Supply real environment values outside version control.
+localhost-only, non-secret values. Supply shared-environment credentials outside
+version control.
+
+`npm run test:e2e:critical` expects the isolated integration runtime on ports `58000`
+and `53000`; CI starts it through `compose.integration.yaml`.
