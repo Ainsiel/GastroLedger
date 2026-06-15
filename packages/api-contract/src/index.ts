@@ -33,6 +33,38 @@ export interface TenantIdentityResponse {
   tenantSlug: string;
 }
 
+export interface TenantSettingsRequest {
+  locale: string;
+  baseCurrency: string;
+  branchLimit: number;
+}
+
+export interface TenantSettingsResponse extends TenantSettingsRequest {
+  branchCount: number;
+}
+
+export interface BranchRequest {
+  name: string;
+  code: string;
+}
+
+export interface WarehouseRequest {
+  name: string;
+  code: string;
+  type: "kitchen" | "bar" | "general";
+}
+
+export interface WarehouseResponse extends WarehouseRequest {
+  warehouseId: string;
+  branchId: string;
+  status: "active" | "inactive";
+}
+
+export interface BranchResponse extends BranchRequest {
+  branchId: string;
+  warehouses: WarehouseResponse[];
+}
+
 export interface ApiProblem {
   type: string;
   title: string;

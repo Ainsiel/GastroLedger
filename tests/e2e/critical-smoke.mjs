@@ -45,3 +45,58 @@ if (!identity.ok || identityBody.tenantId !== registrationBody.tenantId) {
 }
 
 console.log("Critical tenant registration smoke checks passed.");
+
+const settings = await fetch(`${webBaseUrl}/api/v1/tenant/settings`, {
+  method: "PATCH",
+  headers: { "content-type": "application/json", cookie },
+  body: JSON.stringify({ locale: "es", baseCurrency: "CLP", branchLimit: 2 }),
+});
+const settingsBody = await settings.json();
+if (!settings.ok || settingsBody.baseCurrency !== "CLP") {
+  throw new Error("tenant settings critical smoke check failed");
+}
+
+const branch = await fetch(`${webBaseUrl}/api/v1/branches`, {
+  method: "POST",
+  headers: { "content-type": "application/json", cookie },
+  body: JSON.stringify({ name: "Downtown", code: "MAIN" }),
+});
+const branchBody = await branch.json();
+if (!branch.ok || branchBody.code !== "MAIN") {
+  throw new Error("branch creation critical smoke check failed");
+}
+
+const warehouse = await fetch(
+  `${webBaseUrl}/api/v1/branches/${branchBody.branchId}/warehouses`,
+  {
+    method: "POST",
+    headers: { "content-type": "application/json", cookie },
+    body: JSON.stringify({ name: "Main kitchen", code: "KITCHEN", type: "kitchen" }),
+  },
+);
+const warehouseBody = await warehouse.json();
+if (!warehouse.ok || warehouseBody.status !== "active") {
+  throw new Error("warehouse creation critical smoke check failed");
+}
+
+const settingsRoute = await fetch(`${webBaseUrl}/settings`, { headers: { cookie } });
+const settingsRouteBody = await settingsRoute.text();
+if (
+  !settingsRoute.ok ||
+  !settingsRouteBody.includes("Organization settings") ||
+  !settingsRouteBody.includes("Downtown") ||
+  !settingsRouteBody.includes("Main kitchen")
+) {
+  throw new Error("integrated operating scope route critical smoke check failed");
+}
+
+const deactivated = await fetch(
+  `${webBaseUrl}/api/v1/warehouses/${warehouseBody.warehouseId}/deactivate`,
+  { method: "POST", headers: { cookie } },
+);
+const deactivatedBody = await deactivated.json();
+if (!deactivated.ok || deactivatedBody.status !== "inactive") {
+  throw new Error("warehouse deactivation critical smoke check failed");
+}
+
+console.log("Critical tenant operating scope smoke checks passed.");

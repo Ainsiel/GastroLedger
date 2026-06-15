@@ -1,6 +1,29 @@
 from dataclasses import dataclass
 
-from gastroledger_api.application.identifiers import ActorId, BranchId, TenantId, WarehouseId
+from gastroledger_api.application.identifiers import (
+    ActorId,
+    BranchId,
+    TenantId,
+    WarehouseId,
+)
+from gastroledger_api.modules.platform_organization.application.operating_scope import (
+    BranchLimitExceeded,
+    BranchView,
+    CreateBranch,
+    CreateWarehouse,
+    DeactivateWarehouse,
+    OperatingAuthorizationDenied,
+    OperatingCodeConflict,
+    OperatingIdentity,
+    OperatingNotFound,
+    OperatingScopeService,
+    TenantSettingsView,
+    UpdateTenantSettings,
+    WarehouseDeactivationUnsafe,
+    WarehouseInactive,
+    WarehouseMovementGuard,
+    WarehouseView,
+)
 from gastroledger_api.modules.platform_organization.application.registration import (
     AuthenticationRequired,
     RegisterTenant,
@@ -10,6 +33,12 @@ from gastroledger_api.modules.platform_organization.application.registration imp
 from gastroledger_api.modules.platform_organization.application.security import (
     ScryptPasswordHasher,
     SessionTokenIssuer,
+)
+from gastroledger_api.modules.platform_organization.domain.operating_scope import (
+    OperatingValidationError,
+    validate_branch,
+    validate_tenant_settings,
+    validate_warehouse,
 )
 from gastroledger_api.modules.platform_organization.domain.registration import (
     RegistrationValidationError,
@@ -46,7 +75,18 @@ __all__ = [
     "ActorReference",
     "AuthenticationRequired",
     "BranchReference",
+    "BranchLimitExceeded",
+    "BranchView",
+    "CreateBranch",
+    "CreateWarehouse",
+    "DeactivateWarehouse",
     "MODULE_ID",
+    "OperatingAuthorizationDenied",
+    "OperatingCodeConflict",
+    "OperatingIdentity",
+    "OperatingNotFound",
+    "OperatingScopeService",
+    "OperatingValidationError",
     "RegisterTenant",
     "RegistrationCommand",
     "RegistrationConflict",
@@ -54,6 +94,15 @@ __all__ = [
     "ScryptPasswordHasher",
     "SessionTokenIssuer",
     "TenantReference",
+    "TenantSettingsView",
+    "UpdateTenantSettings",
     "WarehouseReference",
+    "WarehouseDeactivationUnsafe",
+    "WarehouseInactive",
+    "WarehouseMovementGuard",
+    "WarehouseView",
+    "validate_branch",
+    "validate_tenant_settings",
+    "validate_warehouse",
 ]
 

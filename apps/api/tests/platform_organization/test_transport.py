@@ -109,6 +109,24 @@ def test_platform_registration_and_tenant_identity_are_public_api_operations() -
     assert schema["paths"]["/api/v1/session/tenant"]["get"]["responses"]["200"]
 
 
+def test_operating_scope_is_a_session_scoped_public_api() -> None:
+    schema = create_application().openapi()
+
+    assert schema["paths"]["/api/v1/tenant/settings"]["get"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/tenant/settings"]["patch"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/branches"]["get"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/branches"]["post"]["responses"]["201"]
+    assert schema["paths"]["/api/v1/branches/{branchId}/warehouses"]["post"]["responses"]["201"]
+    assert schema["paths"]["/api/v1/warehouses/{warehouseId}/deactivate"]["post"][
+        "responses"
+    ]["200"]
+
+    for schema_name in ("TenantSettingsRequest", "BranchRequest", "WarehouseRequest"):
+        properties = schema["components"]["schemas"][schema_name]["properties"]
+        assert "tenantId" not in properties
+        assert "actorId" not in properties
+
+
 def test_openapi_is_a_governed_developer_contract() -> None:
     application = create_application()
     schema = application.openapi()
