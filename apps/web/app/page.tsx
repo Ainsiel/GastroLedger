@@ -49,7 +49,7 @@ export default function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="#principles">Review operating principles</Link>
+                <Link href="/login">Sign in</Link>
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground">

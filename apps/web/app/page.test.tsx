@@ -17,6 +17,9 @@ describe("GastroLedger public home", () => {
     expect(screen.getByRole("link", { name: /create your workspace/i }).getAttribute("href")).toBe(
       "/register",
     );
+    expect(screen.getAllByRole("link", { name: /sign in/i })[0].getAttribute("href")).toBe(
+      "/login",
+    );
     expect(screen.queryByRole("link", { name: /local api docs/i })).toBeNull();
     expect(
       screen.getByText(/no payments, accounting, payroll or external integrations/i),

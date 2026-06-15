@@ -15,6 +15,7 @@ from gastroledger_api.modules.platform_organization.public import (
     CreateBranch,
     CreateWarehouse,
     DeactivateWarehouse,
+    InvalidCredentials,
     OperatingAuthorizationDenied,
     OperatingCodeConflict,
     OperatingIdentity,
@@ -27,6 +28,7 @@ from gastroledger_api.modules.platform_organization.public import (
     RegistrationValidationError,
     ScryptPasswordHasher,
     SessionTokenIssuer,
+    TenantLoginAmbiguous,
     TenantSettingsView,
     UpdateTenantSettings,
     WarehouseDeactivationUnsafe,
@@ -42,7 +44,7 @@ SESSION_COOKIE = "gl_session"
 session_cookie = APIKeyCookie(
     name=SESSION_COOKIE,
     auto_error=False,
-    description="Opaque local session cookie issued after tenant registration.",
+    description="Opaque local session cookie issued after tenant registration or login.",
 )
 
 REGISTRATION_RESPONSES = {
@@ -57,6 +59,17 @@ TENANT_IDENTITY_RESPONSES = {
     404: {"model": ApiProblem, "description": "The scoped tenant is not visible."},
     422: {"model": ApiProblem, "description": "The query parameter is invalid."},
     500: {"model": ApiProblem, "description": "Tenant identity could not be resolved."},
+}
+
+SESSION_LOGIN_RESPONSES = {
+    401: {"model": ApiProblem, "description": "The credentials are invalid."},
+    409: {"model": ApiProblem, "description": "The login belongs to multiple tenants."},
+    422: {"model": ApiProblem, "description": "The bounded login input is invalid."},
+    500: {"model": ApiProblem, "description": "Login could not be completed."},
+}
+
+SESSION_LOGOUT_RESPONSES = {
+    500: {"model": ApiProblem, "description": "Logout could not be completed."},
 }
 
 OPERATING_RESPONSES = {
@@ -92,6 +105,13 @@ class RegistrationResponse(BaseModel):
     branchId: str | None
     tenantName: str
     tenantSlug: str
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: str = Field(min_length=1, max_length=254)
+    password: str = Field(min_length=1, max_length=128)
 
 
 class TenantIdentityResponse(BaseModel):
@@ -187,10 +207,12 @@ def branch_response(branch: BranchView) -> BranchResponse:
 def create_platform_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1", tags=["platform-organization"])
     store = PostgresPlatformStore(database_url or os.environ.get("DATABASE_URL", ""))
+    password_hasher = ScryptPasswordHasher()
+    session_tokens = SessionTokenIssuer()
     register_tenant = RegisterTenant(
         store=store,
-        password_hasher=ScryptPasswordHasher(),
-        session_tokens=SessionTokenIssuer(),
+        password_hasher=password_hasher,
+        session_tokens=session_tokens,
     )
     operating_scope = OperatingScopeService(
         store=store, movement_guard=NoOpenWarehouseMovements()
@@ -200,6 +222,17 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
         if not gl_session:
             raise AuthenticationRequired
         return store.resolve_operating_identity(gl_session)
+
+    def set_session_cookie(response: Response, token: str) -> None:
+        response.set_cookie(
+            key=SESSION_COOKIE,
+            value=token,
+            max_age=8 * 60 * 60,
+            httponly=True,
+            secure=os.environ.get("GL_ENVIRONMENT") not in {"development", "integration"},
+            samesite="strict",
+            path="/",
+        )
 
     def operating_problem(error: Exception, correlation_id: str):
         if isinstance(error, AuthenticationRequired):
@@ -281,15 +314,7 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             )
         except (psycopg.Error, SQLAlchemyError):
             return problem_response(500, "platform.registration_failed", correlation_id, [])
-        response.set_cookie(
-            key=SESSION_COOKIE,
-            value=result.session_token,
-            max_age=8 * 60 * 60,
-            httponly=True,
-            secure=os.environ.get("GL_ENVIRONMENT") not in {"development", "integration"},
-            samesite="strict",
-            path="/",
-        )
+        set_session_cookie(response, result.session_token)
         return RegistrationResponse(
             tenantId=str(result.tenant_id),
             actorId=str(result.actor_id),
@@ -297,6 +322,62 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             tenantName=result.tenant_name,
             tenantSlug=result.tenant_slug,
         )
+
+    @router.post(
+        "/session/login",
+        response_model=TenantIdentityResponse,
+        operation_id="loginSession",
+        summary="Start a tenant-scoped local session",
+        description=(
+            "Authenticates a local user by email and password. If that login belongs "
+            "to exactly one active tenant, a scoped gl_session cookie is issued."
+        ),
+        responses=SESSION_LOGIN_RESPONSES,
+    )
+    def login(request: LoginRequest, response: Response):
+        correlation_id = str(uuid4())
+        try:
+            result = store.login(
+                request.email,
+                request.password,
+                password_hasher,
+                session_tokens,
+            )
+        except InvalidCredentials:
+            return problem_response(401, "platform.invalid_credentials", correlation_id, [])
+        except TenantLoginAmbiguous:
+            return problem_response(
+                409,
+                "platform.login_tenant_ambiguous",
+                correlation_id,
+                [{"field": "email", "code": "tenant_ambiguous", "detail": "select tenant"}],
+            )
+        except (psycopg.Error, SQLAlchemyError):
+            return problem_response(500, "platform.login_failed", correlation_id, [])
+        set_session_cookie(response, result.session_token)
+        return TenantIdentityResponse(
+            tenantId=str(result.tenant_id),
+            actorId=str(result.actor_id),
+            tenantName=result.tenant_name,
+            tenantSlug=result.tenant_slug,
+        )
+
+    @router.post(
+        "/session/logout",
+        status_code=204,
+        operation_id="logoutSession",
+        summary="End the current local session",
+        responses=SESSION_LOGOUT_RESPONSES,
+    )
+    def logout(response: Response, gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            if gl_session:
+                store.revoke_session(gl_session)
+        except (psycopg.Error, SQLAlchemyError):
+            return problem_response(500, "platform.logout_failed", correlation_id, [])
+        response.delete_cookie(key=SESSION_COOKIE, path="/", samesite="strict")
+        return None
 
     @router.get(
         "/session/tenant",

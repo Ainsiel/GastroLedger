@@ -106,6 +106,8 @@ def test_platform_registration_and_tenant_identity_are_public_api_operations() -
     schema = create_application().openapi()
 
     assert schema["paths"]["/api/v1/tenants/register"]["post"]["responses"]["201"]
+    assert schema["paths"]["/api/v1/session/login"]["post"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/session/logout"]["post"]["responses"]["204"]
     assert schema["paths"]["/api/v1/session/tenant"]["get"]["responses"]["200"]
 
 
@@ -135,8 +137,15 @@ def test_openapi_is_a_governed_developer_contract() -> None:
     assert schema["info"]["title"] == "GastroLedger API"
     assert schema["info"]["version"] == "1.0.0"
     assert "Local-first operational ledger" in schema["info"]["description"]
+    assert schema["openapi"].startswith("3.0.")
     assert schema["paths"]["/api/v1/tenants/register"]["post"]["operationId"] == (
         "registerTenant"
+    )
+    assert schema["paths"]["/api/v1/session/login"]["post"]["operationId"] == (
+        "loginSession"
+    )
+    assert schema["paths"]["/api/v1/session/logout"]["post"]["operationId"] == (
+        "logoutSession"
     )
     assert schema["paths"]["/api/v1/session/tenant"]["get"]["operationId"] == (
         "getCurrentTenant"

@@ -60,9 +60,11 @@ def http_json(
     )
     try:
         with urlopen(request, timeout=5) as response:
-            return response.status, json.loads(response.read()), response.headers
+            body = response.read()
+            return response.status, json.loads(body) if body else {}, response.headers
     except HTTPError as error:
-        return error.code, json.loads(error.read()), error.headers
+        body = error.read()
+        return error.code, json.loads(body) if body else {}, error.headers
 
 
 def registration_payload(slug: str) -> dict[str, object]:
@@ -247,6 +249,130 @@ def test_invalid_or_membershipless_session_returns_authentication_required(
     assert session_count == (0,)
     assert removed_status == 401
     assert removed["type"] == "platform.authentication_required"
+
+
+def test_http_login_issues_fresh_tenant_scoped_cookie_and_logout_revokes_it(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    slug = f"login-{uuid4().hex}"
+    created_status, created, registration_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(slug),
+    )
+    registration_cookie = registration_headers["set-cookie"].split(";", 1)[0]
+
+    login_status, logged_in, login_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={
+            "email": f"admin-{slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+    login_cookie = login_headers["set-cookie"].split(";", 1)[0]
+    resolved_status, resolved, _resolved_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie=login_cookie,
+    )
+    logout_status, logout_body, logout_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/logout",
+        cookie=login_cookie,
+    )
+    revoked_status, revoked, _revoked_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie=login_cookie,
+    )
+
+    token = login_cookie.split("=", 1)[1]
+    token_hash = SessionTokenIssuer().hash(token)
+    with postgres_connection.transaction():
+        revoked_at = postgres_connection.execute(
+            "select revoked_at from platform_sessions where token_hash = %s",
+            (token_hash,),
+        ).fetchone()
+
+    assert created_status == 201
+    assert login_status == 200
+    assert logged_in == {
+        "tenantId": created["tenantId"],
+        "actorId": created["actorId"],
+        "tenantName": created["tenantName"],
+        "tenantSlug": created["tenantSlug"],
+    }
+    assert login_cookie.startswith("gl_session=")
+    assert login_cookie != registration_cookie
+    assert resolved_status == 200
+    assert resolved == logged_in
+    assert logout_status == 204
+    assert logout_body == {}
+    assert "gl_session=" in logout_headers["set-cookie"]
+    assert revoked_status == 401
+    assert revoked["type"] == "platform.authentication_required"
+    assert revoked_at is not None
+    assert revoked_at[0] is not None
+
+
+def test_http_login_rejects_invalid_credentials_without_cookie(
+    api_base_url: str,
+) -> None:
+    status, body, headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={"email": "missing@example.com", "password": "wrong"},
+    )
+
+    assert status == 401
+    assert body["type"] == "platform.invalid_credentials"
+    assert "set-cookie" not in headers
+
+
+def test_http_login_returns_typed_problem_when_email_has_multiple_tenants(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    first_slug = f"ambiguous-a-{uuid4().hex}"
+    second_slug = f"ambiguous-b-{uuid4().hex}"
+    first_status, first, _first_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(first_slug),
+    )
+    second_status, second, _second_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(second_slug),
+    )
+    with postgres_connection.transaction():
+        postgres_connection.execute(
+            """
+            insert into platform_memberships (tenant_id, user_id, role)
+            values (%s, %s, 'tenant_admin')
+            """,
+            (second["tenantId"], first["actorId"]),
+        )
+
+    login_status, login, headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={
+            "email": f"admin-{first_slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+
+    assert first_status == 201
+    assert second_status == 201
+    assert login_status == 409
+    assert login["type"] == "platform.login_tenant_ambiguous"
+    assert login["errors"] == [
+        {"field": "email", "code": "tenant_ambiguous", "detail": "select tenant"}
+    ]
+    assert "set-cookie" not in headers
 
 
 def test_runtime_database_identity_is_not_privileged(

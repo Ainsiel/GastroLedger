@@ -33,6 +33,13 @@ export interface TenantIdentityResponse {
   tenantSlug: string;
 }
 
+export interface SessionLoginRequest {
+  email: string;
+  password: string;
+}
+
+export type SessionLoginResponse = TenantIdentityResponse;
+
 export interface TenantSettingsRequest {
   locale: string;
   baseCurrency: string;

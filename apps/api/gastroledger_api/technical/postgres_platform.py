@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 from psycopg import errors
-from sqlalchemy import create_engine, func, select, text
+from sqlalchemy import create_engine, func, select, text, update
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -31,7 +31,11 @@ from gastroledger_api.modules.platform_organization.application.registration imp
     TenantIdentity,
 )
 from gastroledger_api.modules.platform_organization.application.security import (
+    InvalidCredentials,
+    ScryptPasswordHasher,
+    SessionLoginResult,
     SessionTokenIssuer,
+    TenantLoginAmbiguous,
 )
 from gastroledger_api.modules.platform_organization.domain.operating_scope import (
     ValidatedBranch,
@@ -151,6 +155,81 @@ class PostgresPlatformStore:
             ActorId(str(actor_uuid)),
             BranchId(str(branch_uuid)) if branch_uuid else None,
         )
+
+    def login(
+        self,
+        email: str,
+        password: str,
+        password_hasher: ScryptPasswordHasher,
+        session_tokens: SessionTokenIssuer,
+    ) -> SessionLoginResult:
+        normalized_login = email.strip().lower()
+        expires_at = datetime.now(UTC) + timedelta(hours=8)
+
+        with self._open_session() as session, session.begin():
+            session.execute(text("set local role gastroledger_session_manager"))
+            user = session.execute(
+                select(PlatformUser.id, PlatformUser.password_hash).where(
+                    PlatformUser.normalized_login == normalized_login
+                )
+            ).one_or_none()
+            if user is None:
+                raise InvalidCredentials
+            actor_id, password_hash = user
+            if not password_hasher.verify(password, password_hash):
+                raise InvalidCredentials
+
+            memberships = session.execute(
+                select(
+                    PlatformMembership.tenant_id,
+                    PlatformTenant.name,
+                    PlatformTenant.slug,
+                )
+                .join(PlatformTenant, PlatformTenant.id == PlatformMembership.tenant_id)
+                .where(
+                    PlatformMembership.user_id == actor_id,
+                    PlatformTenant.status == "active",
+                )
+            ).all()
+            if not memberships:
+                raise InvalidCredentials
+            if len(memberships) > 1:
+                raise TenantLoginAmbiguous
+
+            tenant_id, tenant_name, tenant_slug = memberships[0]
+            issued = session_tokens.issue()
+            session.add(
+                PlatformSession(
+                    id=uuid4(),
+                    tenant_id=tenant_id,
+                    user_id=actor_id,
+                    token_hash=issued.token_hash,
+                    expires_at=expires_at,
+                    revoked_at=None,
+                    created_at=datetime.now(UTC),
+                )
+            )
+            return SessionLoginResult(
+                tenant_id=TenantId(str(tenant_id)),
+                actor_id=ActorId(str(actor_id)),
+                tenant_name=tenant_name,
+                tenant_slug=tenant_slug,
+                session_token=issued.raw_token,
+            )
+
+    def revoke_session(self, raw_session_token: str) -> None:
+        token_hash = SessionTokenIssuer().hash(raw_session_token)
+        with self._open_session() as session, session.begin():
+            session.execute(text("set local role gastroledger_session_manager"))
+            session.execute(
+                update(PlatformSession)
+                .where(
+                    PlatformSession.token_hash == token_hash,
+                    PlatformSession.revoked_at.is_(None),
+                    PlatformSession.expires_at > datetime.now(UTC),
+                )
+                .values(revoked_at=datetime.now(UTC))
+            )
 
     def resolve_tenant(
         self,

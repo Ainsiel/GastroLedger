@@ -181,6 +181,12 @@ export default function RegisterPage() {
                     "Create workspace"
                   )}
                 </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  Already have an administrator account?{" "}
+                  <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+                    Sign in
+                  </Link>
+                </p>
               </form>
             </CardContent>
           </Card>

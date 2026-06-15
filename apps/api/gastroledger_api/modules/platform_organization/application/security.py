@@ -4,11 +4,30 @@ import hmac
 import secrets
 from dataclasses import dataclass
 
+from gastroledger_api.application.identifiers import ActorId, TenantId
+
 
 @dataclass(frozen=True)
 class IssuedSession:
     raw_token: str
     token_hash: str
+
+
+@dataclass(frozen=True)
+class SessionLoginResult:
+    tenant_id: TenantId
+    actor_id: ActorId
+    tenant_name: str
+    tenant_slug: str
+    session_token: str
+
+
+class InvalidCredentials(Exception):
+    pass
+
+
+class TenantLoginAmbiguous(Exception):
+    pass
 
 
 class ScryptPasswordHasher:

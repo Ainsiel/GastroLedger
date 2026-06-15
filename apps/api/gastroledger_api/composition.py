@@ -68,6 +68,7 @@ def create_application(
         redoc_url=None,
         openapi_tags=OPENAPI_TAGS,
     )
+    application.openapi_version = "3.0.3"
     configure_api_docs(application)
     configure_problem_handlers(application)
     application.add_middleware(RegistrationPayloadLimitMiddleware)

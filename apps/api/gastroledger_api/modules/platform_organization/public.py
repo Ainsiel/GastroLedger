@@ -31,8 +31,11 @@ from gastroledger_api.modules.platform_organization.application.registration imp
     RegistrationConflict,
 )
 from gastroledger_api.modules.platform_organization.application.security import (
+    InvalidCredentials,
     ScryptPasswordHasher,
+    SessionLoginResult,
     SessionTokenIssuer,
+    TenantLoginAmbiguous,
 )
 from gastroledger_api.modules.platform_organization.domain.operating_scope import (
     OperatingValidationError,
@@ -80,6 +83,7 @@ __all__ = [
     "CreateBranch",
     "CreateWarehouse",
     "DeactivateWarehouse",
+    "InvalidCredentials",
     "MODULE_ID",
     "OperatingAuthorizationDenied",
     "OperatingCodeConflict",
@@ -92,7 +96,9 @@ __all__ = [
     "RegistrationConflict",
     "RegistrationValidationError",
     "ScryptPasswordHasher",
+    "SessionLoginResult",
     "SessionTokenIssuer",
+    "TenantLoginAmbiguous",
     "TenantReference",
     "TenantSettingsView",
     "UpdateTenantSettings",

@@ -6,6 +6,8 @@ WEB_ROOT = ROOT / "apps" / "web"
 FEATURES_ROOT = WEB_ROOT / "features"
 ROUTE_OWNERS = {
     "app/(public)/register/layout.tsx": "onboarding",
+    "app/(public)/login/layout.tsx": "onboarding",
+    "app/(app)/dashboard/layout.tsx": "platform-admin",
     "app/(app)/settings/layout.tsx": "platform-admin",
     "app/(app)/menu/layout.tsx": "menu-engineering",
     "app/(app)/procurement/layout.tsx": "procurement",

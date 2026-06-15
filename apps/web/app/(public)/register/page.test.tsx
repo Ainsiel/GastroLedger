@@ -21,6 +21,7 @@ describe("tenant registration experience", () => {
     expect(screen.getByLabelText(/company name/i).getAttribute("autocomplete")).toBe("organization");
     expect(screen.getByLabelText(/administrator email/i).getAttribute("type")).toBe("email");
     expect(screen.getByRole("button", { name: /create workspace/i })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /sign in/i }).getAttribute("href")).toBe("/login");
   });
 
   it("shows a visible success state after registration", async () => {
