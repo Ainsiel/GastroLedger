@@ -3,10 +3,10 @@ from uuid import uuid4
 
 import psycopg
 from fastapi import APIRouter, Cookie, Query, Response
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from gastroledger_api.modules.platform_organization.application.registration import (
+    AuthenticationRequired,
     RegisterTenant,
     RegistrationCommand,
     RegistrationConflict,
@@ -19,20 +19,25 @@ from gastroledger_api.modules.platform_organization.domain.registration import (
     RegistrationValidationError,
 )
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
+from gastroledger_api.technical.problems import problem_response
 
 SESSION_COOKIE = "gl_session"
 
 
 class FirstBranchRequest(BaseModel):
-    name: str
-    code: str
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    code: str = Field(min_length=1, max_length=63)
 
 
 class RegistrationRequest(BaseModel):
-    tenantName: str
-    tenantSlug: str
-    adminEmail: str
-    password: str
+    model_config = ConfigDict(extra="forbid")
+
+    tenantName: str = Field(min_length=1, max_length=120)
+    tenantSlug: str = Field(min_length=1, max_length=63)
+    adminEmail: str = Field(min_length=1, max_length=254)
+    password: str = Field(min_length=1, max_length=128)
     firstBranch: FirstBranchRequest | None = None
 
 
@@ -49,19 +54,6 @@ class TenantIdentityResponse(BaseModel):
     actorId: str
     tenantName: str
     tenantSlug: str
-
-
-def problem(status: int, code: str, correlation_id: str, errors: list[dict[str, str]]):
-    return JSONResponse(
-        status_code=status,
-        content={
-            "type": code,
-            "title": "The request could not be completed",
-            "status": status,
-            "correlationId": correlation_id,
-            "errors": errors,
-        },
-    )
 
 
 def create_platform_router(database_url: str | None = None) -> APIRouter:
@@ -88,7 +80,7 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
                 )
             )
         except RegistrationValidationError as error:
-            return problem(
+            return problem_response(
                 422,
                 "platform.registration_invalid",
                 correlation_id,
@@ -98,14 +90,14 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
                 ],
             )
         except RegistrationConflict:
-            return problem(
+            return problem_response(
                 409,
                 "platform.tenant_slug_conflict",
                 correlation_id,
                 [{"field": "tenantSlug", "code": "duplicate", "detail": "already registered"}],
             )
         except psycopg.Error:
-            return problem(500, "platform.registration_failed", correlation_id, [])
+            return problem_response(500, "platform.registration_failed", correlation_id, [])
         response.set_cookie(
             key=SESSION_COOKIE,
             value=result.session_token,
@@ -130,13 +122,17 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
     ):
         correlation_id = str(uuid4())
         if not gl_session:
-            return problem(401, "platform.authentication_required", correlation_id, [])
+            return problem_response(401, "platform.authentication_required", correlation_id, [])
         try:
             identity = store.resolve_tenant(gl_session, tenantId, correlation_id)
+        except AuthenticationRequired:
+            return problem_response(
+                401, "platform.authentication_required", correlation_id, []
+            )
         except psycopg.Error:
-            return problem(500, "platform.tenant_identity_failed", correlation_id, [])
+            return problem_response(500, "platform.tenant_identity_failed", correlation_id, [])
         if not identity:
-            return problem(404, "platform.tenant_not_found", correlation_id, [])
+            return problem_response(404, "platform.tenant_not_found", correlation_id, [])
         return TenantIdentityResponse(
             tenantId=str(identity.tenant_id),
             actorId=str(identity.actor_id),

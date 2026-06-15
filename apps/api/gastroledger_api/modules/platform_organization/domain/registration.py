@@ -50,6 +50,7 @@ def validate_registration(
         details.append(ValidationDetail("adminEmail", "invalid_email"))
     if (
         len(password) < 12
+        or len(password) > 128
         or not any(character.islower() for character in password)
         or not any(character.isupper() for character in password)
         or not any(character.isdigit() for character in password)
@@ -57,6 +58,10 @@ def validate_registration(
         details.append(ValidationDetail("password", "weak_password"))
     if bool(normalized_branch_name) != bool(normalized_branch_code):
         details.append(ValidationDetail("firstBranch", "incomplete_branch"))
+    if normalized_branch_name and len(normalized_branch_name) > 120:
+        details.append(ValidationDetail("firstBranch.name", "invalid_name"))
+    if normalized_branch_code and len(normalized_branch_code) > 63:
+        details.append(ValidationDetail("firstBranch.code", "invalid_code"))
 
     if details:
         raise RegistrationValidationError(tuple(details))

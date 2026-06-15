@@ -44,6 +44,10 @@ class RegistrationConflict(Exception):
     pass
 
 
+class AuthenticationRequired(Exception):
+    pass
+
+
 class PlatformStore(Protocol):
     def register(
         self,

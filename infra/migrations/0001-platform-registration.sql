@@ -16,6 +16,21 @@ BEGIN
 END
 $$;
 
+SELECT format(
+    'CREATE ROLE %I LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD %L',
+    :'runtime_user',
+    :'runtime_password'
+)
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'runtime_user')
+\gexec
+
+SELECT format(
+    'ALTER ROLE %I WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD %L',
+    :'runtime_user',
+    :'runtime_password'
+)
+\gexec
+
 CREATE TABLE IF NOT EXISTS platform_tenants (
     id uuid PRIMARY KEY,
     slug text NOT NULL UNIQUE,
@@ -54,8 +69,28 @@ CREATE TABLE IF NOT EXISTS platform_sessions (
     token_hash text NOT NULL UNIQUE,
     expires_at timestamptz NOT NULL,
     revoked_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT platform_sessions_membership_fk
+        FOREIGN KEY (tenant_id, user_id)
+        REFERENCES platform_memberships (tenant_id, user_id)
+        ON DELETE CASCADE
 );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'platform_sessions_membership_fk'
+          AND conrelid = 'platform_sessions'::regclass
+    ) THEN
+        ALTER TABLE platform_sessions
+        ADD CONSTRAINT platform_sessions_membership_fk
+        FOREIGN KEY (tenant_id, user_id)
+        REFERENCES platform_memberships (tenant_id, user_id)
+        ON DELETE CASCADE;
+    END IF;
+END
+$$;
 CREATE TABLE IF NOT EXISTS control_audit_events (
     id uuid PRIMARY KEY,
     tenant_id uuid NOT NULL REFERENCES platform_tenants(id),
@@ -67,7 +102,11 @@ CREATE TABLE IF NOT EXISTS control_audit_events (
 );
 
 GRANT USAGE ON SCHEMA public TO gastroledger_app;
-GRANT SELECT ON platform_tenants, platform_tenant_settings TO gastroledger_app;
+GRANT SELECT ON
+    platform_tenants,
+    platform_tenant_settings,
+    platform_memberships
+TO gastroledger_app;
 GRANT INSERT ON control_audit_events TO gastroledger_app;
 GRANT USAGE ON SCHEMA public TO gastroledger_registration;
 GRANT INSERT ON
@@ -80,6 +119,11 @@ GRANT INSERT ON
 TO gastroledger_registration;
 GRANT USAGE ON SCHEMA public TO gastroledger_session_resolver;
 GRANT SELECT ON platform_sessions TO gastroledger_session_resolver;
+GRANT
+    gastroledger_app,
+    gastroledger_registration,
+    gastroledger_session_resolver
+TO :"runtime_user";
 
 ALTER TABLE platform_tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE platform_tenants FORCE ROW LEVEL SECURITY;

@@ -40,3 +40,23 @@ def test_invalid_credentials_report_stable_field_errors() -> None:
         }
     else:
         raise AssertionError("invalid registration must fail")
+
+
+def test_registration_rejects_unbounded_password_and_branch_fields() -> None:
+    try:
+        validate_registration(
+            tenant_name="Tenant",
+            tenant_slug="tenant",
+            admin_email="admin@example.com",
+            password="Aa1" + ("x" * 126),
+            branch_name="x" * 121,
+            branch_code="X" * 64,
+        )
+    except RegistrationValidationError as error:
+        assert {detail.field for detail in error.details} == {
+            "password",
+            "firstBranch.name",
+            "firstBranch.code",
+        }
+    else:
+        raise AssertionError("unbounded registration fields must fail")

@@ -6,6 +6,7 @@ from psycopg import errors
 
 from gastroledger_api.application.identifiers import ActorId, BranchId, TenantId
 from gastroledger_api.modules.platform_organization.application.registration import (
+    AuthenticationRequired,
     RegistrationConflict,
     TenantIdentity,
 )
@@ -99,13 +100,23 @@ class PostgresPlatformStore:
                     (token_hash,),
                 ).fetchone()
                 if not session:
-                    return None
+                    raise AuthenticationRequired
                 tenant_id, actor_id = session
                 connection.execute("set local role gastroledger_app")
                 connection.execute(
                     "select set_config('app.current_tenant_id', %s, true)",
                     (str(tenant_id),),
                 )
+                membership = connection.execute(
+                    """
+                    select 1
+                    from platform_memberships
+                    where tenant_id = %s and user_id = %s
+                    """,
+                    (tenant_id, actor_id),
+                ).fetchone()
+                if not membership:
+                    raise AuthenticationRequired
                 if requested_tenant_id and requested_tenant_id != str(tenant_id):
                     connection.execute(
                         """

@@ -15,6 +15,12 @@ from gastroledger_api.modules.store_operations.public import MODULE_ID as STORE_
 from gastroledger_api.runtime import configure_logging
 from gastroledger_api.technical.health import router as health_router
 from gastroledger_api.technical.platform_routes import create_platform_router
+from gastroledger_api.technical.problems import configure_problem_handlers
+from gastroledger_api.technical.registration_rate_limit import (
+    RegistrationPayloadLimitMiddleware,
+    RegistrationRateLimiter,
+    RegistrationRateLimitMiddleware,
+)
 
 
 @dataclass(frozen=True)
@@ -32,11 +38,21 @@ MODULE_BOUNDARIES = (
 )
 
 
-def create_application() -> FastAPI:
+def create_application(
+    *,
+    database_url: str | None = None,
+    registration_rate_limiter: RegistrationRateLimiter | None = None,
+) -> FastAPI:
     configure_logging()
     application = FastAPI(title="GastroLedger API", version="0.0.0")
+    configure_problem_handlers(application)
+    application.add_middleware(RegistrationPayloadLimitMiddleware)
+    application.add_middleware(
+        RegistrationRateLimitMiddleware,
+        limiter=registration_rate_limiter or RegistrationRateLimiter(),
+    )
     application.include_router(health_router)
-    application.include_router(create_platform_router())
+    application.include_router(create_platform_router(database_url))
     application.state.module_boundaries = MODULE_BOUNDARIES
     return application
 
