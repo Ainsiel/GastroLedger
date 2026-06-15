@@ -117,7 +117,12 @@ class PostgresPlatformStore:
                 ).fetchone()
                 if not membership:
                     raise AuthenticationRequired
-                if requested_tenant_id and requested_tenant_id != str(tenant_id):
+                target_tenant_id = requested_tenant_id or str(tenant_id)
+                tenant = connection.execute(
+                    "select id, name, slug from platform_tenants where id = %s",
+                    (target_tenant_id,),
+                ).fetchone()
+                if not tenant and requested_tenant_id:
                     connection.execute(
                         """
                         insert into control_audit_events (
@@ -134,10 +139,6 @@ class PostgresPlatformStore:
                         ),
                     )
                     return None
-                tenant = connection.execute(
-                    "select id, name, slug from platform_tenants where id = %s",
-                    (tenant_id,),
-                ).fetchone()
                 if not tenant:
                     return None
                 return TenantIdentity(

@@ -5,18 +5,14 @@ import psycopg
 from fastapi import APIRouter, Cookie, Query, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from gastroledger_api.modules.platform_organization.application.registration import (
+from gastroledger_api.modules.platform_organization.public import (
     AuthenticationRequired,
     RegisterTenant,
     RegistrationCommand,
     RegistrationConflict,
-)
-from gastroledger_api.modules.platform_organization.application.security import (
+    RegistrationValidationError,
     ScryptPasswordHasher,
     SessionTokenIssuer,
-)
-from gastroledger_api.modules.platform_organization.domain.registration import (
-    RegistrationValidationError,
 )
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
 from gastroledger_api.technical.problems import problem_response

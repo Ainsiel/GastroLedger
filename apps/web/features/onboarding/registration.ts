@@ -1,3 +1,9 @@
+import type {
+  ApiProblem,
+  TenantRegistrationRequest,
+  TenantRegistrationResponse,
+} from "@gastroledger/api-contract";
+
 export type RegistrationOutcome =
   | { kind: "idle" }
   | { kind: "submitting" }
@@ -22,5 +28,28 @@ export function registrationMessage(outcome: RegistrationOutcome): string {
       return "Registering your company...";
     default:
       return "";
+  }
+}
+
+export async function submitRegistration(
+  request: TenantRegistrationRequest,
+  fetcher: typeof fetch = fetch,
+): Promise<RegistrationOutcome> {
+  try {
+    const response = await fetcher("/api/v1/tenants/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+    });
+    if (response.ok) {
+      const registration = (await response.json()) as TenantRegistrationResponse;
+      return { kind: "success", tenantName: registration.tenantName };
+    }
+    const problem = (await response.json()) as ApiProblem;
+    if (response.status === 409) return { kind: "duplicate" };
+    if (response.status === 422) return { kind: "validation" };
+    return { kind: "unexpected", correlationId: problem.correlationId };
+  } catch {
+    return { kind: "unexpected" };
   }
 }

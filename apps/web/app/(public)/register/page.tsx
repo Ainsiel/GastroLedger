@@ -1,14 +1,11 @@
 "use client";
 
-import type {
-  ApiProblem,
-  TenantRegistrationRequest,
-  TenantRegistrationResponse,
-} from "@gastroledger/api-contract";
+import type { TenantRegistrationRequest } from "@gastroledger/api-contract";
 import { type FormEvent, useState } from "react";
 
 import {
   registrationMessage,
+  submitRegistration,
   type RegistrationOutcome,
 } from "@/features/onboarding";
 
@@ -29,24 +26,10 @@ export default function RegisterPage() {
       password: String(form.get("password") ?? ""),
       ...(branchName || branchCode ? { firstBranch: { name: branchName, code: branchCode } } : {}),
     };
-    const response = await fetch("/api/v1/tenants/register", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(request),
-    });
-    if (response.ok) {
-      const registration = (await response.json()) as TenantRegistrationResponse;
-      setOutcome({ kind: "success", tenantName: registration.tenantName });
+    const nextOutcome = await submitRegistration(request);
+    setOutcome(nextOutcome);
+    if (nextOutcome.kind === "success") {
       formElement.reset();
-      return;
-    }
-    const problem = (await response.json()) as ApiProblem;
-    if (response.status === 409) {
-      setOutcome({ kind: "duplicate" });
-    } else if (response.status === 422) {
-      setOutcome({ kind: "validation" });
-    } else {
-      setOutcome({ kind: "unexpected", correlationId: problem.correlationId });
     }
   }
 
@@ -57,15 +40,20 @@ export default function RegisterPage() {
       <form onSubmit={submit} aria-describedby="registration-status">
         <label>
           Company name
-          <input name="tenantName" required autoComplete="organization" />
+          <input name="tenantName" required maxLength={120} autoComplete="organization" />
         </label>
         <label>
           Company identifier
-          <input name="tenantSlug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" />
+          <input
+            name="tenantSlug"
+            required
+            maxLength={63}
+            pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          />
         </label>
         <label>
           Administrator email
-          <input name="adminEmail" required type="email" autoComplete="email" />
+          <input name="adminEmail" required maxLength={254} type="email" autoComplete="email" />
         </label>
         <label>
           Administrator password
@@ -74,6 +62,7 @@ export default function RegisterPage() {
             required
             type="password"
             minLength={12}
+            maxLength={128}
             autoComplete="new-password"
           />
         </label>
@@ -81,11 +70,11 @@ export default function RegisterPage() {
           <legend>Optional first branch</legend>
           <label>
             Branch name
-            <input name="branchName" />
+            <input name="branchName" maxLength={120} />
           </label>
           <label>
             Branch code
-            <input name="branchCode" />
+            <input name="branchCode" maxLength={63} />
           </label>
         </fieldset>
         <button type="submit" disabled={outcome.kind === "submitting"}>

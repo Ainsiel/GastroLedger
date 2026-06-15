@@ -9,7 +9,10 @@ from gastroledger_api.technical.registration_rate_limit import RegistrationRateL
 
 
 async def invoke_registration(
-    application: FastAPI, body: dict[str, object]
+    application: FastAPI,
+    body: dict[str, object],
+    *,
+    registration_key: str | None = None,
 ) -> tuple[int, dict[str, Any], dict[str, str]]:
     messages: list[dict[str, Any]] = []
     sent = False
@@ -28,6 +31,11 @@ async def invoke_registration(
     async def send(message: dict[str, Any]) -> None:
         messages.append(message)
 
+    headers = [(b"content-type", b"application/json")]
+    if registration_key:
+        headers.append(
+            (b"x-gastroledger-registration-key", registration_key.encode())
+        )
     await application(
         {
             "type": "http",
@@ -38,7 +46,7 @@ async def invoke_registration(
             "path": "/api/v1/tenants/register",
             "raw_path": b"/api/v1/tenants/register",
             "query_string": b"",
-            "headers": [(b"content-type", b"application/json")],
+            "headers": headers,
             "client": ("127.0.0.1", 12345),
             "server": ("test", 80),
         },
@@ -96,6 +104,22 @@ def test_public_registration_is_rate_limited_before_use_case_execution() -> None
     assert second_status == 429
     assert second_body["type"] == "platform.registration_rate_limited"
     assert second_headers["retry-after"] == "60"
+
+
+def test_registration_proxy_key_keeps_client_rate_limits_independent() -> None:
+    application = create_application(
+        registration_rate_limiter=RegistrationRateLimiter(limit=1, window_seconds=60)
+    )
+
+    first_status, _first_body, _first_headers = asyncio.run(
+        invoke_registration(application, {}, registration_key="client-a")
+    )
+    second_status, _second_body, _second_headers = asyncio.run(
+        invoke_registration(application, {}, registration_key="client-b")
+    )
+
+    assert first_status == 422
+    assert second_status == 422
 
 
 def test_public_registration_rejects_an_unbounded_request_body() -> None:

@@ -44,6 +44,16 @@ class RegistrationRateLimiter:
             return count < self.limit
 
 
+def registration_client_key(scope: AsgiScope) -> str:
+    for name, value in scope.get("headers", []):
+        if name.lower() == b"x-gastroledger-registration-key":
+            decoded = value.decode(errors="ignore").strip()
+            if decoded:
+                return decoded[:256]
+    client = scope.get("client")
+    return str(client[0]) if client else "unknown"
+
+
 class RegistrationRateLimitMiddleware:
     def __init__(self, app: AsgiApplication, limiter: RegistrationRateLimiter) -> None:
         self._app = app
@@ -57,8 +67,7 @@ class RegistrationRateLimitMiddleware:
             and scope["method"] == "POST"
             and scope["path"] == REGISTRATION_PATH
         ):
-            client = scope.get("client")
-            key = str(client[0]) if client else "unknown"
+            key = registration_client_key(scope)
             if not self._limiter.allow(key):
                 response = problem_response(
                     429,
