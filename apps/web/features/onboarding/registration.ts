@@ -9,7 +9,7 @@ export type RegistrationOutcome =
   | { kind: "submitting" }
   | { kind: "success"; tenantName: string }
   | { kind: "duplicate" }
-  | { kind: "validation" }
+  | { kind: "validation"; errors: ApiProblem["errors"] }
   | { kind: "unexpected"; correlationId?: string };
 
 export function registrationMessage(outcome: RegistrationOutcome): string {
@@ -47,7 +47,7 @@ export async function submitRegistration(
     }
     const problem = (await response.json()) as ApiProblem;
     if (response.status === 409) return { kind: "duplicate" };
-    if (response.status === 422) return { kind: "validation" };
+    if (response.status === 422) return { kind: "validation", errors: problem.errors };
     return { kind: "unexpected", correlationId: problem.correlationId };
   } catch {
     return { kind: "unexpected" };

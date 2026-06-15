@@ -10,7 +10,7 @@ describe("registrationMessage", () => {
     expect(registrationMessage({ kind: "duplicate" })).toBe(
       "That company identifier is already registered.",
     );
-    expect(registrationMessage({ kind: "validation" })).toBe(
+    expect(registrationMessage({ kind: "validation", errors: [] })).toBe(
       "Review the highlighted registration fields.",
     );
   });

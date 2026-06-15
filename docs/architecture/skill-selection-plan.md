@@ -16,6 +16,11 @@
 | `frontend-state-strategy` | Server, URL and local state ownership | Selected |
 | `frontend-api-contract-consumption` | Typed consumers and error semantics | Selected |
 | `frontend-testing-strategy` | Visible workflow test levels | Selected |
+| `nextjs-ui-design` | UI design spec and visual hierarchy | Selected and implemented |
+| `nextjs-app-router-architecture` | Route groups and shared layouts | Selected and implemented |
+| `tdd` | Red-green-refactor delivery discipline | Selected and implemented |
+| `integration-testing` | PostgreSQL ORM and transport verification | Selected and implemented |
+| `architecture-conformance-verification` | Dependency boundary checks | Selected and implemented |
 | `monorepo-layout-design` | Future repository boundaries | Selected |
 | `docker-compose-environment-strategy` | Local and isolated test environments | Selected |
 | `rollback-planning` | Migration/deployment recovery constraints | Selected |

@@ -109,6 +109,26 @@ def test_platform_registration_and_tenant_identity_are_public_api_operations() -
     assert schema["paths"]["/api/v1/session/tenant"]["get"]["responses"]["200"]
 
 
+def test_openapi_is_a_governed_developer_contract() -> None:
+    application = create_application()
+    schema = application.openapi()
+    routes = {route.path for route in application.routes if hasattr(route, "path")}
+
+    assert schema["info"]["title"] == "GastroLedger API"
+    assert schema["info"]["version"] == "1.0.0"
+    assert "Local-first operational ledger" in schema["info"]["description"]
+    assert schema["paths"]["/api/v1/tenants/register"]["post"]["operationId"] == (
+        "registerTenant"
+    )
+    assert schema["paths"]["/api/v1/session/tenant"]["get"]["operationId"] == (
+        "getCurrentTenant"
+    )
+    assert "/docs" in routes
+    assert "/openapi.json" in routes
+    assert "/assets/swagger-ui" in routes
+    assert "/redoc" not in routes
+
+
 def test_transport_validation_uses_the_stable_problem_shape() -> None:
     status, body, _headers = asyncio.run(invoke_registration(create_application(), {}))
 

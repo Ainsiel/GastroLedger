@@ -55,6 +55,17 @@ def test_compose_declares_only_approved_services() -> None:
         assert forbidden not in content.lower()
 
 
+def test_develop_web_syncs_dependencies_and_cache_before_starting_nextjs() -> None:
+    content = (ROOT / "infra" / "compose" / "compose.develop.yaml").read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        'command: sh -c "npm ci && rm -rf apps/web/.next/* '
+        '&& npm --workspace @gastroledger/web run dev"'
+    ) in content
+
+
 def test_foundation_migration_contains_no_functional_schema() -> None:
     content = (ROOT / "infra" / "migrations" / "0000-foundation.sql").read_text(
         encoding="utf-8"

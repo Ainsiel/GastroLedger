@@ -30,8 +30,8 @@ servicios externos.
 
 | Área | Tecnología |
 |---|---|
-| Frontend | Next.js `16.2.9` App Router, React `19.2.7`, TypeScript `6.0.3` |
-| Backend | Python `3.13`, FastAPI `0.137.0`, Uvicorn `0.49.0` |
+| Frontend | Next.js `16.2.9` App Router, React `19.2.7`, TypeScript `6.0.3`, shadcn/ui, Tailwind CSS `4.3.1` |
+| Backend | Python `3.13`, FastAPI `0.137.0`, SQLAlchemy `2.0.50`, psycopg `3.3.4`, Uvicorn `0.49.0` |
 | Worker | Entry point Python separado que reutiliza módulos de `apps/api` |
 | Datos | PostgreSQL `17-alpine` |
 | JavaScript | Node.js `22.13.1`, npm `10.9.2`, workspaces npm |
@@ -120,6 +120,14 @@ docker compose --env-file infra/compose/.env.example -f infra/compose/compose.ya
 
 Servicios: web `http://127.0.0.1:3000`, API
 `http://127.0.0.1:8000/health` y PostgreSQL `127.0.0.1:5432`.
+
+Documentacion interactiva local del backend:
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
+
+Swagger usa assets servidos por el propio contenedor API y no necesita CDN ni
+conexion a Internet.
 
 Para trabajar con los logs adjuntos y hot reload, el script interactivo confirmado
 es `npm run dev`; permanece activo hasta interrumpirlo.

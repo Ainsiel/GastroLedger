@@ -3,6 +3,21 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+
+class ProblemDetail(BaseModel):
+    field: str | None = None
+    code: str
+    detail: str
+
+
+class ApiProblem(BaseModel):
+    type: str
+    title: str
+    status: int
+    correlationId: str
+    errors: list[ProblemDetail]
 
 
 def problem_response(
