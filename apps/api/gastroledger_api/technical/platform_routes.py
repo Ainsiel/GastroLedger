@@ -9,12 +9,31 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from gastroledger_api.modules.platform_organization.public import (
     AuthenticationRequired,
+    BranchId,
+    BranchLimitExceeded,
+    BranchView,
+    CreateBranch,
+    CreateWarehouse,
+    DeactivateWarehouse,
+    OperatingAuthorizationDenied,
+    OperatingCodeConflict,
+    OperatingIdentity,
+    OperatingNotFound,
+    OperatingScopeService,
+    OperatingValidationError,
     RegisterTenant,
     RegistrationCommand,
     RegistrationConflict,
     RegistrationValidationError,
     ScryptPasswordHasher,
     SessionTokenIssuer,
+    TenantSettingsView,
+    UpdateTenantSettings,
+    WarehouseDeactivationUnsafe,
+    WarehouseId,
+    WarehouseInactive,
+    WarehouseMovementGuard,
+    WarehouseView,
 )
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
 from gastroledger_api.technical.problems import ApiProblem, problem_response
@@ -38,6 +57,15 @@ TENANT_IDENTITY_RESPONSES = {
     404: {"model": ApiProblem, "description": "The scoped tenant is not visible."},
     422: {"model": ApiProblem, "description": "The query parameter is invalid."},
     500: {"model": ApiProblem, "description": "Tenant identity could not be resolved."},
+}
+
+OPERATING_RESPONSES = {
+    401: {"model": ApiProblem, "description": "A valid local session is required."},
+    403: {"model": ApiProblem, "description": "Tenant administrator access is required."},
+    404: {"model": ApiProblem, "description": "The scoped resource is not visible."},
+    409: {"model": ApiProblem, "description": "The operating-scope command conflicts."},
+    422: {"model": ApiProblem, "description": "The operating-scope input is invalid."},
+    500: {"model": ApiProblem, "description": "The command could not be completed."},
 }
 
 
@@ -73,6 +101,89 @@ class TenantIdentityResponse(BaseModel):
     tenantSlug: str
 
 
+class TenantSettingsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    locale: str = Field(min_length=1, max_length=20)
+    baseCurrency: str = Field(min_length=3, max_length=3)
+    branchLimit: int = Field(strict=True, ge=1, le=100)
+
+
+class TenantSettingsResponse(BaseModel):
+    locale: str
+    baseCurrency: str
+    branchLimit: int
+    branchCount: int
+
+
+class BranchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    code: str = Field(min_length=1, max_length=63)
+
+
+class WarehouseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    code: str = Field(min_length=1, max_length=63)
+    type: str = Field(min_length=1, max_length=20)
+
+
+class WarehouseResponse(BaseModel):
+    warehouseId: str
+    branchId: str
+    name: str
+    code: str
+    type: str
+    status: str
+
+
+class BranchResponse(BaseModel):
+    branchId: str
+    name: str
+    code: str
+    warehouses: list[WarehouseResponse]
+
+
+class NoOpenWarehouseMovements(WarehouseMovementGuard):
+    def has_open_movements(
+        self, _identity: OperatingIdentity, _warehouse_id: WarehouseId
+    ) -> bool:
+        # Inventory movement lifecycles are introduced by later accepted slices.
+        return False
+
+
+def settings_response(settings: TenantSettingsView) -> TenantSettingsResponse:
+    return TenantSettingsResponse(
+        locale=settings.locale,
+        baseCurrency=settings.base_currency,
+        branchLimit=settings.branch_limit,
+        branchCount=settings.branch_count,
+    )
+
+
+def warehouse_response(warehouse: WarehouseView) -> WarehouseResponse:
+    return WarehouseResponse(
+        warehouseId=str(warehouse.warehouse_id),
+        branchId=str(warehouse.branch_id),
+        name=warehouse.name,
+        code=warehouse.code,
+        type=warehouse.warehouse_type,
+        status=warehouse.status,
+    )
+
+
+def branch_response(branch: BranchView) -> BranchResponse:
+    return BranchResponse(
+        branchId=str(branch.branch_id),
+        name=branch.name,
+        code=branch.code,
+        warehouses=[warehouse_response(item) for item in branch.warehouses],
+    )
+
+
 def create_platform_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1", tags=["platform-organization"])
     store = PostgresPlatformStore(database_url or os.environ.get("DATABASE_URL", ""))
@@ -81,6 +192,50 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
         password_hasher=ScryptPasswordHasher(),
         session_tokens=SessionTokenIssuer(),
     )
+    operating_scope = OperatingScopeService(
+        store=store, movement_guard=NoOpenWarehouseMovements()
+    )
+
+    def operating_identity(gl_session: str | None) -> OperatingIdentity:
+        if not gl_session:
+            raise AuthenticationRequired
+        return store.resolve_operating_identity(gl_session)
+
+    def operating_problem(error: Exception, correlation_id: str):
+        if isinstance(error, AuthenticationRequired):
+            return problem_response(
+                401, "platform.authentication_required", correlation_id, []
+            )
+        if isinstance(error, OperatingAuthorizationDenied):
+            return problem_response(403, "platform.authorization_denied", correlation_id, [])
+        if isinstance(error, OperatingNotFound):
+            return problem_response(404, "platform.operating_scope_not_found", correlation_id, [])
+        if isinstance(error, OperatingValidationError):
+            return problem_response(
+                422,
+                "platform.operating_scope_invalid",
+                correlation_id,
+                [
+                    {"field": detail.field, "code": detail.code, "detail": "review field"}
+                    for detail in error.details
+                ],
+            )
+        if isinstance(error, OperatingCodeConflict):
+            return problem_response(409, "platform.code_conflict", correlation_id, [])
+        if isinstance(error, BranchLimitExceeded):
+            return problem_response(
+                409,
+                "platform.branch_limit_exceeded",
+                correlation_id,
+                [{"field": "branchLimit", "code": "exceeded", "detail": "review limit"}],
+            )
+        if isinstance(error, WarehouseInactive):
+            return problem_response(409, "platform.warehouse_inactive", correlation_id, [])
+        if isinstance(error, WarehouseDeactivationUnsafe):
+            return problem_response(
+                409, "platform.warehouse_has_open_movements", correlation_id, []
+            )
+        return problem_response(500, "platform.operating_scope_failed", correlation_id, [])
 
     @router.post(
         "/tenants/register",
@@ -175,5 +330,184 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             tenantName=identity.tenant_name,
             tenantSlug=identity.tenant_slug,
         )
+
+    @router.get(
+        "/tenant/settings",
+        response_model=TenantSettingsResponse,
+        operation_id="getTenantSettings",
+        summary="Get tenant operating settings",
+        responses=OPERATING_RESPONSES,
+    )
+    def get_tenant_settings(gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            return settings_response(
+                operating_scope.get_settings(operating_identity(gl_session))
+            )
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.patch(
+        "/tenant/settings",
+        response_model=TenantSettingsResponse,
+        operation_id="updateTenantSettings",
+        summary="Update tenant operating settings",
+        responses=OPERATING_RESPONSES,
+    )
+    def update_tenant_settings(
+        request: TenantSettingsRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return settings_response(
+                operating_scope.update_settings(
+                    operating_identity(gl_session),
+                    UpdateTenantSettings(
+                        locale=request.locale,
+                        base_currency=request.baseCurrency,
+                        branch_limit=request.branchLimit,
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            OperatingValidationError,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.get(
+        "/branches",
+        response_model=list[BranchResponse],
+        operation_id="listBranches",
+        summary="List tenant branches and warehouses",
+        responses=OPERATING_RESPONSES,
+    )
+    def list_branches(gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            return [
+                branch_response(branch)
+                for branch in operating_scope.list_branches(
+                    operating_identity(gl_session)
+                )
+            ]
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.post(
+        "/branches",
+        response_model=BranchResponse,
+        status_code=201,
+        operation_id="createBranch",
+        summary="Create a tenant branch",
+        responses=OPERATING_RESPONSES,
+    )
+    def create_branch(
+        request: BranchRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return branch_response(
+                operating_scope.create_branch(
+                    operating_identity(gl_session),
+                    CreateBranch(name=request.name, code=request.code),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            OperatingValidationError,
+            OperatingCodeConflict,
+            BranchLimitExceeded,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.post(
+        "/branches/{branchId}/warehouses",
+        response_model=WarehouseResponse,
+        status_code=201,
+        operation_id="createWarehouse",
+        summary="Create a branch warehouse",
+        responses=OPERATING_RESPONSES,
+    )
+    def create_warehouse(
+        branchId: UUID,
+        request: WarehouseRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return warehouse_response(
+                operating_scope.create_warehouse(
+                    operating_identity(gl_session),
+                    CreateWarehouse(
+                        branch_id=BranchId(str(branchId)),
+                        name=request.name,
+                        code=request.code,
+                        warehouse_type=request.type,
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            OperatingValidationError,
+            OperatingCodeConflict,
+            OperatingNotFound,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.post(
+        "/warehouses/{warehouseId}/deactivate",
+        response_model=WarehouseResponse,
+        operation_id="deactivateWarehouse",
+        summary="Deactivate an unused warehouse",
+        responses=OPERATING_RESPONSES,
+    )
+    def deactivate_warehouse(
+        warehouseId: UUID,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return warehouse_response(
+                operating_scope.deactivate_warehouse(
+                    operating_identity(gl_session),
+                    DeactivateWarehouse(warehouse_id=WarehouseId(str(warehouseId))),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            OperatingNotFound,
+            WarehouseDeactivationUnsafe,
+            WarehouseInactive,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
 
     return router

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, ForeignKeyConstraint, Text, Uuid
+from sqlalchemy import DateTime, ForeignKey, ForeignKeyConstraint, Integer, Text, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -27,6 +27,7 @@ class PlatformTenantSetting(Base):
     )
     locale: Mapped[str] = mapped_column(Text)
     base_currency: Mapped[str] = mapped_column(Text)
+    branch_limit: Mapped[int] = mapped_column(Integer)
 
 
 class PlatformUser(Base):
@@ -59,6 +60,22 @@ class PlatformBranch(Base):
     name: Mapped[str] = mapped_column(Text)
 
 
+class PlatformWarehouse(Base):
+    __tablename__ = "platform_warehouses"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["branch_id", "tenant_id"],
+            ["platform_branches.id", "platform_branches.tenant_id"],
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    branch_id: Mapped[UUID] = mapped_column(Uuid)
+    code: Mapped[str] = mapped_column(Text)
+    name: Mapped[str] = mapped_column(Text)
+    type: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text)
 class PlatformSession(Base):
     __tablename__ = "platform_sessions"
     __table_args__ = (
