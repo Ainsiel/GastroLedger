@@ -20,6 +20,12 @@
     "github-label-manager",
     "github-cli",
     "work-order-branch-lifecycle",
+    "frontend-architecture-design",
+    "frontend-state-strategy",
+    "frontend-api-contract-consumption",
+    "frontend-testing-strategy",
+    "nextjs-frontend-guidance",
+    "nextjs-ui-design",
     "handoff"
   ],
   "requiredInputs": [

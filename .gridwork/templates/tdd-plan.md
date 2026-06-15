@@ -19,6 +19,16 @@ expected_red_reason =
 minimum_green_scope =
 ```
 
+## Frontend Evidence Plan
+
+Complete when frontend scope exists:
+
+- Accessible interaction:
+- Integrated route:
+- Required visible states:
+- Responsive viewports:
+- Visual QA evidence:
+
 ## Gates And Risks
 
 - Allowed paths:

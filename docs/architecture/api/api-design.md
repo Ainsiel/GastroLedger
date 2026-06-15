@@ -54,3 +54,13 @@ external_public_api = none
 - OpenAPI is generated from public transport schemas and used for consumer contract
   verification.
 - Domain and persistence models are never exported as API schemas.
+
+## Developer Documentation
+
+- `/openapi.json` is the machine-readable contract.
+- `/docs` provides locally served Swagger UI without an Internet dependency.
+- `/redoc` is disabled until an approved locally served ReDoc asset is available.
+- Operations define stable IDs, bounded tags, summaries, response models and problem
+  responses.
+- Session-cookie security and public bounded registration are described without
+  exposing secret values.

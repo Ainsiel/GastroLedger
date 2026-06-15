@@ -15,12 +15,16 @@
 ## Boundaries
 
 - Route files compose pages and load initial server-owned data.
+- shadcn/ui-derived primitives and GastroLedger design tokens live under shared
+  frontend component paths and contain no domain behavior.
 - Server Components are the default for read views and access-sensitive composition.
 - Client Components are limited to interactive forms, scanners/count entry, previews
   and pending-state feedback.
 - Typed API clients and DTO-to-view mappings live at feature boundaries.
 - Visual components never call FastAPI directly.
 - Backend remains the final authority for tenant scope, permissions and invariants.
+- Visual direction and responsive/accessibility requirements are defined in
+  `ui-design-spec.md`.
 
 ## State Ownership
 
@@ -48,3 +52,10 @@ exceptions or incomplete confidence.
 - accessibility checks for keyboard and accessible names;
 - end-to-end coverage for registration, recipe approval, receiving, count approval,
   sales import and variance report.
+
+## Delivery Rule
+
+Every frontend-bearing vertical slice follows
+`docs/backlog/frontend-delivery-contract.md`. Work orders must select the relevant
+frontend Gridwork skills and verifiers must reject missing integrated route,
+responsive/accessibility or visual QA evidence.

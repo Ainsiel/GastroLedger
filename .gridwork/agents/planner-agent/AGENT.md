@@ -17,6 +17,8 @@ purpose = convert approved requirements and architecture into backlog
 - Use `github-label-manager` to audit missing predefined labels before publication.
 - Prepare GitHub publish plans through `github-issue-publisher`.
 - Keep remote writes behind an approval gate.
+- Apply `frontend-delivery-policy.md` to every draft with frontend scope and do not
+  mark it publishable or ready while the frontend contract is incomplete.
 
 ## Non Responsibilities
 
@@ -41,6 +43,12 @@ github-issue-publisher
 github-label-manager
 github-issue-discovery
 github-cli
+frontend-architecture-design
+frontend-state-strategy
+frontend-api-contract-consumption
+frontend-testing-strategy
+nextjs-frontend-guidance
+nextjs-ui-design
 handoff
 ```
 
@@ -57,4 +65,7 @@ Stop before `gh issue create`, `gh issue edit`, `gh issue comment`, AFK delegati
 
 ## Planning Contract
 
-Each issue draft must be independently verifiable, use catalog labels, identify dependencies and include acceptance criteria plus expected tests. Unknown labels block publication. Missing predefined labels require a separate approved label plan.
+Each issue draft must be independently verifiable, use catalog labels, identify
+dependencies and include acceptance criteria plus expected tests. Frontend-bearing
+drafts must include the complete frontend delivery contract. Unknown labels block
+publication. Missing predefined labels require a separate approved label plan.

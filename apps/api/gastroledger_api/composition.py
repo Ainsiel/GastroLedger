@@ -13,6 +13,7 @@ from gastroledger_api.modules.platform_organization.public import (
 from gastroledger_api.modules.procurement.public import MODULE_ID as PROCUREMENT
 from gastroledger_api.modules.store_operations.public import MODULE_ID as STORE_OPERATIONS
 from gastroledger_api.runtime import configure_logging
+from gastroledger_api.technical.api_docs import configure_api_docs
 from gastroledger_api.technical.health import router as health_router
 from gastroledger_api.technical.platform_routes import create_platform_router
 from gastroledger_api.technical.problems import configure_problem_handlers
@@ -37,6 +38,17 @@ MODULE_BOUNDARIES = (
     ModuleBoundary(CONTROL_INSIGHTS),
 )
 
+OPENAPI_TAGS = [
+    {
+        "name": "technical",
+        "description": "Runtime readiness and technical service status.",
+    },
+    {
+        "name": "platform-organization",
+        "description": "Tenant registration and scoped local session operations.",
+    },
+]
+
 
 def create_application(
     *,
@@ -44,7 +56,19 @@ def create_application(
     registration_rate_limiter: RegistrationRateLimiter | None = None,
 ) -> FastAPI:
     configure_logging()
-    application = FastAPI(title="GastroLedger API", version="0.0.0")
+    application = FastAPI(
+        title="GastroLedger API",
+        summary="Local operational contracts for restaurant groups",
+        description=(
+            "Local-first operational ledger API for tenant-scoped restaurant workflows. "
+            "No payment, accounting, payroll or external integration API is provided."
+        ),
+        version="1.0.0",
+        docs_url=None,
+        redoc_url=None,
+        openapi_tags=OPENAPI_TAGS,
+    )
+    configure_api_docs(application)
     configure_problem_handlers(application)
     application.add_middleware(RegistrationPayloadLimitMiddleware)
     application.add_middleware(

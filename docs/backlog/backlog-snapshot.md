@@ -2,7 +2,7 @@
 
 ```text
 run_id = backlog-management-20260614-01
-generated_at = 2026-06-14T19:04:08-04:00
+generated_at = 2026-06-15
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
 status = published and reconciled
 github_issues_observed = 23
@@ -12,22 +12,24 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Ready candidate | 1 |
-| Defined, blocked by dependencies | 22 |
+| Done | 1 |
+| Ready candidate | 2 |
+| Defined, blocked by dependencies | 20 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
 
-The repository already contains the bootstrap, architecture foundation, delivery
-infrastructure, six backend module boundaries, frontend feature boundaries and an
-isolated PostgreSQL harness. No product behavior or functional tables exist yet.
+The repository contains the bootstrap, architecture foundation, delivery
+infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
+SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001 tenant
+registration and isolation is accepted in `develop`.
 
 ## Items
 
 | ID | Outcome | Primary context | Trace | Readiness | Dependencies |
 |---|---|---|---|---|---|
-| [GL-001](https://github.com/Ainsiel/GastroLedger/issues/1) | Register a tenant and prove isolation | Platform & Organization | UC-001 | Ready tracer | Foundation |
-| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | Blocked | GL-001 |
-| [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Blocked | GL-001 |
+| [GL-001](https://github.com/Ainsiel/GastroLedger/issues/1) | Register a tenant and prove isolation | Platform & Organization | UC-001 | Done | Foundation |
+| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | Ready | GL-001 |
+| [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Ready | GL-001 |
 | [GL-004](https://github.com/Ainsiel/GastroLedger/issues/4) | Manage units and ingredient catalog | Menu Engineering | UC-005, UC-006 | Blocked | GL-003 |
 | [GL-005](https://github.com/Ainsiel/GastroLedger/issues/5) | Manage suppliers and effective-dated offers | Procurement | UC-007 | Blocked | GL-004 |
 | [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Blocked | GL-004 |
@@ -51,7 +53,7 @@ isolated PostgreSQL harness. No product behavior or functional tables exist yet.
 
 ## Tracer Slice
 
-`GL-001` is the initial tracer. It proves the highest-risk path before broader
+`GL-001` delivered the initial tracer and proved the highest-risk path before broader
 feature work:
 
 ```text
@@ -59,7 +61,7 @@ Next.js registration -> FastAPI command -> tenant aggregate -> PostgreSQL transa
 -> RLS tenant context -> local session -> isolated authenticated read
 ```
 
-It must establish production migrations for the minimum Platform & Organization
+It established production migrations for the minimum Platform & Organization
 relations, RLS, transaction-scoped tenant context, password/session security,
 transport contracts, visible registration states and cross-tenant integration
 evidence.
@@ -68,6 +70,9 @@ evidence.
 
 - Exact endpoint paths and DTO field names must be selected inside each approved
   work order while preserving the existing public module boundaries.
+- Every frontend-bearing issue now follows
+  `docs/backlog/frontend-delivery-contract.md`; missing frontend contract fields make
+  an item `needs_refinement`, not ready.
 - The approved documents define complete behavior, but performance baselines remain
   deferred until representative data exists.
 - `GL-023` is intentionally last because a complete export must cover the accepted
@@ -79,5 +84,6 @@ evidence.
   its sequence but split large lifecycles into implementable outcomes.
 - ADR files have documentary status `proposed`, but the user explicitly supplied
   them as approved workflow sources.
-- GitHub publication was explicitly approved and reconciled on 2026-06-14: issues
-  `#1` through `#23` and the four proposed Gridwork labels are present.
+- GitHub publication was explicitly approved on 2026-06-14. On 2026-06-15, issues
+  `#1` through `#23` were reconciled with the frontend delivery contract; GL-001 was
+  completed and GL-002/GL-003 became ready.

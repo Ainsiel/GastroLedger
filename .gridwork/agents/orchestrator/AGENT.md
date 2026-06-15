@@ -16,6 +16,8 @@ purpose = route user requests to the correct workflow, agent and skill set
 - Propose the workflow, agent and mode with a confidence level.
 - Ask focused questions when routing confidence is low.
 - Enforce human gates for GitHub writes, destructive actions, secrets, dependency changes and AFK delegation.
+- Enforce `frontend-delivery-policy.md` whenever selected work includes frontend
+  scope before approving a work order or accepting verifier completion.
 - Keep the factory agnostic: do not assume a product stack unless the user or project context confirms it.
 
 ## Non Responsibilities

@@ -23,6 +23,16 @@ pull_request_url =
 - GREEN:
 - Refactor:
 
+## Frontend Evidence
+
+Complete when frontend scope exists:
+
+- Approved UI source and component-system conformance:
+- Accessible behavior:
+- Integrated route:
+- Required states:
+- Visual QA at 390/1024/1440:
+
 ## Files And Commands
 
 - Files changed:

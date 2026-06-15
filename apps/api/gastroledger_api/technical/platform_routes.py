@@ -2,8 +2,10 @@ import os
 from uuid import UUID, uuid4
 
 import psycopg
-from fastapi import APIRouter, Cookie, Query, Response
+from fastapi import APIRouter, Query, Response, Security
+from fastapi.security import APIKeyCookie
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.exc import SQLAlchemyError
 
 from gastroledger_api.modules.platform_organization.public import (
     AuthenticationRequired,
@@ -15,9 +17,28 @@ from gastroledger_api.modules.platform_organization.public import (
     SessionTokenIssuer,
 )
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
-from gastroledger_api.technical.problems import problem_response
+from gastroledger_api.technical.problems import ApiProblem, problem_response
 
 SESSION_COOKIE = "gl_session"
+session_cookie = APIKeyCookie(
+    name=SESSION_COOKIE,
+    auto_error=False,
+    description="Opaque local session cookie issued after tenant registration.",
+)
+
+REGISTRATION_RESPONSES = {
+    409: {"model": ApiProblem, "description": "The tenant identifier already exists."},
+    422: {"model": ApiProblem, "description": "The bounded registration input is invalid."},
+    429: {"model": ApiProblem, "description": "The public registration limit was reached."},
+    500: {"model": ApiProblem, "description": "Registration could not be completed."},
+}
+
+TENANT_IDENTITY_RESPONSES = {
+    401: {"model": ApiProblem, "description": "A valid local session is required."},
+    404: {"model": ApiProblem, "description": "The scoped tenant is not visible."},
+    422: {"model": ApiProblem, "description": "The query parameter is invalid."},
+    500: {"model": ApiProblem, "description": "Tenant identity could not be resolved."},
+}
 
 
 class FirstBranchRequest(BaseModel):
@@ -61,7 +82,18 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
         session_tokens=SessionTokenIssuer(),
     )
 
-    @router.post("/tenants/register", response_model=RegistrationResponse, status_code=201)
+    @router.post(
+        "/tenants/register",
+        response_model=RegistrationResponse,
+        status_code=201,
+        operation_id="registerTenant",
+        summary="Register a tenant and first administrator",
+        description=(
+            "Atomically creates an isolated local tenant, its first administrator, "
+            "an optional first branch and a scoped local session."
+        ),
+        responses=REGISTRATION_RESPONSES,
+    )
     def register(request: RegistrationRequest, response: Response):
         correlation_id = str(uuid4())
         try:
@@ -92,7 +124,7 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
                 correlation_id,
                 [{"field": "tenantSlug", "code": "duplicate", "detail": "already registered"}],
             )
-        except psycopg.Error:
+        except (psycopg.Error, SQLAlchemyError):
             return problem_response(500, "platform.registration_failed", correlation_id, [])
         response.set_cookie(
             key=SESSION_COOKIE,
@@ -111,10 +143,16 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             tenantSlug=result.tenant_slug,
         )
 
-    @router.get("/session/tenant", response_model=TenantIdentityResponse)
+    @router.get(
+        "/session/tenant",
+        response_model=TenantIdentityResponse,
+        operation_id="getCurrentTenant",
+        summary="Resolve the tenant for the current local session",
+        responses=TENANT_IDENTITY_RESPONSES,
+    )
     def tenant_identity(
         tenantId: UUID | None = Query(default=None),
-        gl_session: str | None = Cookie(default=None),
+        gl_session: str | None = Security(session_cookie),
     ):
         correlation_id = str(uuid4())
         if not gl_session:
@@ -127,7 +165,7 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             return problem_response(
                 401, "platform.authentication_required", correlation_id, []
             )
-        except psycopg.Error:
+        except (psycopg.Error, SQLAlchemyError):
             return problem_response(500, "platform.tenant_identity_failed", correlation_id, [])
         if not identity:
             return problem_response(404, "platform.tenant_not_found", correlation_id, [])

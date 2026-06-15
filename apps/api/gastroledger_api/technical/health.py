@@ -11,7 +11,11 @@ class HealthResponse(BaseModel):
     status: Literal["ok"]
 
 
-@router.get("/health", response_model=HealthResponse)
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    operation_id="getApiHealth",
+    summary="Check API readiness",
+)
 def health() -> HealthResponse:
     return HealthResponse(service="api", status="ok")
-

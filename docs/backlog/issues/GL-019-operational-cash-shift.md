@@ -36,6 +36,13 @@ reasoned variance without processing or settling money.
 - [ ] Duplicate open shift and closing another cashier's shift are rejected.
 - [ ] UI and contracts never describe the result as payment or settlement truth.
 
+## Frontend Delivery Contract
+
+- Follow `docs/backlog/frontend-delivery-contract.md`, `docs/architecture/frontend/ui-design-spec.md`, `docs/architecture/frontend/frontend-architecture.md` and ADR-0007.
+- Implement the owned App Router route with the approved `(app)` shell, existing GastroLedger design tokens and shadcn/ui-derived primitives; add shared primitives only for confirmed consumers.
+- Define and test every applicable loading, empty, validation/error, unauthorized, success, stale/conflict and destructive state without enabling unimplemented behavior.
+- Verify keyboard/focus/accessibility behavior and responsive rendering at 390, 1024 and 1440 CSS pixels with no horizontal scroll at 390.
+- Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
 - [ ] TC-022-S/A/F and IT-022 pass.

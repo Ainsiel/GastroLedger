@@ -8,7 +8,8 @@
 4. Include keyboard, accessible-name and important state checks.
 5. Test loading, empty, error, unauthorized, stale and destructive states.
 6. Prefer public user interactions over implementation details.
-7. Define evidence and confirmed commands.
+7. Define responsive checks at approved viewports and visual QA evidence.
+8. Define evidence and confirmed commands.
 
 ## Coverage Model
 
@@ -18,12 +19,14 @@ feature integration
 API contract consumption
 critical end-to-end workflows
 accessibility checks
+responsive and visual QA evidence
 ```
 
 ## Verification
 
-Reject brittle implementation-detail tests, excessive mocking, missing error states and
-end-to-end coverage that duplicates cheaper tests without additional confidence.
+Reject brittle implementation-detail tests, excessive mocking, missing error states,
+missing required viewport/visual evidence and end-to-end coverage that duplicates
+cheaper tests without additional confidence.
 
 ## Output
 

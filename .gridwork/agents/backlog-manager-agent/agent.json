@@ -18,6 +18,12 @@
     "github-label-manager",
     "github-cli",
     "work-order-branch-lifecycle",
+    "frontend-architecture-design",
+    "frontend-state-strategy",
+    "frontend-api-contract-consumption",
+    "frontend-testing-strategy",
+    "nextjs-frontend-guidance",
+    "nextjs-ui-design",
     "handoff"
   ],
   "permissionProfile": "backlog-manager-assisted",
@@ -37,7 +43,8 @@
     "../../policies/workspace-domains.md",
     "../../policies/human-gates.md",
     "../../policies/policy-precedence.md",
-    "../../policies/work-order-policy.md"
+    "../../policies/work-order-policy.md",
+    "../../policies/frontend-delivery-policy.md"
   ],
   "handoffPolicy": "required_on_agent_or_session_transfer"
 }

@@ -73,7 +73,8 @@
     "../../policies/tdd-evidence-policy.md",
     "../../policies/git-policy.md",
     "../../policies/tool-allowlist.md",
-    "../../policies/stack-skill-policy.md"
+    "../../policies/stack-skill-policy.md",
+    "../../policies/frontend-delivery-policy.md"
   ],
   "handoffPolicy": "required_on_agent_or_session_transfer"
 }

@@ -30,6 +30,16 @@ ci_status =
 
 <architecture findings>
 
+## Frontend Conformance
+
+When frontend scope exists:
+
+- approved UI sources and shadcn/ui:
+- route and Server/Client boundaries:
+- visible states:
+- responsive and accessibility evidence:
+- integrated route and visual QA evidence:
+
 ## Policy Review
 
 <policy findings>

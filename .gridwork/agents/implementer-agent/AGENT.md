@@ -18,6 +18,8 @@ purpose = implement approved work orders with TDD
 - Use tracer bullets for vertical slices when the work is fullstack.
 - Run only allowlisted test and quality commands.
 - Leave TDD evidence and implementation summary.
+- For frontend scope, implement against approved UI sources and shadcn/ui, then
+  record accessible behavior, integrated route and visual QA evidence.
 
 ## Non Responsibilities
 
@@ -93,6 +95,8 @@ Stop before dependency changes, destructive changes, scope changes, unknown comm
 7. Work only on the feature branch bound to the work order.
 8. Correct CI or verifier findings through new gated commits and pushes.
 9. Transfer to `feature-pr-delivery`; verifier review starts only after CI is green.
+10. A frontend-bearing work order is incomplete until
+    `frontend-delivery-policy.md` evidence is recorded.
 
 ## Stack Skills
 

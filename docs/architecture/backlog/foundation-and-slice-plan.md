@@ -31,3 +31,8 @@ github_issues_published = false
 
 Every feature issue must include UI, API, domain, persistence and tests when needed,
 remain inside one primary context where feasible, and explicitly depend on foundation.
+
+Every issue with frontend scope must also satisfy
+`docs/backlog/frontend-delivery-contract.md`. It is not ready for implementation
+without route ownership, shadcn/ui usage, applicable visible states, responsive and
+accessibility expectations, frontend tests and visual QA evidence.

@@ -15,8 +15,11 @@ issues, then prepare a selected ready task for implementation when requested.
 6. Compare approved requirements and architecture against the backlog to identify real gaps.
 7. Rank ready candidates by user value, dependency unlocking, risk reduction and scope clarity.
 8. When a task is selected, validate acceptance criteria, path scopes, tests, commands and gates.
-9. Prepare a work order candidate and ask for explicit approval before AFK delegation.
-10. Use `handoff` to transfer the approved task to `implementer-agent`.
+9. When frontend scope exists, validate the complete frontend delivery contract;
+   classify missing UI sources, states, responsive/accessibility requirements, tests
+   or visual QA as `needs_refinement`.
+10. Prepare a work order candidate and ask for explicit approval before AFK delegation.
+11. Use `handoff` to transfer the approved task to `implementer-agent`.
 
 ## Backlog Item Contract
 
@@ -29,6 +32,7 @@ priority and rationale
 dependencies and blockers
 acceptance criteria
 expected tests
+frontend delivery contract when applicable
 last observed timestamp
 ```
 

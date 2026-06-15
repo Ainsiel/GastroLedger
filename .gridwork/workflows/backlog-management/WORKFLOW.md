@@ -43,10 +43,13 @@ handoff
 4. Answer the user's backlog question using a timestamped snapshot.
 5. Identify missing tasks only from approved requirements, architecture or observed gaps.
 6. If the user asks to take a task, recommend or validate one ready candidate.
-7. Prepare a complete implementation work order candidate and selection record.
-8. Ask for explicit approval of the work order and AFK delegation.
-9. After approval, hand off to `implementer-agent` using `tdd-implementation`.
-10. Prepare GitHub updates only when requested and execute them only after a separate approval.
+7. When frontend scope exists, validate the issue and work order against
+   `frontend-delivery-policy.md`; incomplete frontend contracts are
+   `needs_refinement`, not `ready`.
+8. Prepare a complete implementation work order candidate and selection record.
+9. Ask for explicit approval of the work order and AFK delegation.
+10. After approval, hand off to `implementer-agent` using `tdd-implementation`.
+11. Prepare GitHub updates only when requested and execute them only after a separate approval.
 
 ## Human Gates
 

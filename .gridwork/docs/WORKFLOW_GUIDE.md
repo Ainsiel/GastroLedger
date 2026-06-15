@@ -410,7 +410,13 @@ URL, server, local or global state ownership
 API/error consumption contract
 loading, empty, unauthorized and stale states
 frontend behavior, accessibility and E2E tests
+approved UI sources and shadcn/ui usage
+responsive checks at 390, 1024 and 1440 CSS pixels
+visual QA evidence
 ```
+
+If these fields are missing, the frontend-bearing task is `needs_refinement` and
+must not be delegated.
 
 The workflow stops before dependency changes, scope changes, unknown commands,
 destructive actions, commit, push, PR creation or deployment.

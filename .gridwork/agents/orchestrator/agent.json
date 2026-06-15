@@ -46,7 +46,8 @@
     "../../policies/workspace-domains.md",
     "../../policies/human-gates.md",
     "../../policies/policy-precedence.md",
-    "../../policies/git-policy.md"
+    "../../policies/git-policy.md",
+    "../../policies/frontend-delivery-policy.md"
   ],
   "handoffPolicy": "required_on_agent_or_session_transfer"
 }

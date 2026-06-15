@@ -14,7 +14,7 @@ CONTEXTS = {
     "store_operations",
     "control_insights",
 }
-FORBIDDEN_DOMAIN_IMPORTS = {"fastapi", "pydantic", "psycopg", "starlette"}
+FORBIDDEN_DOMAIN_IMPORTS = {"fastapi", "pydantic", "psycopg", "sqlalchemy", "starlette"}
 
 
 def imported_modules(path: Path) -> set[str]:
@@ -123,3 +123,13 @@ def test_no_external_http_client_dependency_is_declared() -> None:
     python_dependencies = set(re.findall(r"(?m)^\s*([A-Za-z0-9_-]+)", requirements))
     assert not {"requests", "httpx", "aiohttp"} & python_dependencies
     assert not {"axios", "got", "ky", "node-fetch"} & set(node_dependencies)
+
+
+def test_sqlalchemy_is_confined_to_technical_persistence_adapters() -> None:
+    violations: list[str] = []
+    for path in API_PACKAGE.rglob("*.py"):
+        if "sqlalchemy" not in imported_modules(path):
+            continue
+        if "technical" not in path.relative_to(API_PACKAGE).parts:
+            violations.append(str(path.relative_to(ROOT)))
+    assert not violations, "\n".join(violations)

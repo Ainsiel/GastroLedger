@@ -8,17 +8,17 @@ target_branch = develop
 required_pr_check = regression-gate
 ```
 
-## Candidate 1: GL-001 Tenant Registration And Isolation Tracer
+## Completed: GL-001 Tenant Registration And Isolation Tracer
 
 ```text
 work_order_id = GL-001
 feature_branch = feature/GL-001-tenant-registration-isolation
-readiness = ready
+readiness = done
 target_agent = implementer-agent
 workflow = tdd-implementation
 ```
 
-Objective: deliver visible company registration that atomically creates the tenant,
+Delivered objective: visible company registration that atomically creates the tenant,
 first administrator and scoped local session, then prove cross-tenant isolation.
 
 Primary paths:
@@ -39,35 +39,43 @@ npm run test:migrations
 npm run build
 ```
 
-Pending gates: work-order approval, AFK delegation, dependency changes, branch
-creation, commit, push, PR creation, verifier approval and merge.
+Delivery evidence: PR #24 merged into `develop`; required root checks and PostgreSQL
+integration evidence passed.
 
 ## Candidate 2: GL-002 Local Users, Invitations And Scoped Roles
 
 ```text
 work_order_id = GL-002
 feature_branch = feature/GL-002-local-users-scoped-roles
-readiness = blocked_by_GL-001
+readiness = ready
 ```
 
 Objective: let a tenant administrator generate a manually shared invitation and
 assign a branch-scoped role while preventing privilege escalation.
 
-This becomes ready only after the session, tenant context and minimum Platform &
-Organization persistence from `GL-001` are accepted.
+This is ready because the session, tenant context and minimum Platform & Organization
+persistence from `GL-001` are accepted.
+
+The work order must include `docs/backlog/frontend-delivery-contract.md`, including
+the `(app)` route, permission-visible states, shadcn/ui usage, accessibility,
+responsive checks and visual QA evidence.
 
 ## Candidate 3: GL-003 Tenant Operating Scope
 
 ```text
 work_order_id = GL-003
 feature_branch = feature/GL-003-tenant-operating-scope
-readiness = blocked_by_GL-001
+readiness = ready
 ```
 
 Objective: configure tenant settings and create/deactivate branches and warehouses
 with enforced limits and audit evidence.
 
-This becomes ready after `GL-001`; it unlocks every branch-owned operational slice.
+This is ready after `GL-001`; it unlocks every branch-owned operational slice.
+
+The work order must include `docs/backlog/frontend-delivery-contract.md`, including
+the `(app)/settings` route, management states, shadcn/ui usage, accessibility,
+responsive checks and visual QA evidence.
 
 ## Approval Contract
 

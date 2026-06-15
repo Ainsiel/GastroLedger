@@ -426,6 +426,7 @@
     "policies/architecture-design-policy.md",
     "policies/architecture-foundation-policy.md",
     "policies/delivery-lifecycle-policy.md",
+    "policies/frontend-delivery-policy.md",
     "policies/diagram-html-policy.md",
     "policies/stack-skill-policy.md",
     "policies/delivery-infrastructure-policy.md"
