@@ -12,9 +12,11 @@ Turn approved requirements and architecture into ordered, independently verifiab
 4. Slice remaining behavior by user outcome or business capability, not technical layer.
 5. Keep each issue inside one primary bounded context when feasible.
 6. Include acceptance criteria, expected tests, path hints, dependencies, risks and exclusions.
-7. Validate labels against `github-labels.json`.
-8. Review readiness before creating a publish plan.
-9. Write local drafts first; publish only through `github-issue-publisher`.
+7. For frontend scope, include the complete contract from
+   `frontend-delivery-policy.md` and approved UI source references.
+8. Validate labels against `github-labels.json`.
+9. Review readiness before creating a publish plan.
+10. Write local drafts first; publish only through `github-issue-publisher`.
 
 ## Vertical Slice Test
 
@@ -48,6 +50,8 @@ server/client boundary
 frontend state ownership
 API consumption contract
 expected frontend and accessibility tests
+approved UI sources and component system
+responsive viewports and visual QA evidence
 ```
 
 ## Ordering

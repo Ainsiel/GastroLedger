@@ -25,6 +25,10 @@ There is no agent workflow named `cicd-release` in v1. CI/CD is handled as GitHu
 
 `backlog-management` consolidates local drafts and governed GitHub issue reads, answers backlog questions and prepares an approved task handoff to `tdd-implementation`.
 
+Frontend-bearing backlog work is ready only after it satisfies
+`frontend-delivery-policy.md`. Implementation and verification must preserve that
+contract through visual QA evidence.
+
 `backlog-task-delivery` composes `backlog-management`, `tdd-implementation`, `feature-pr-delivery` and `verification-pr` for a single request to select, implement, verify and merge a ready task into `develop`. Work-order approval and AFK delegation remain explicit gates.
 
 `feature-pr-delivery` keeps a feature PR open through CI and verifier correction cycles, then performs an approved squash merge to `develop`.

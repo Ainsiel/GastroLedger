@@ -40,6 +40,8 @@ ADR.
 
 - Modular monolith in one monorepo.
 - Next.js App Router frontend in `apps/web`.
+- shadcn/ui-derived source components, Tailwind CSS and GastroLedger design tokens
+  provide the approved frontend component system.
 - FastAPI API and backend modules in `apps/api`.
 - Separate worker entry point in `apps/worker`; it reuses public API composition and
   modules instead of duplicating domain code.
@@ -80,6 +82,9 @@ design direction for the foundation:
 4. `ADR-0004`: immutable approved recipe versions and historical cost snapshots.
 5. `ADR-0005`: no external APIs or real-money workflows in V1.
 6. `ADR-0006`: PostgreSQL leased jobs and transactional outbox, with no broker.
+7. `ADR-0007`: shadcn/ui-derived components and GastroLedger-owned design tokens.
+8. `ADR-0008`: SQLAlchemy ORM is confined to PostgreSQL technical adapters while SQL
+   migrations remain authoritative.
 
 ## Dependency Rules
 
@@ -123,7 +128,9 @@ workflows are:
 - Operations: `ci-failure-repair`, `release-promotion`.
 
 Functional implementation starts only from approved vertical work orders. Do not
-use skills or create HTML artifacts for GastroLedger work.
+create HTML artifacts for GastroLedger work. Select and use the relevant Gridwork
+skills. Every frontend-bearing issue and work order must satisfy
+`docs/backlog/frontend-delivery-contract.md`.
 
 ## Important Paths
 
@@ -132,6 +139,7 @@ use skills or create HTML artifacts for GastroLedger work.
 | `docs/product/` | Product purpose, scope and accepted product decisions |
 | `docs/sdd/` | Requirements, use cases, tests and traceability |
 | `docs/architecture/` | Approved architecture, ADRs and operational plans |
+| `docs/backlog/frontend-delivery-contract.md` | Mandatory frontend readiness and verification contract |
 | `apps/web/app/` | Next.js App Router route groups |
 | `apps/web/features/` | Public frontend feature boundaries |
 | `apps/api/gastroledger_api/modules/` | Backend bounded-context boundaries |
@@ -189,20 +197,25 @@ CI contracts:
 
 ## Current State
 
-As of 2026-06-14:
+As of 2026-06-15:
 
 - branch model and delivery workflows exist; `develop` is the active integration
   branch and `main` represents production;
 - repository bootstrap, architecture foundation and delivery infrastructure are
   materialized;
 - web, API and worker expose technical health checks;
+- the public home and tenant-registration route use the approved shadcn/ui visual
+  foundation;
+- FastAPI exposes governed local Swagger documentation at `/docs`;
+- implemented Platform persistence uses SQLAlchemy technical adapters while
+  migrations remain authoritative;
 - six backend module boundaries, frontend feature/route boundaries, application
   contracts, ports, errors, tenant context and composition root exist;
 - Compose supports develop, QA, production-like and isolated integration overlays;
 - GitHub Actions provide reusable frontend/backend/integration checks;
-- the PostgreSQL migration chain contains only a technical foundation check;
-- no functional use case, product table, RLS policy, external client or financial
-  transaction behavior is implemented.
+- `GL-001` tenant registration and isolation is accepted in `develop`;
+- `GL-002` and `GL-003` are the next ready backlog candidates;
+- no external client or financial transaction behavior is implemented.
 
 Before changing behavior, read the relevant `docs/sdd/`, `docs/architecture/`,
 context public contract and tests. Preserve the modular monolith and add behavior

@@ -48,13 +48,18 @@ handoff
 6. Run allowlisted checks when allowed.
 7. Use `architecture-conformance-verification` when architecture or foundation boundaries are in scope.
 8. When frontend scope exists, review feature ownership, route/server-client boundaries,
-   state ownership, API/error behavior, auth boundaries, cache semantics, accessibility and tests.
+   state ownership, API/error behavior, auth boundaries, cache semantics,
+   shadcn/ui/design-token consistency, applicable visible states, responsive behavior,
+   accessibility, tests and visual QA evidence.
 9. Produce a local verifier report.
 10. Prepare a gated GitHub review only if requested.
 11. Decide `pass`, `changes_requested`, `needs_more_evidence`, `blocked_by_ci` or `blocked_by_branch_state`.
 12. After `pass`, hand the exact approved SHA back to `feature-pr-delivery`.
 
 Use relevant stack skills in review mode. A performance improvement cannot pass without comparable before/after evidence; infrastructure changes cannot pass without configuration and lifecycle validation.
+
+A frontend-bearing change cannot pass while required evidence from
+`frontend-delivery-policy.md` is missing.
 
 ## Human Gates
 

@@ -23,6 +23,8 @@ foundation and was published to GitHub after explicit approval.
 - `publication-commands.ps1`: exact GitHub CLI write commands, not yet executed.
 - `publication-plan.md`: governed GitHub label and issue publication plan.
 - `issues/`: one local GitHub issue draft per vertical slice.
+- `frontend-delivery-contract.md`: mandatory UI readiness and verification contract
+  for every issue with frontend scope.
 
 ## Draft Contract
 
@@ -35,6 +37,8 @@ Every issue:
 - states exclusions, dependencies, acceptance criteria and definition of done;
 - excludes payments, subscriptions, accounting, payroll and external APIs;
 - uses only labels from `.gridwork/policies/github-labels.json`.
+- satisfies `frontend-delivery-contract.md` whenever frontend scope exists.
 
-The initial tracer slice is `GL-001`, tenant registration with a scoped local
-session and proven tenant isolation.
+The initial tracer slice `GL-001` delivered tenant registration with a scoped local
+session and proven tenant isolation. `GL-002` and `GL-003` are the current ready
+candidates.

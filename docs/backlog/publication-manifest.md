@@ -4,9 +4,13 @@
 status = published and reconciled
 repo = Ainsiel/GastroLedger
 published = 23
+completed = 1
+ready = 2
 ```
 
 This manifest is the stable link between each local draft and its GitHub issue.
+All linked issues with frontend scope include the approved frontend delivery
+contract.
 
 | ID | Local draft | GitHub issue |
 |---|---|---|

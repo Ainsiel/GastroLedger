@@ -52,3 +52,10 @@ exceptions or incomplete confidence.
 - accessibility checks for keyboard and accessible names;
 - end-to-end coverage for registration, recipe approval, receiving, count approval,
   sales import and variance report.
+
+## Delivery Rule
+
+Every frontend-bearing vertical slice follows
+`docs/backlog/frontend-delivery-contract.md`. Work orders must select the relevant
+frontend Gridwork skills and verifiers must reject missing integrated route,
+responsive/accessibility or visual QA evidence.

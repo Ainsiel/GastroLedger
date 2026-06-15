@@ -2,6 +2,9 @@
 
 ## Delivery Sequence
 
+Current state: GL-001 is complete. GL-002 and GL-003 are ready; GL-003 remains the
+recommended dependency-unlocking next slice.
+
 | Order | Issue | Why At This Point |
 |---:|---|---|
 | 1 | GL-001 | Proves the multi-tenant security and full-stack tracer |

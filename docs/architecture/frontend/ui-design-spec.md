@@ -111,3 +111,11 @@ erase the submitted form.
 - Confirm no unimplemented action appears enabled.
 - Confirm production build output contains no external visual asset dependency.
 
+## Delivery Gate For Future Slices
+
+Every backlog issue and work order with frontend scope must satisfy
+`docs/backlog/frontend-delivery-contract.md`.
+
+An issue is not ready, and a verifier must not pass it, unless the affected route,
+applicable visible states, shadcn/ui usage, responsive/accessibility expectations,
+frontend tests and visual QA evidence are explicit.

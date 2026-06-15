@@ -14,6 +14,8 @@ Execute or assess test-driven development as small vertical cycles that prove ob
 - Mock only real external boundaries when using the real boundary is unsafe, unavailable or nondeterministic.
 - Refactor only while green and rerun the relevant tests after each refactor step.
 - Record commands and concise evidence; never copy secrets or uncontrolled logs.
+- For frontend scope, observable behavior includes the approved UI hierarchy,
+  applicable states, accessible interaction, responsive behavior and visual QA.
 
 ## Procedure
 
@@ -27,6 +29,8 @@ Execute or assess test-driven development as small vertical cycles that prove ob
 8. Repeat one behavior at a time.
 9. Refactor only after green, without expanding scope.
 10. Run final allowlisted checks and complete `tdd-evidence.md`.
+11. For frontend scope, record integrated route and visual QA evidence required by
+    `frontend-delivery-policy.md`.
 
 ## RED Gate
 
@@ -48,6 +52,8 @@ The verifier may use this skill to assess evidence, but must not modify code. Ve
 - each cycle is vertical rather than a batch of tests followed by a batch of implementation;
 - refactor happened only after green;
 - final checks cover the acceptance criteria.
+- frontend evidence follows approved UI sources and covers required viewports and
+  accessible interactions when applicable.
 
 ## Outputs
 

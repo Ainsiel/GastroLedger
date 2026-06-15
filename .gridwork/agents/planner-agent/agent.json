@@ -17,6 +17,12 @@
     "github-label-manager",
     "github-issue-discovery",
     "github-cli",
+    "frontend-architecture-design",
+    "frontend-state-strategy",
+    "frontend-api-contract-consumption",
+    "frontend-testing-strategy",
+    "nextjs-frontend-guidance",
+    "nextjs-ui-design",
     "handoff"
   ],
   "permissionProfile": "planner-assisted",
@@ -33,7 +39,8 @@
     "../../policies/github-labels.json",
     "../../policies/path-scopes.md",
     "../../policies/agent-permissions.md",
-    "../../policies/human-gates.md"
+    "../../policies/human-gates.md",
+    "../../policies/frontend-delivery-policy.md"
   ],
   "handoffPolicy": "required_on_agent_or_session_transfer"
 }

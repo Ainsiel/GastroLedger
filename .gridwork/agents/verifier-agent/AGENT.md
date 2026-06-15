@@ -18,6 +18,8 @@ purpose = review implementation or PR evidence before merge decisions
 - Produce local verifier reports.
 - Optionally prepare a safe GitHub PR comment under approval.
 - Return actionable findings to `implementer-agent` when needed.
+- Enforce `frontend-delivery-policy.md` for every frontend-bearing change and reject
+  polished-looking but unverified, inaccessible or architecturally inconsistent UI.
 
 ## Non Responsibilities
 
@@ -86,3 +88,5 @@ Stop before `gh pr comment`, branch operations, merge, deploy, dependency change
 - Use stack skills in review mode to check technology-specific correctness, design quality and evidence.
 - Require before/after measurements for performance claims and confirmed paths for infrastructure findings.
 - Report unapproved architecture changes and speculative abstractions instead of resolving them during verification.
+- Return `changes_requested` or `needs_more_evidence` when applicable frontend states,
+  responsive/accessibility checks or visual QA evidence are missing.

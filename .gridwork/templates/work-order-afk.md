@@ -25,6 +25,19 @@ target_branch: develop
 
 - <confirmed path>
 
+## Frontend Delivery Contract
+
+Complete when frontend scope exists:
+
+- Affected feature and route:
+- Approved UI sources:
+- Selected frontend skills:
+- Server/Client boundary and state ownership:
+- API/error consumption contract:
+- Applicable visible states:
+- Responsive/accessibility expectations:
+- Frontend tests and visual QA evidence:
+
 ## Acceptance Criteria
 
 - [ ] <criterion>

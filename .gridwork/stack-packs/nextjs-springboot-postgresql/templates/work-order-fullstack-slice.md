@@ -16,6 +16,20 @@ status: draft
 
 <paths and behavior>
 
+## Frontend Contract
+
+Complete when frontend scope exists:
+
+- Feature and route:
+- Approved UI sources:
+- Selected frontend skills:
+- shadcn/ui and design-token reuse:
+- Server/Client boundary and state ownership:
+- API/error consumption:
+- Applicable visible states:
+- Responsive/accessibility checks:
+- Frontend tests and visual QA evidence:
+
 ## Red Phase
 
 <first failing behavior test>
@@ -27,4 +41,3 @@ status: draft
 ## Refactor Notes
 
 <cleanup constraints>
-

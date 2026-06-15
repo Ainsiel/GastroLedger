@@ -29,7 +29,16 @@ decision = complete | needs_more_evidence
 
 <public interface or tracer bullet evidence>
 
+## Frontend Evidence
+
+Complete when frontend scope exists:
+
+- Approved UI source and shadcn/ui conformance:
+- Accessible interaction evidence:
+- Integrated route evidence:
+- Required visible states:
+- 390/1024/1440 visual QA evidence:
+
 ## Remaining Risk
 
 <risk>
-

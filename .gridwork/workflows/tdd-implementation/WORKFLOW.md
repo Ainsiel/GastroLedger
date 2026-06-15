@@ -53,11 +53,14 @@ handoff
 8. Run the same relevant test and record the passing result.
 9. Repeat one vertical behavior cycle at a time.
 10. Refactor only while green and without changing behavior.
-11. Run final verification commands from the allowlist.
-12. Write TDD evidence and handoff to verifier when needed.
-13. Correct CI or verifier findings on the same work-order feature branch.
-14. Use `git-branch-management` only for an explicitly approved Git action.
-15. Hand completed local implementation to `feature-pr-delivery`.
+11. For frontend scope, implement the approved UI hierarchy with existing
+    shadcn/ui-derived primitives and record accessible behavior, integrated route and
+    visual QA evidence required by `frontend-delivery-policy.md`.
+12. Run final verification commands from the allowlist.
+13. Write TDD evidence and handoff to verifier when needed.
+14. Correct CI or verifier findings on the same work-order feature branch.
+15. Use `git-branch-management` only for an explicitly approved Git action.
+16. Hand completed local implementation to `feature-pr-delivery`.
 
 When a work order confirms Next.js, Spring Boot, FastAPI, PostgreSQL or Docker scope, select the smallest relevant stack skill. Use `integration-testing` when behavior must cross real component boundaries. Use performance skills only when the acceptance criteria include a measurable performance problem or target.
 
@@ -69,6 +72,9 @@ missing_red_or_green_evidence = needs_more_evidence
 ```
 
 For fullstack vertical slices, prefer a tracer bullet that crosses the visible user path, API/application boundary, domain behavior and persistence boundary when reasonable.
+
+For frontend-bearing slices, the visible user path is part of the tracer bullet.
+Semantic behavior without the approved UI contract is not complete.
 
 ## Human Gates
 

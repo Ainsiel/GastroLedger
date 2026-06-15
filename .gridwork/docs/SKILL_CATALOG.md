@@ -71,3 +71,7 @@ The `nextjs-springboot-postgresql` stack pack provides:
 | Docker | `dockerfile-authoring`, `docker-compose-local-guidance`, `docker-compose-optimization` |
 
 Stack skills never generate product code during `init`. They may guide or modify confirmed scoped files only inside the active agent and workflow permissions.
+
+For frontend-bearing GastroLedger work, the relevant frontend skills operate under
+`frontend-delivery-policy.md`: approved UI sources, shadcn/ui consistency,
+responsive/accessibility evidence and visual QA are mandatory.

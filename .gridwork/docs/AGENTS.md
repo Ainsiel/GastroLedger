@@ -28,6 +28,10 @@ Key capability assignments:
 - `architecture-foundation-agent` creates only the approved minimal executable structure, required contracts, composition root and architecture tests.
 - `software-architect`, `architecture-foundation-agent`, `implementer-agent` and `verifier-agent` may use integration testing and stack-pack skills after technology and paths are confirmed.
 - `architecture-foundation-agent` materializes approved frontend boundaries without functional screens; implementer and verifier apply the frontend strategy per slice.
+- `planner-agent` and `backlog-manager-agent` cannot mark frontend-bearing work ready
+  until the frontend delivery contract is complete.
+- `implementer-agent` and `verifier-agent` must enforce approved UI sources,
+  shadcn/ui usage, responsive/accessibility behavior and visual QA evidence.
 - `platform-engineer-agent` creates approved framework scaffolds, root quality commands, Compose environments and GitHub Actions without implementing business behavior.
 
 Ask `backlog-manager-agent` for the current backlog, remaining or blocked tasks,

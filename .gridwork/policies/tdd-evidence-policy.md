@@ -27,3 +27,9 @@ If red or green evidence is missing, the verifier should use:
 decision = needs_more_evidence
 ```
 
+## Frontend Evidence
+
+For frontend-bearing work orders, evidence must also include accessible public
+interaction tests, integrated route behavior and the visual QA required by
+`frontend-delivery-policy.md`. Missing applicable frontend evidence produces
+`needs_more_evidence`.
