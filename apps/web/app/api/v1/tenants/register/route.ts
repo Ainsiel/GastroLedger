@@ -1,7 +1,10 @@
 import type { ApiProblem } from "@gastroledger/api-contract";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const apiBaseUrl = process.env.API_BASE_URL ?? "http://api:8000";
 const maxRegistrationBodyBytes = 16 * 1024;
+const registrationIdentityCookie = "gl_registration_identity";
+const registrationIdentitySecret = randomBytes(32);
 
 class EdgeRateLimiter {
   private windows = new Map<string, { startedAt: number; count: number }>();
@@ -32,7 +35,8 @@ class EdgeRateLimiter {
   }
 }
 
-export const registrationEdgeLimiter = new EdgeRateLimiter();
+export const registrationIdentityLimiter = new EdgeRateLimiter();
+export const registrationGlobalLimiter = new EdgeRateLimiter(100);
 
 function problem(status: number, type: string, errors: ApiProblem["errors"] = []) {
   return Response.json(
@@ -47,14 +51,47 @@ function problem(status: number, type: string, errors: ApiProblem["errors"] = []
   );
 }
 
-function registrationClientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim();
-  return (
-    forwarded ||
-    request.headers.get("x-real-ip")?.trim() ||
-    request.headers.get("user-agent")?.trim() ||
-    "unknown"
-  ).slice(0, 256);
+function signIdentity(identity: string): string {
+  return createHmac("sha256", registrationIdentitySecret).update(identity).digest("base64url");
+}
+
+function registrationIdentity(request: Request): string | null {
+  const cookie = request.headers
+    .get("cookie")
+    ?.split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${registrationIdentityCookie}=`))
+    ?.slice(registrationIdentityCookie.length + 1);
+  if (!cookie) return null;
+
+  const [identity, signature, ...extra] = cookie.split(".");
+  if (!identity || !signature || extra.length > 0) return null;
+  const expected = Buffer.from(signIdentity(identity));
+  const provided = Buffer.from(signature);
+  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) return null;
+  return identity;
+}
+
+function issueRegistrationIdentity(): string {
+  const identity = randomBytes(18).toString("base64url");
+  const secure =
+    process.env.GL_ENVIRONMENT &&
+    !["development", "integration"].includes(process.env.GL_ENVIRONMENT);
+  return [
+    `${registrationIdentityCookie}=${identity}.${signIdentity(identity)}`,
+    "Max-Age=86400",
+    "HttpOnly",
+    "SameSite=Strict",
+    "Path=/api/v1/tenants/register",
+    secure ? "Secure" : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
+}
+
+function withRegistrationIdentity(response: Response, cookie: string | null): Response {
+  if (cookie) response.headers.append("set-cookie", cookie);
+  return response;
 }
 
 async function boundedBody(request: Request): Promise<string | Response> {
@@ -92,22 +129,25 @@ async function boundedBody(request: Request): Promise<string | Response> {
 }
 
 export async function POST(request: Request) {
-  const registrationKey = registrationClientKey(request);
-  if (!registrationEdgeLimiter.allow(registrationKey)) {
+  const identity = registrationIdentity(request);
+  const identityCookie = identity ? null : issueRegistrationIdentity();
+  if (
+    !registrationGlobalLimiter.allow("global") ||
+    !registrationIdentityLimiter.allow(identity ? `identity:${identity}` : "anonymous")
+  ) {
     const response = problem(429, "platform.registration_rate_limited");
     response.headers.set("retry-after", "60");
     return response;
   }
 
   const body = await boundedBody(request);
-  if (body instanceof Response) return body;
+  if (body instanceof Response) return withRegistrationIdentity(body, identityCookie);
 
   try {
     const upstream = await fetch(`${apiBaseUrl}/api/v1/tenants/register`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-gastroledger-registration-key": registrationKey,
       },
       body,
       cache: "no-store",
@@ -119,8 +159,14 @@ export async function POST(request: Request) {
     });
     const cookie = upstream.headers.get("set-cookie");
     if (cookie) headers.set("set-cookie", cookie);
-    return new Response(upstreamText, { status: upstream.status, headers });
+    return withRegistrationIdentity(
+      new Response(upstreamText, { status: upstream.status, headers }),
+      identityCookie,
+    );
   } catch {
-    return problem(500, "platform.registration_upstream_unavailable");
+    return withRegistrationIdentity(
+      problem(500, "platform.registration_upstream_unavailable"),
+      identityCookie,
+    );
   }
 }

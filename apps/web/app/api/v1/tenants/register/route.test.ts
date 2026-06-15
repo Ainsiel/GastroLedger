@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { POST, registrationEdgeLimiter } from "./route";
+import { POST, registrationGlobalLimiter, registrationIdentityLimiter } from "./route";
 
 describe("POST /api/v1/tenants/register", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
-    registrationEdgeLimiter.reset();
+    registrationGlobalLimiter.reset();
+    registrationIdentityLimiter.reset();
   });
 
   it("forwards registration and the scoped session cookie", async () => {
@@ -23,16 +24,16 @@ describe("POST /api/v1/tenants/register", () => {
     const response = await POST(
       new Request("http://web/api/v1/tenants/register", {
         method: "POST",
-        headers: { "x-forwarded-for": "192.0.2.10" },
         body: JSON.stringify({ tenantSlug: "tenant-1" }),
       }),
     );
 
     expect(response.status).toBe(201);
     expect(response.headers.get("set-cookie")).toContain("gl_session=opaque");
+    expect(response.headers.get("set-cookie")).toContain("gl_registration_identity=");
     expect(upstream).toHaveBeenCalledOnce();
-    expect(upstream.mock.calls[0][1].headers["x-gastroledger-registration-key"]).toBe(
-      "192.0.2.10",
+    expect(upstream.mock.calls[0][1].headers).not.toHaveProperty(
+      "x-gastroledger-registration-key",
     );
   });
 
@@ -52,7 +53,7 @@ describe("POST /api/v1/tenants/register", () => {
     expect(upstream).not.toHaveBeenCalled();
   });
 
-  it("rate limits at the public web edge before calling FastAPI", async () => {
+  it("does not allow client-controlled headers to evade the public edge limit", async () => {
     const upstream = vi
       .fn()
       .mockImplementation(async () =>
@@ -60,12 +61,14 @@ describe("POST /api/v1/tenants/register", () => {
       );
     vi.stubGlobal("fetch", upstream);
 
-    const requests = Array.from(
-      { length: 6 },
-      () =>
+    const requests = Array.from({ length: 6 }, (_, index) =>
         new Request("http://web/api/v1/tenants/register", {
           method: "POST",
-          headers: { "x-forwarded-for": "192.0.2.20" },
+          headers: {
+            "x-forwarded-for": `192.0.2.${index}`,
+            "x-real-ip": `198.51.100.${index}`,
+            "user-agent": `rotating-agent-${index}`,
+          },
           body: "{}",
         }),
     );
@@ -74,15 +77,68 @@ describe("POST /api/v1/tenants/register", () => {
 
     expect(responses.at(-1)?.status).toBe(429);
     expect(upstream).toHaveBeenCalledTimes(5);
+  });
 
-    const otherClient = await POST(
+  it("does not allow forged registration identity cookies to evade the limit", async () => {
+    const upstream = vi
+      .fn()
+      .mockImplementation(async () =>
+        Response.json({ type: "platform.validation_error" }, { status: 422 }),
+      );
+    vi.stubGlobal("fetch", upstream);
+
+    const responses = [];
+    for (let index = 0; index < 6; index += 1) {
+      responses.push(
+        await POST(
+          new Request("http://web/api/v1/tenants/register", {
+            method: "POST",
+            headers: { cookie: `gl_registration_identity=forged-${index}.signature` },
+            body: "{}",
+          }),
+        ),
+      );
+    }
+
+    expect(responses.at(-1)?.status).toBe(429);
+    expect(upstream).toHaveBeenCalledTimes(5);
+  });
+
+  it("uses a valid signed registration identity after it is issued", async () => {
+    const upstream = vi
+      .fn()
+      .mockImplementation(async () =>
+        Response.json({ type: "platform.validation_error" }, { status: 422 }),
+      );
+    vi.stubGlobal("fetch", upstream);
+
+    const initial = await POST(
+      new Request("http://web/api/v1/tenants/register", { method: "POST", body: "{}" }),
+    );
+    const identityCookie = initial.headers
+      .get("set-cookie")
+      ?.match(/gl_registration_identity=([^;]+)/)?.[1];
+    expect(identityCookie).toBeTruthy();
+
+    registrationIdentityLimiter.reset();
+    for (let index = 0; index < 5; index += 1) {
+      await POST(
+        new Request("http://web/api/v1/tenants/register", {
+          method: "POST",
+          headers: { cookie: `gl_registration_identity=${identityCookie}` },
+          body: "{}",
+        }),
+      );
+    }
+    const limited = await POST(
       new Request("http://web/api/v1/tenants/register", {
         method: "POST",
-        headers: { "x-forwarded-for": "192.0.2.21" },
+        headers: { cookie: `gl_registration_identity=${identityCookie}` },
         body: "{}",
       }),
     );
-    expect(otherClient.status).toBe(422);
+
+    expect(limited.status).toBe(429);
     expect(upstream).toHaveBeenCalledTimes(6);
   });
 

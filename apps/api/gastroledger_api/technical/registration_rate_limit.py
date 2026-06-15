@@ -45,11 +45,6 @@ class RegistrationRateLimiter:
 
 
 def registration_client_key(scope: AsgiScope) -> str:
-    for name, value in scope.get("headers", []):
-        if name.lower() == b"x-gastroledger-registration-key":
-            decoded = value.decode(errors="ignore").strip()
-            if decoded:
-                return decoded[:256]
     client = scope.get("client")
     return str(client[0]) if client else "unknown"
 

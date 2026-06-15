@@ -1,5 +1,5 @@
 import os
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import psycopg
 from fastapi import APIRouter, Cookie, Query, Response
@@ -113,14 +113,16 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
 
     @router.get("/session/tenant", response_model=TenantIdentityResponse)
     def tenant_identity(
-        tenantId: str | None = Query(default=None),
+        tenantId: UUID | None = Query(default=None),
         gl_session: str | None = Cookie(default=None),
     ):
         correlation_id = str(uuid4())
         if not gl_session:
             return problem_response(401, "platform.authentication_required", correlation_id, [])
         try:
-            identity = store.resolve_tenant(gl_session, tenantId, correlation_id)
+            identity = store.resolve_tenant(
+                gl_session, str(tenantId) if tenantId else None, correlation_id
+            )
         except AuthenticationRequired:
             return problem_response(
                 401, "platform.authentication_required", correlation_id, []
