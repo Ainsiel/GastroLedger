@@ -96,6 +96,16 @@ def test_composition_root_imports_contexts_through_public_boundaries() -> None:
     assert context_imports == expected
 
 
+def test_fastapi_routes_import_contexts_through_public_boundaries() -> None:
+    violations: list[str] = []
+    for path in (API_PACKAGE / "technical").glob("*routes.py"):
+        for imported in imported_modules(path):
+            prefix = "gastroledger_api.modules."
+            if imported.startswith(prefix) and not imported.endswith(".public"):
+                violations.append(f"{path.relative_to(ROOT)} imports {imported}")
+    assert not violations, "\n".join(violations)
+
+
 def test_no_external_http_client_dependency_is_declared() -> None:
     requirements = "\n".join(
         path.read_text(encoding="utf-8")
