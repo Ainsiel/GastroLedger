@@ -8,7 +8,7 @@ import type {
   WarehouseResponse,
 } from "@gastroledger/api-contract";
 import { Building2, CheckCircle2, LoaderCircle, Settings2, Warehouse } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,22 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
   const [notice, setNotice] = useState<Notice | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [confirmWarehouse, setConfirmWarehouse] = useState<string | null>(null);
+  const restoreWarehouseFocus = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (notice) document.getElementById("operating-scope-notice")?.focus();
+  }, [notice]);
+
+  useEffect(() => {
+    if (confirmWarehouse) {
+      document.getElementById(`confirm-deactivate-${confirmWarehouse}`)?.focus();
+      return;
+    }
+    if (restoreWarehouseFocus.current) {
+      document.getElementById(`deactivate-${restoreWarehouseFocus.current}`)?.focus();
+      restoreWarehouseFocus.current = null;
+    }
+  }, [confirmWarehouse, snapshot]);
 
   if (snapshot.kind === "unauthorized") {
     return (
@@ -134,6 +150,11 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
     if (outcome.kind === "success") setConfirmWarehouse(null);
   }
 
+  function cancelWarehouseDeactivation(warehouseId: string) {
+    restoreWarehouseFocus.current = warehouseId;
+    setConfirmWarehouse(null);
+  }
+
   const branchCapacityReached =
     snapshot.settings.branchCount >= snapshot.settings.branchLimit;
 
@@ -158,6 +179,8 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
 
       {notice ? (
         <Alert
+          id="operating-scope-notice"
+          tabIndex={-1}
           className={
             notice.kind === "success"
               ? "border-emerald-200 bg-emerald-50"
@@ -307,21 +330,28 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
                                 History remains visible. New operations will be blocked.
                               </p>
                               <div className="mt-3 flex flex-wrap gap-2">
-                                <Button
-                                  type="button"
+                                 <Button
+                                   id={`confirm-deactivate-${warehouse.warehouseId}`}
+                                   type="button"
                                   size="sm"
                                   onClick={() => deactivateWarehouse(warehouse)}
                                   disabled={pending === `deactivate-${warehouse.warehouseId}`}
                                 >
                                   Confirm deactivation
                                 </Button>
-                                <Button type="button" size="sm" variant="outline" onClick={() => setConfirmWarehouse(null)}>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => cancelWarehouseDeactivation(warehouse.warehouseId)}
+                                >
                                   Cancel
                                 </Button>
                               </div>
                             </div>
                           ) : (
                             <Button
+                              id={`deactivate-${warehouse.warehouseId}`}
                               type="button"
                               size="sm"
                               variant="outline"

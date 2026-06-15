@@ -20,6 +20,7 @@ from gastroledger_api.modules.platform_organization.public import (
     CreateBranch,
     CreateWarehouse,
     DeactivateWarehouse,
+    OperatingAuthorizationDenied,
     OperatingCodeConflict,
     OperatingIdentity,
     OperatingScopeService,
@@ -385,3 +386,207 @@ def test_http_unsupported_settings_and_non_admin_change_nothing(
     assert forbidden["type"] == "platform.authorization_denied"
     assert settings == ("en", "USD", 1)
     assert audit_count == (0,)
+
+
+def test_cross_tenant_reads_and_mutations_are_blocked_at_every_boundary(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    database_url: str,
+    api_base_url: str,
+) -> None:
+    owner_slug = f"http-owner-{uuid4().hex}"
+    _, owner, owner_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload={
+            "tenantName": "Owner Tenant",
+            "tenantSlug": owner_slug,
+            "adminEmail": f"{owner_slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+    owner_cookie = owner_headers["set-cookie"].split(";", 1)[0]
+    _, owner_branch, _ = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/branches",
+        payload={"name": "Owner Branch", "code": "OWNER"},
+        cookie=owner_cookie,
+    )
+    _, owner_warehouse, _ = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/branches/{owner_branch['branchId']}/warehouses",
+        payload={"name": "Owner Kitchen", "code": "KITCHEN", "type": "kitchen"},
+        cookie=owner_cookie,
+    )
+
+    attacker_slug = f"http-attacker-{uuid4().hex}"
+    _, attacker, attacker_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload={
+            "tenantName": "Attacker Tenant",
+            "tenantSlug": attacker_slug,
+            "adminEmail": f"{attacker_slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+    attacker_cookie = attacker_headers["set-cookie"].split(";", 1)[0]
+
+    forged_identity = OperatingIdentity(
+        tenant_id=owner["tenantId"],
+        actor_id=attacker["actorId"],
+        role="tenant_admin",
+    )
+    service = OperatingScopeService(
+        store=PostgresPlatformStore(database_url),
+        movement_guard=NoOpenMovements(),
+    )
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.get_settings(forged_identity)
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.list_branches(forged_identity)
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.update_settings(
+            forged_identity,
+            UpdateTenantSettings(locale="es", base_currency="CLP", branch_limit=2),
+            correlation_id="forged-settings",
+        )
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.create_branch(
+            forged_identity,
+            CreateBranch(name="Forged Branch", code="FORGED"),
+            correlation_id="forged-branch",
+        )
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.create_warehouse(
+            forged_identity,
+            CreateWarehouse(
+                branch_id=owner_branch["branchId"],
+                name="Forged Warehouse",
+                code="FORGED",
+                warehouse_type="general",
+            ),
+            correlation_id="forged-warehouse",
+        )
+    with pytest.raises(OperatingAuthorizationDenied):
+        service.deactivate_warehouse(
+            forged_identity,
+            DeactivateWarehouse(warehouse_id=owner_warehouse["warehouseId"]),
+            correlation_id="forged-deactivation",
+        )
+
+    settings_status, attacker_settings, _ = http_json(
+        "GET", f"{api_base_url}/api/v1/tenant/settings", cookie=attacker_cookie
+    )
+    branches_status, attacker_branches, _ = http_json(
+        "GET", f"{api_base_url}/api/v1/branches", cookie=attacker_cookie
+    )
+    create_status, create_problem, _ = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/branches/{owner_branch['branchId']}/warehouses",
+        payload={"name": "HTTP Forged", "code": "FORGED", "type": "general"},
+        cookie=attacker_cookie,
+    )
+    deactivate_status, deactivate_problem, _ = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/warehouses/{owner_warehouse['warehouseId']}/deactivate",
+        cookie=attacker_cookie,
+    )
+    patch_status, patched_attacker_settings, _ = http_json(
+        "PATCH",
+        f"{api_base_url}/api/v1/tenant/settings",
+        payload={"locale": "es", "baseCurrency": "CLP", "branchLimit": 2},
+        cookie=attacker_cookie,
+    )
+
+    with psycopg.connect(database_url) as runtime_connection:
+        with runtime_connection.transaction():
+            runtime_connection.execute("set local role gastroledger_app")
+            runtime_connection.execute(
+                "select set_config('app.current_tenant_id', %s, true)",
+                (attacker["tenantId"],),
+            )
+            hidden_settings = runtime_connection.execute(
+                "select tenant_id from platform_tenant_settings where tenant_id = %s",
+                (owner["tenantId"],),
+            ).fetchone()
+            hidden_branches = runtime_connection.execute(
+                "select id from platform_branches where tenant_id = %s",
+                (owner["tenantId"],),
+            ).fetchall()
+            hidden_warehouses = runtime_connection.execute(
+                "select id from platform_warehouses where tenant_id = %s",
+                (owner["tenantId"],),
+            ).fetchall()
+            changed_settings = runtime_connection.execute(
+                """
+                update platform_tenant_settings
+                set locale = 'pt-br'
+                where tenant_id = %s
+                returning tenant_id
+                """,
+                (owner["tenantId"],),
+            ).fetchall()
+            changed_warehouses = runtime_connection.execute(
+                """
+                update platform_warehouses
+                set status = 'inactive'
+                where tenant_id = %s
+                returning id
+                """,
+                (owner["tenantId"],),
+            ).fetchall()
+
+    with (
+        pytest.raises(psycopg.errors.InsufficientPrivilege),
+        psycopg.connect(database_url) as branch_mutation_connection,
+        branch_mutation_connection.transaction(),
+    ):
+        branch_mutation_connection.execute("set local role gastroledger_app")
+        branch_mutation_connection.execute(
+            "select set_config('app.current_tenant_id', %s, true)",
+            (attacker["tenantId"],),
+        )
+        branch_mutation_connection.execute(
+            """
+            insert into platform_branches (id, tenant_id, code, name)
+            values (%s, %s, 'CROSS', 'Cross tenant branch')
+            """,
+            (str(uuid4()), owner["tenantId"]),
+        )
+
+    with postgres_connection.transaction():
+        owner_settings = postgres_connection.execute(
+            """
+            select locale, base_currency, branch_limit
+            from platform_tenant_settings
+            where tenant_id = %s
+            """,
+            (owner["tenantId"],),
+        ).fetchone()
+        owner_branch_name = postgres_connection.execute(
+            "select name from platform_branches where id = %s",
+            (owner_branch["branchId"],),
+        ).fetchone()
+        owner_warehouse_status = postgres_connection.execute(
+            "select status from platform_warehouses where id = %s",
+            (owner_warehouse["warehouseId"],),
+        ).fetchone()
+
+    assert settings_status == 200
+    assert attacker_settings["locale"] == "en"
+    assert branches_status == 200
+    assert all(branch["branchId"] != owner_branch["branchId"] for branch in attacker_branches)
+    assert create_status == 404
+    assert create_problem["type"] == "platform.operating_scope_not_found"
+    assert deactivate_status == 404
+    assert deactivate_problem["type"] == "platform.operating_scope_not_found"
+    assert patch_status == 200
+    assert patched_attacker_settings["locale"] == "es"
+    assert hidden_settings is None
+    assert hidden_branches == []
+    assert hidden_warehouses == []
+    assert changed_settings == []
+    assert changed_warehouses == []
+    assert owner_settings == ("en", "USD", 1)
+    assert owner_branch_name == ("Owner Branch",)
+    assert owner_warehouse_status == ("active",)

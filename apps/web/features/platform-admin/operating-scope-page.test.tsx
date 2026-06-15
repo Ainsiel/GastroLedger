@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { OperatingScopePage } from "./operating-scope-page";
 
 describe("tenant operating scope experience", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
 
   it("exposes accessible settings and an honest empty branch state", () => {
     render(
@@ -65,11 +68,69 @@ describe("tenant operating scope experience", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /deactivate kitchen/i }));
+    const deactivate = screen.getByRole("button", { name: /deactivate kitchen/i });
+    deactivate.focus();
+    await user.click(deactivate);
 
     expect(screen.getByText(/deactivate kitchen\?/i)).toBeTruthy();
-    expect(screen.getByRole("button", { name: /confirm deactivation/i })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeTruthy();
+    const confirm = screen.getByRole("button", { name: /confirm deactivation/i });
+    expect(document.activeElement).toBe(confirm);
+
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: /deactivate kitchen/i }));
+  });
+
+  it("moves focus to the result after completing warehouse deactivation", async () => {
+    const user = userEvent.setup();
+    const inactiveWarehouse = {
+      warehouseId: "warehouse-1",
+      branchId: "branch-1",
+      name: "Kitchen",
+      code: "KITCHEN",
+      type: "kitchen" as const,
+      status: "inactive" as const,
+    };
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(Response.json(inactiveWarehouse))
+      .mockResolvedValueOnce(Response.json({
+        locale: "en",
+        baseCurrency: "USD",
+        branchLimit: 1,
+        branchCount: 1,
+      }))
+      .mockResolvedValueOnce(Response.json([{
+        branchId: "branch-1",
+        name: "Downtown",
+        code: "MAIN",
+        warehouses: [inactiveWarehouse],
+      }]));
+    vi.stubGlobal("fetch", fetcher);
+    render(
+      <OperatingScopePage
+        initial={{
+          kind: "ready",
+          settings: {
+            locale: "en",
+            baseCurrency: "USD",
+            branchLimit: 1,
+            branchCount: 1,
+          },
+          branches: [{
+            branchId: "branch-1",
+            name: "Downtown",
+            code: "MAIN",
+            warehouses: [{ ...inactiveWarehouse, status: "active" }],
+          }],
+        }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /deactivate kitchen/i }));
+    await user.click(screen.getByRole("button", { name: /confirm deactivation/i }));
+
+    const result = (await screen.findByText("Saved")).closest('[role="alert"]');
+    await waitFor(() => expect(document.activeElement).toBe(result));
   });
 
   it("shows an authentication-required state without enabled management actions", () => {
