@@ -33,6 +33,57 @@ describe("tenant operating scope experience", () => {
     expect(screen.getByLabelText(/base currency/i)).toBeTruthy();
     expect(screen.getByText(/no branches configured/i)).toBeTruthy();
     expect(screen.getByRole("button", { name: /create branch/i })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /user invitations and scoped roles/i })).toBeTruthy();
+  });
+
+  it("generates a manually shareable branch scoped invitation", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json(
+          {
+            invitationId: "invitation-1",
+            manualShareToken: "manual-token",
+            inviteeLogin: "manager@example.com",
+            role: "branch_manager",
+            scope: "branch",
+            branchId: "branch-1",
+            ttlHours: 24,
+            expiresAt: "2026-06-16T12:00:00Z",
+            status: "pending",
+          },
+          { status: 201 },
+        ),
+      ),
+    );
+    render(
+      <OperatingScopePage
+        initial={{
+          kind: "ready",
+          settings: {
+            locale: "en",
+            baseCurrency: "USD",
+            branchLimit: 1,
+            branchCount: 1,
+          },
+          branches: [
+            {
+              branchId: "branch-1",
+              name: "Downtown",
+              code: "MAIN",
+              warehouses: [],
+            },
+          ],
+        }}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/invitee email/i), "manager@example.com");
+    await user.click(screen.getByRole("button", { name: /^invite$/i }));
+
+    expect(await screen.findByText(/manual invitation ready/i)).toBeTruthy();
+    expect(screen.getByText("manual-token")).toBeTruthy();
   });
 
   it("requires confirmation before deactivating an active warehouse", async () => {

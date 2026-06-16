@@ -51,6 +51,27 @@ class PlatformMembership(Base):
     role: Mapped[str] = mapped_column(Text)
 
 
+class PlatformMembershipRole(Base):
+    __tablename__ = "platform_membership_roles"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "user_id"],
+            ["platform_memberships.tenant_id", "platform_memberships.user_id"],
+        ),
+        ForeignKeyConstraint(
+            ["branch_id", "tenant_id"],
+            ["platform_branches.id", "platform_branches.tenant_id"],
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    user_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_users.id"))
+    role: Mapped[str] = mapped_column(Text)
+    scope: Mapped[str] = mapped_column(Text)
+    branch_id: Mapped[UUID | None] = mapped_column(Uuid)
+
+
 class PlatformBranch(Base):
     __tablename__ = "platform_branches"
 
@@ -76,6 +97,28 @@ class PlatformWarehouse(Base):
     name: Mapped[str] = mapped_column(Text)
     type: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(Text)
+
+
+class PlatformInvitation(Base):
+    __tablename__ = "platform_invitations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["branch_id", "tenant_id"],
+            ["platform_branches.id", "platform_branches.tenant_id"],
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    invitee_login: Mapped[str] = mapped_column(Text)
+    token_hash: Mapped[str] = mapped_column(Text, unique=True)
+    role: Mapped[str] = mapped_column(Text)
+    scope: Mapped[str] = mapped_column(Text)
+    branch_id: Mapped[UUID | None] = mapped_column(Uuid)
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_users.id"))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 class PlatformSession(Base):
     __tablename__ = "platform_sessions"
     __table_args__ = (

@@ -129,6 +129,19 @@ def test_operating_scope_is_a_session_scoped_public_api() -> None:
         assert "actorId" not in properties
 
 
+def test_user_access_is_a_session_scoped_public_api() -> None:
+    schema = create_application().openapi()
+
+    assert schema["paths"]["/api/v1/users/invitations"]["post"]["responses"]["201"]
+    assert schema["paths"]["/api/v1/users/invitations/accept"]["post"]["responses"]["200"]
+    assert schema["paths"]["/api/v1/users/me/branch-access"]["get"]["responses"]["200"]
+
+    for schema_name in ("InvitationRequest", "InvitationAcceptanceRequest"):
+        properties = schema["components"]["schemas"][schema_name]["properties"]
+        assert "tenantId" not in properties
+        assert "actorId" not in properties
+
+
 def test_openapi_is_a_governed_developer_contract() -> None:
     application = create_application()
     schema = application.openapi()

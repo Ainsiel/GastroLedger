@@ -37,6 +37,15 @@ from gastroledger_api.modules.platform_organization.application.security import 
     SessionTokenIssuer,
     TenantLoginAmbiguous,
 )
+from gastroledger_api.modules.platform_organization.application.user_access import (
+    AcceptInvitation,
+    InvitationExpired,
+    InvitationNotFound,
+    InvitationSingleUseViolation,
+    InviteLocalUser,
+    PrivilegeEscalationDenied,
+    UserAccessService,
+)
 from gastroledger_api.modules.platform_organization.domain.operating_scope import (
     OperatingValidationError,
     validate_branch,
@@ -45,6 +54,10 @@ from gastroledger_api.modules.platform_organization.domain.operating_scope impor
 )
 from gastroledger_api.modules.platform_organization.domain.registration import (
     RegistrationValidationError,
+)
+from gastroledger_api.modules.platform_organization.domain.user_access import (
+    UserAccessValidationError,
+    validate_invitation,
 )
 
 MODULE_ID = "platform_organization"
@@ -76,6 +89,7 @@ class WarehouseReference:
 
 __all__ = [
     "ActorReference",
+    "AcceptInvitation",
     "AuthenticationRequired",
     "BranchReference",
     "BranchLimitExceeded",
@@ -84,6 +98,10 @@ __all__ = [
     "CreateWarehouse",
     "DeactivateWarehouse",
     "InvalidCredentials",
+    "InvitationExpired",
+    "InvitationNotFound",
+    "InvitationSingleUseViolation",
+    "InviteLocalUser",
     "MODULE_ID",
     "OperatingAuthorizationDenied",
     "OperatingCodeConflict",
@@ -91,6 +109,7 @@ __all__ = [
     "OperatingNotFound",
     "OperatingScopeService",
     "OperatingValidationError",
+    "PrivilegeEscalationDenied",
     "RegisterTenant",
     "RegistrationCommand",
     "RegistrationConflict",
@@ -102,12 +121,15 @@ __all__ = [
     "TenantReference",
     "TenantSettingsView",
     "UpdateTenantSettings",
+    "UserAccessService",
+    "UserAccessValidationError",
     "WarehouseReference",
     "WarehouseDeactivationUnsafe",
     "WarehouseInactive",
     "WarehouseMovementGuard",
     "WarehouseView",
     "validate_branch",
+    "validate_invitation",
     "validate_tenant_settings",
     "validate_warehouse",
 ]
