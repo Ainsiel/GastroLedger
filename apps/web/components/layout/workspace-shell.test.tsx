@@ -33,6 +33,7 @@ describe("WorkspaceShell", () => {
     expect(screen.getByRole("link", { name: /organization/i }).getAttribute("href")).toBe(
       "/settings",
     );
+    expect(screen.getByRole("link", { name: /menu engineering/i }).textContent).toContain("Live");
     expect(screen.getAllByRole("button", { name: /sign out/i }).length).toBeGreaterThan(0);
   });
 });

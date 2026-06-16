@@ -23,10 +23,10 @@ const sections = [
   },
   {
     title: "Menu engineering",
-    description: "Recipes, menus and contribution analysis will live here.",
+    description: "Manage units, conversions and the ingredient catalog.",
     href: "/menu",
     icon: CookingPot,
-    status: "Planned",
+    status: "Available",
   },
   {
     title: "Procurement",
@@ -62,21 +62,21 @@ export function DashboardPage({ tenant }: { tenant: TenantIdentityResponse }) {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border bg-card p-6 shadow-sm lg:p-8">
-        <Badge variant="secondary">Administrator dashboard</Badge>
+        <Badge variant="secondary">Tenant dashboard</Badge>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight lg:text-4xl">
           Welcome back, {tenant.tenantName}
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Navigate the tenant workspace from one protected dashboard. Live sections
-          are available now; planned sections remain visible so the operating model
-          stays understandable while the backlog grows.
+          Navigate the tenant workspace from one protected dashboard. Available
+          sections are live now; planned sections remain visible so the operating
+          model stays understandable while the backlog grows.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild>
-            <Link href="/settings">Configure organization</Link>
+            <Link href="/settings">Open organization</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/register">Create another workspace</Link>
+            <Link href="/menu">Open menu catalog</Link>
           </Button>
         </div>
       </section>

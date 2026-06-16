@@ -1,8 +1,8 @@
 ---
 id: GL-004
 title: Manage units and ingredient catalog
-status: draft
-readiness: blocked
+status: done
+readiness: done
 primary_context: Menu Engineering
 labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-003]
@@ -33,11 +33,11 @@ validated, effective-dated conversion factors.
 
 ## Acceptance Criteria
 
-- [ ] Compatible units convert precise decimal quantities with a positive factor.
-- [ ] Future factor versions do not replace the current factor early.
-- [ ] Invalid dimensions, overlap and non-positive factors are rejected.
-- [ ] A valid ingredient becomes available to downstream offers and recipes.
-- [ ] Archiving preserves history and blocks new use.
+- [x] Compatible units convert precise decimal quantities with a positive factor.
+- [x] Future factor versions do not replace the current factor early.
+- [x] Invalid dimensions, overlap and non-positive factors are rejected.
+- [x] A valid ingredient becomes available to downstream offers and recipes.
+- [x] Archiving preserves history and blocks new use.
 
 ## Frontend Delivery Contract
 
@@ -48,7 +48,12 @@ validated, effective-dated conversion factors.
 - Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
-- [ ] TC-005-S/A/F, TC-006-S/A/F and IT-005 pass.
-- [ ] API and frontend transport preserve decimal values.
-- [ ] Menu Engineering does not import another context's internals.
-- [ ] Required root quality commands and `regression-gate` pass.
+- [x] TC-005-S/A/F, TC-006-S/A/F and IT-005 pass.
+- [x] API and frontend transport preserve decimal values.
+- [x] Menu Engineering does not import another context's internals.
+- [x] Required root quality commands and `regression-gate` pass.
+
+## Delivery Evidence
+
+- Completed by PR #27: https://github.com/Ainsiel/GastroLedger/pull/27
+- Merged into `develop` on 2026-06-16.

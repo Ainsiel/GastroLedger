@@ -20,11 +20,11 @@ describe("tenant login experience", () => {
     replace.mockReset();
   });
 
-  it("renders accessible administrator login controls", () => {
+  it("renders accessible tenant login controls", () => {
     render(<Page />);
 
     expect(screen.getByRole("heading", { name: /sign in to gastroledger/i })).toBeTruthy();
-    expect(screen.getByLabelText(/administrator email/i).getAttribute("autocomplete")).toBe("email");
+    expect(screen.getByLabelText(/^email$/i).getAttribute("autocomplete")).toBe("email");
     expect(screen.getByLabelText(/password/i).getAttribute("autocomplete")).toBe("current-password");
     expect(screen.getByRole("button", { name: /sign in/i })).toBeTruthy();
     expect(screen.getByRole("link", { name: /create one first/i }).getAttribute("href")).toBe(
@@ -32,7 +32,7 @@ describe("tenant login experience", () => {
     );
   });
 
-  it("submits credentials and sends the administrator to the dashboard", async () => {
+  it("submits credentials and sends the user to the dashboard", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -47,7 +47,7 @@ describe("tenant login experience", () => {
     const user = userEvent.setup();
     render(<Page />);
 
-    await user.type(screen.getByLabelText(/administrator email/i), "admin@example.com");
+    await user.type(screen.getByLabelText(/^email$/i), "admin@example.com");
     await user.type(screen.getByLabelText(/password/i), "StrongPassword123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
@@ -74,7 +74,7 @@ describe("tenant login experience", () => {
     const user = userEvent.setup();
     render(<Page />);
 
-    await user.type(screen.getByLabelText(/administrator email/i), "admin@example.com");
+    await user.type(screen.getByLabelText(/^email$/i), "admin@example.com");
     await user.type(screen.getByLabelText(/password/i), "wrong-password");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
