@@ -1,6 +1,24 @@
 from dataclasses import dataclass
 
 from gastroledger_api.application.identifiers import EventId, TenantId
+from gastroledger_api.modules.procurement.application.suppliers import (
+    CreateSupplier,
+    CreateSupplierOffer,
+    ProcurementAuthorizationDenied,
+    ProcurementCodeConflict,
+    ProcurementDateOverlap,
+    ProcurementNotFound,
+    ProcurementService,
+    ProcurementUnitMismatch,
+    SupplierIdentity,
+    SupplierOfferView,
+    SupplierView,
+)
+from gastroledger_api.modules.procurement.domain.suppliers import (
+    ProcurementValidationError,
+    validate_supplier,
+    validate_supplier_offer,
+)
 
 MODULE_ID = "procurement"
 
@@ -18,3 +36,23 @@ class SupplierReturnAccepted:
     tenant_id: TenantId
     return_id: str
 
+
+__all__ = [
+    "CreateSupplier",
+    "CreateSupplierOffer",
+    "MODULE_ID",
+    "ProcurementAuthorizationDenied",
+    "ProcurementCodeConflict",
+    "ProcurementDateOverlap",
+    "ProcurementNotFound",
+    "ProcurementService",
+    "ProcurementUnitMismatch",
+    "ProcurementValidationError",
+    "SupplierIdentity",
+    "SupplierOfferView",
+    "SupplierReceiptAccepted",
+    "SupplierReturnAccepted",
+    "SupplierView",
+    "validate_supplier",
+    "validate_supplier_offer",
+]

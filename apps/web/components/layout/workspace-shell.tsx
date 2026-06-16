@@ -20,7 +20,7 @@ const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, status: "Live" },
   { label: "Organization", href: "/settings", icon: Settings2, status: "Live" },
   { label: "Menu engineering", href: "/menu", icon: CookingPot, status: "Live" },
-  { label: "Procurement", href: "/procurement", icon: ClipboardList, status: "Planned" },
+  { label: "Procurement", href: "/procurement", icon: ClipboardList, status: "Live" },
   { label: "Inventory & production", href: "/inventory", icon: Boxes, status: "Planned" },
   { label: "Store operations", href: "/operations", icon: Store, status: "Planned" },
   { label: "Control & insights", href: "/control", icon: ChartNoAxesCombined, status: "Planned" },

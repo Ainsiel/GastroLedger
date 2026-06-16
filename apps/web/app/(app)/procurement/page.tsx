@@ -1,13 +1,5 @@
-import { ClipboardList } from "lucide-react";
+import { SuppliersPage, loadProcurementCatalogFromServer } from "@/features/procurement";
 
-import { PlannedSectionPage } from "@/components/layout/planned-section-page";
-
-export default function Page() {
-  return (
-    <PlannedSectionPage
-      title="Procurement"
-      description="Supplier ordering, receiving and return workflows are planned."
-      icon={ClipboardList}
-    />
-  );
+export default async function Page() {
+  return <SuppliersPage initial={await loadProcurementCatalogFromServer()} />;
 }
