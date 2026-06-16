@@ -93,12 +93,24 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-005 Manage suppliers and effective-dated offers
 GL-006 Approve versioned sub-recipes
 GL-016 Apply manual ordering holds
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-005 Suppliers And Effective Offers
+
+```text
+work_order_id = GL-005
+feature_branch = feature/GL-005-suppliers-effective-offers
+readiness = implemented_in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/29
+```
+
+Delivery evidence: PR #29 implements tenant-scoped suppliers and effective-dated
+ingredient offers under Procurement. Required root checks passed locally before PR
+creation.
 
 ## Approval Contract
 

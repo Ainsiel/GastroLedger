@@ -1,10 +1,10 @@
 ---
 id: GL-005
 title: Manage suppliers and effective-dated offers
-status: draft
-readiness: ready
+status: implemented
+readiness: in_pr
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-004]
 requirements: [FR-011]
 use_cases: [UC-007]
@@ -51,3 +51,8 @@ ingredient offers with visible price history.
 - [ ] Informational amounts cannot be mistaken for payment truth.
 - [ ] Procurement consumes ingredient identity through an approved contract.
 - [ ] Required root quality commands and `regression-gate` pass.
+
+## Delivery Evidence
+
+- Implemented by PR #29: https://github.com/Ainsiel/GastroLedger/pull/29
+- CI is pending; issue remains open until merge approval.
