@@ -1,0 +1,239 @@
+from datetime import date
+from decimal import Decimal
+
+import pytest
+
+from gastroledger_api.modules.menu_engineering.public import (
+    ArchiveIngredient,
+    CreateConversionFactor,
+    CreateIngredient,
+    CreateUnit,
+    IngredientArchived,
+    MenuAuthorizationDenied,
+    MenuCatalogService,
+    MenuIdentity,
+    MenuValidationError,
+    UnitConversionUnavailable,
+    UnitDimensionMismatch,
+    validate_conversion_factor,
+    validate_ingredient,
+    validate_unit,
+)
+
+
+def test_unit_and_ingredient_inputs_are_normalized() -> None:
+    unit = validate_unit(name="  Kilogram  ", code=" kg ", dimension="MASS")
+    ingredient = validate_ingredient(
+        name="  Flour  ",
+        code=" flour-all-purpose ",
+        purchase_unit_id="unit-purchase",
+        consumption_unit_id="unit-consumption",
+        shelf_life_days=180,
+        critical_stock_quantity="12.500",
+    )
+
+    assert (unit.name, unit.code, unit.dimension) == ("Kilogram", "KG", "mass")
+    assert ingredient.name == "Flour"
+    assert ingredient.code == "FLOUR-ALL-PURPOSE"
+    assert ingredient.critical_stock_quantity == Decimal("12.500")
+
+
+def test_non_positive_conversion_and_unknown_dimension_are_rejected() -> None:
+    with pytest.raises(MenuValidationError) as error:
+        validate_unit(name="Bottle", code="bottle", dimension="currency")
+
+    assert [(detail.field, detail.code) for detail in error.value.details] == [
+        ("dimension", "unsupported")
+    ]
+
+    with pytest.raises(MenuValidationError) as conversion_error:
+        validate_conversion_factor(
+            source_unit_id="unit-a",
+            target_unit_id="unit-b",
+            factor="0",
+            effective_from=date(2026, 6, 16),
+        )
+
+    assert [(detail.field, detail.code) for detail in conversion_error.value.details] == [
+        ("factor", "positive_required")
+    ]
+
+
+class RecordingMenuStore:
+    def __init__(self) -> None:
+        self.units: list[object] = []
+        self.conversions: list[object] = []
+        self.ingredients: list[object] = []
+        self.archived: list[str] = []
+        self.source_dimension = "mass"
+        self.target_dimension = "mass"
+        self.active_conversion_exists = True
+        self.ingredient_archived = False
+
+    def list_units(self, _identity: MenuIdentity) -> tuple[object, ...]:
+        return tuple(self.units)
+
+    def create_unit(self, _identity: MenuIdentity, unit: object, _correlation_id: str) -> object:
+        self.units.append(unit)
+        return unit
+
+    def create_conversion_factor(
+        self,
+        _identity: MenuIdentity,
+        conversion: object,
+        _correlation_id: str,
+    ) -> object:
+        self.conversions.append(conversion)
+        return conversion
+
+    def convert_quantity(
+        self,
+        _identity: MenuIdentity,
+        source_unit_id: str,
+        target_unit_id: str,
+        quantity: Decimal,
+        as_of: date,
+    ) -> object:
+        del as_of
+        if not self.active_conversion_exists:
+            raise UnitConversionUnavailable
+        return {
+            "quantity": quantity * Decimal("1000"),
+            "target_unit_id": target_unit_id,
+        }
+
+    def list_ingredients(self, _identity: MenuIdentity) -> tuple[object, ...]:
+        return tuple(self.ingredients)
+
+    def create_ingredient(
+        self,
+        _identity: MenuIdentity,
+        ingredient: object,
+        _correlation_id: str,
+    ) -> object:
+        if self.source_dimension != self.target_dimension:
+            raise UnitDimensionMismatch
+        if not self.active_conversion_exists:
+            raise UnitConversionUnavailable
+        self.ingredients.append(ingredient)
+        return ingredient
+
+    def archive_ingredient(
+        self,
+        _identity: MenuIdentity,
+        ingredient_id: str,
+        _correlation_id: str,
+    ) -> object:
+        if self.ingredient_archived:
+            raise IngredientArchived
+        self.archived.append(ingredient_id)
+        return {"ingredient_id": ingredient_id, "status": "archived"}
+
+
+def admin_identity() -> MenuIdentity:
+    return MenuIdentity(
+        tenant_id="tenant-1",
+        actor_id="actor-1",
+        role="tenant_admin",
+    )
+
+
+def test_menu_engineer_records_precise_conversion_and_uses_current_factor() -> None:
+    store = RecordingMenuStore()
+    service = MenuCatalogService(store=store)
+
+    unit = service.create_unit(
+        admin_identity(),
+        CreateUnit(name="  Gram  ", code=" g ", dimension="mass"),
+        correlation_id="unit-1",
+    )
+    conversion = service.create_conversion_factor(
+        admin_identity(),
+        CreateConversionFactor(
+            source_unit_id="unit-kg",
+            target_unit_id="unit-g",
+            factor="1000.0000",
+            effective_from=date(2026, 6, 16),
+        ),
+        correlation_id="conversion-1",
+    )
+    converted = service.convert_quantity(
+        admin_identity(),
+        source_unit_id="unit-kg",
+        target_unit_id="unit-g",
+        quantity=Decimal("1.25"),
+        as_of=date(2026, 6, 16),
+    )
+
+    assert getattr(unit, "code") == "G"
+    assert getattr(conversion, "factor") == Decimal("1000.0000")
+    assert converted["quantity"] == Decimal("1250.00")
+
+
+def test_incompatible_or_missing_unit_mapping_blocks_ingredient_creation() -> None:
+    store = RecordingMenuStore()
+    store.source_dimension = "mass"
+    store.target_dimension = "volume"
+    service = MenuCatalogService(store=store)
+
+    with pytest.raises(UnitDimensionMismatch):
+        service.create_ingredient(
+            admin_identity(),
+            CreateIngredient(
+                name="Flour",
+                code="FLOUR",
+                purchase_unit_id="unit-kg",
+                consumption_unit_id="unit-liter",
+                shelf_life_days=180,
+                critical_stock_quantity="10",
+            ),
+            correlation_id="ingredient-1",
+        )
+
+    store.source_dimension = "mass"
+    store.target_dimension = "mass"
+    store.active_conversion_exists = False
+
+    with pytest.raises(UnitConversionUnavailable):
+        service.create_ingredient(
+            admin_identity(),
+            CreateIngredient(
+                name="Flour",
+                code="FLOUR",
+                purchase_unit_id="unit-kg",
+                consumption_unit_id="unit-g",
+                shelf_life_days=180,
+                critical_stock_quantity="10",
+            ),
+            correlation_id="ingredient-2",
+        )
+
+    assert store.ingredients == []
+
+
+def test_non_menu_actor_cannot_mutate_catalog() -> None:
+    store = RecordingMenuStore()
+    service = MenuCatalogService(store=store)
+
+    with pytest.raises(MenuAuthorizationDenied):
+        service.create_unit(
+            MenuIdentity(tenant_id="tenant-1", actor_id="actor-1", role="operator"),
+            CreateUnit(name="Gram", code="G", dimension="mass"),
+            correlation_id="unit-1",
+        )
+
+    assert store.units == []
+
+
+def test_archived_ingredient_is_reported_as_not_available_for_new_use() -> None:
+    store = RecordingMenuStore()
+    service = MenuCatalogService(store=store)
+
+    archived = service.archive_ingredient(
+        admin_identity(),
+        ArchiveIngredient(ingredient_id="ingredient-1"),
+        correlation_id="archive-1",
+    )
+
+    assert archived["status"] == "archived"
+    assert store.archived == ["ingredient-1"]

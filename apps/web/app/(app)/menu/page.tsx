@@ -1,13 +1,5 @@
-import { CookingPot } from "lucide-react";
+import { MenuCatalogPage, loadMenuCatalogFromServer } from "@/features/menu-engineering";
 
-import { PlannedSectionPage } from "@/components/layout/planned-section-page";
-
-export default function Page() {
-  return (
-    <PlannedSectionPage
-      title="Menu engineering"
-      description="Recipes, menu structure and profitability workflows are planned."
-      icon={CookingPot}
-    />
-  );
+export default async function Page() {
+  return <MenuCatalogPage initial={await loadMenuCatalogFromServer()} />;
 }

@@ -72,6 +72,45 @@ export interface BranchResponse extends BranchRequest {
   warehouses: WarehouseResponse[];
 }
 
+export type UnitDimension = "mass" | "volume" | "count";
+
+export interface UnitRequest {
+  name: string;
+  code: string;
+  dimension: UnitDimension;
+}
+
+export interface ConversionFactorRequest {
+  sourceUnitId: string;
+  targetUnitId: string;
+  factor: string;
+  effectiveFrom: string;
+}
+
+export interface ConversionFactorResponse extends ConversionFactorRequest {
+  conversionFactorId: string;
+}
+
+export interface UnitResponse extends UnitRequest {
+  unitId: string;
+  conversions: ConversionFactorResponse[];
+}
+
+export interface IngredientRequest {
+  name: string;
+  code: string;
+  purchaseUnitId: string;
+  consumptionUnitId: string;
+  shelfLifeDays: number;
+  criticalStockQuantity: string;
+}
+
+export interface IngredientResponse extends IngredientRequest {
+  ingredientId: string;
+  status: "active" | "archived";
+  availableForNewUse: boolean;
+}
+
 export interface ApiProblem {
   type: string;
   title: string;
