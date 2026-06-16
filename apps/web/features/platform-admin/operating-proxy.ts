@@ -32,11 +32,14 @@ export async function proxyOperatingRequest(
     });
     const upstreamText = await upstream.text();
     JSON.parse(upstreamText);
+    const headers = new Headers({
+      "content-type": upstream.headers.get("content-type") ?? "application/json",
+    });
+    const cookie = upstream.headers.get("set-cookie");
+    if (cookie) headers.set("set-cookie", cookie);
     return new Response(upstreamText, {
       status: upstream.status,
-      headers: {
-        "content-type": upstream.headers.get("content-type") ?? "application/json",
-      },
+      headers,
     });
   } catch {
     return unavailableProblem();

@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import SQLAlchemyError
 
 from gastroledger_api.modules.platform_organization.public import (
+    AcceptInvitation,
     AuthenticationRequired,
     BranchId,
     BranchLimitExceeded,
@@ -16,12 +17,17 @@ from gastroledger_api.modules.platform_organization.public import (
     CreateWarehouse,
     DeactivateWarehouse,
     InvalidCredentials,
+    InvitationExpired,
+    InvitationNotFound,
+    InvitationSingleUseViolation,
+    InviteLocalUser,
     OperatingAuthorizationDenied,
     OperatingCodeConflict,
     OperatingIdentity,
     OperatingNotFound,
     OperatingScopeService,
     OperatingValidationError,
+    PrivilegeEscalationDenied,
     RegisterTenant,
     RegistrationCommand,
     RegistrationConflict,
@@ -31,6 +37,8 @@ from gastroledger_api.modules.platform_organization.public import (
     TenantLoginAmbiguous,
     TenantSettingsView,
     UpdateTenantSettings,
+    UserAccessService,
+    UserAccessValidationError,
     WarehouseDeactivationUnsafe,
     WarehouseId,
     WarehouseInactive,
@@ -167,6 +175,39 @@ class BranchResponse(BaseModel):
     warehouses: list[WarehouseResponse]
 
 
+class InvitationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    inviteeLogin: str = Field(min_length=1, max_length=254)
+    role: str = Field(min_length=1, max_length=40)
+    scope: str = Field(min_length=1, max_length=20)
+    branchId: str | None = None
+    ttlHours: int = Field(strict=True, ge=1, le=168)
+
+
+class InvitationResponse(BaseModel):
+    invitationId: str
+    manualShareToken: str
+    inviteeLogin: str
+    role: str
+    scope: str
+    branchId: str | None
+    ttlHours: int
+    expiresAt: str
+    status: str
+
+
+class InvitationAcceptanceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    manualShareToken: str = Field(min_length=1, max_length=256)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class BranchAccessResponse(BaseModel):
+    branchIds: list[str]
+
+
 class NoOpenWarehouseMovements(WarehouseMovementGuard):
     def has_open_movements(
         self, _identity: OperatingIdentity, _warehouse_id: WarehouseId
@@ -204,6 +245,21 @@ def branch_response(branch: BranchView) -> BranchResponse:
     )
 
 
+def invitation_response(invitation: dict[str, object]) -> InvitationResponse:
+    expires_at = invitation["expiresAt"]
+    return InvitationResponse(
+        invitationId=str(invitation["invitationId"]),
+        manualShareToken=str(invitation["manualShareToken"]),
+        inviteeLogin=str(invitation["inviteeLogin"]),
+        role=str(invitation["role"]),
+        scope=str(invitation["scope"]),
+        branchId=str(invitation["branchId"]) if invitation["branchId"] else None,
+        ttlHours=int(invitation["ttlHours"]),
+        expiresAt=expires_at.isoformat() if hasattr(expires_at, "isoformat") else str(expires_at),
+        status=str(invitation["status"]),
+    )
+
+
 def create_platform_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1", tags=["platform-organization"])
     store = PostgresPlatformStore(database_url or os.environ.get("DATABASE_URL", ""))
@@ -217,6 +273,7 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
     operating_scope = OperatingScopeService(
         store=store, movement_guard=NoOpenWarehouseMovements()
     )
+    user_access = UserAccessService(store=store)
 
     def operating_identity(gl_session: str | None) -> OperatingIdentity:
         if not gl_session:
@@ -268,6 +325,22 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             return problem_response(
                 409, "platform.warehouse_has_open_movements", correlation_id, []
             )
+        if isinstance(error, (UserAccessValidationError, PrivilegeEscalationDenied)):
+            return problem_response(
+                422,
+                "platform.user_access_invalid",
+                correlation_id,
+                [
+                    {"field": detail.field, "code": detail.code, "detail": "review field"}
+                    for detail in getattr(error, "details", ())
+                ],
+            )
+        if isinstance(error, InvitationNotFound):
+            return problem_response(404, "platform.invitation_not_found", correlation_id, [])
+        if isinstance(error, InvitationExpired):
+            return problem_response(409, "platform.invitation_expired", correlation_id, [])
+        if isinstance(error, InvitationSingleUseViolation):
+            return problem_response(409, "platform.invitation_already_used", correlation_id, [])
         return problem_response(500, "platform.operating_scope_failed", correlation_id, [])
 
     @router.post(
@@ -586,6 +659,98 @@ def create_platform_router(database_url: str | None = None) -> APIRouter:
             OperatingNotFound,
             WarehouseDeactivationUnsafe,
             WarehouseInactive,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.post(
+        "/users/invitations",
+        response_model=InvitationResponse,
+        status_code=201,
+        operation_id="inviteLocalUser",
+        summary="Create a manually shared local user invitation",
+        responses=OPERATING_RESPONSES,
+    )
+    def invite_local_user(
+        request: InvitationRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            invitation = user_access.invite_local_user(
+                operating_identity(gl_session),
+                InviteLocalUser(
+                    invitee_login=request.inviteeLogin,
+                    role=request.role,
+                    scope=request.scope,
+                    branch_id=request.branchId,
+                    ttl_hours=request.ttlHours,
+                ),
+                correlation_id=correlation_id,
+            )
+            return invitation_response(invitation)  # type: ignore[arg-type]
+        except (
+            AuthenticationRequired,
+            OperatingAuthorizationDenied,
+            OperatingNotFound,
+            UserAccessValidationError,
+            PrivilegeEscalationDenied,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+
+    @router.post(
+        "/users/invitations/accept",
+        response_model=TenantIdentityResponse,
+        operation_id="acceptLocalUserInvitation",
+        summary="Accept a manually shared local user invitation",
+        responses=OPERATING_RESPONSES,
+    )
+    def accept_invitation(request: InvitationAcceptanceRequest, response: Response):
+        correlation_id = str(uuid4())
+        try:
+            result = user_access.accept_invitation(
+                AcceptInvitation(
+                    manual_share_token=request.manualShareToken,
+                    password=request.password,
+                ),
+                correlation_id=correlation_id,
+            )
+        except (
+            InvitationNotFound,
+            InvitationExpired,
+            InvitationSingleUseViolation,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return operating_problem(error, correlation_id)
+        set_session_cookie(response, result.session_token)
+        return TenantIdentityResponse(
+            tenantId=str(result.tenant_id),
+            actorId=str(result.actor_id),
+            tenantName=result.tenant_name,
+            tenantSlug=result.tenant_slug,
+        )
+
+    @router.get(
+        "/users/me/branch-access",
+        response_model=BranchAccessResponse,
+        operation_id="getMyBranchAccess",
+        summary="List branch ids visible to the current local user",
+        responses=OPERATING_RESPONSES,
+    )
+    def branch_access(gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            return BranchAccessResponse(
+                branchIds=list(
+                    user_access.list_visible_branches(operating_identity(gl_session))
+                )
+            )
+        except (
+            AuthenticationRequired,
             psycopg.Error,
             SQLAlchemyError,
         ) as error:

@@ -28,6 +28,28 @@ describe("platform operating scope proxy", () => {
     expect(init.body).toContain("Downtown");
   });
 
+  it("forwards Set-Cookie from invitation acceptance responses", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json(
+          { tenantId: "tenant-1", actorId: "actor-1", tenantName: "Sabor", tenantSlug: "sabor" },
+          { headers: { "set-cookie": "gl_session=accepted; Path=/; HttpOnly" } },
+        ),
+      ),
+    );
+
+    const response = await proxyOperatingRequest(
+      new Request("http://web/api/v1/users/invitations/accept", {
+        method: "POST",
+        body: JSON.stringify({ manualShareToken: "token", password: "StrongPassword123" }),
+      }),
+      "/api/v1/users/invitations/accept",
+    );
+
+    expect(response.headers.get("set-cookie")).toContain("gl_session=accepted");
+  });
+
   it("returns a typed unexpected problem when FastAPI is unavailable", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 

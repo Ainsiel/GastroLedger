@@ -1,7 +1,7 @@
 "use client";
 
-import type { SessionLoginRequest } from "@gastroledger/api-contract";
-import { ArrowLeft, LoaderCircle, LogIn, ShieldCheck } from "lucide-react";
+import type { InvitationAcceptanceRequest } from "@gastroledger/api-contract";
+import { ArrowLeft, KeyRound, LoaderCircle, UserCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
@@ -14,55 +14,76 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { loginMessage, submitLogin, type LoginOutcome } from "./session";
+import {
+  submitInvitationAcceptance,
+  type InvitationAcceptanceOutcome,
+} from "@/features/onboarding/invitation";
 
-export function LoginPage() {
+type AcceptOutcome =
+  | { kind: "idle" }
+  | { kind: "submitting" }
+  | InvitationAcceptanceOutcome;
+
+function acceptMessage(outcome: AcceptOutcome): string {
+  switch (outcome.kind) {
+    case "success":
+      return `Invitation accepted. Opening ${outcome.tenantName}.`;
+    case "validation":
+      return "Review the invitation token and password.";
+    case "conflict":
+    case "unexpected":
+      return outcome.message;
+    case "submitting":
+      return "Accepting invitation...";
+    default:
+      return "";
+  }
+}
+
+export function AcceptInvitationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [outcome, setOutcome] = useState<LoginOutcome>({ kind: "idle" });
-  const fieldError = (field: string) =>
-    outcome.kind === "validation"
-      ? outcome.errors.find((error) => error.field === field)?.detail
-      : undefined;
+  const [outcome, setOutcome] = useState<AcceptOutcome>({ kind: "idle" });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setOutcome({ kind: "submitting" });
     const form = new FormData(event.currentTarget);
-    const request: SessionLoginRequest = {
-      email: String(form.get("email") ?? ""),
+    const request: InvitationAcceptanceRequest = {
+      manualShareToken: String(form.get("manualShareToken") ?? ""),
       password: String(form.get("password") ?? ""),
     };
-    const nextOutcome = await submitLogin(request);
-    setOutcome(nextOutcome);
+    const nextOutcome = await submitInvitationAcceptance(request);
     if (nextOutcome.kind === "success") {
-      const next = searchParams.get("next");
-      router.replace(next && next.startsWith("/") ? next : "/dashboard");
+      setOutcome(nextOutcome);
+      router.replace("/dashboard");
+      return;
     }
+    setOutcome(nextOutcome);
   }
 
-  const statusMessage = loginMessage(outcome);
+  const statusMessage = acceptMessage(outcome);
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-[0.95fr_1.05fr]">
       <aside className="relative hidden overflow-hidden bg-[#292520] px-10 py-12 text-[#fffaf3] lg:flex lg:flex-col">
         <Brand className="text-[#fffaf3]" />
         <div className="my-auto max-w-lg">
-          <Badge className="bg-[#d77a38] text-white">Tenant access</Badge>
-          <h1 className="mt-6 text-4xl font-semibold tracking-[-0.04em]">
-            Continue inside your tenant workspace.
+          <Badge className="bg-[#d77a38] text-white">Manual invitation</Badge>
+          <h1 className="mt-6 text-4xl font-semibold">
+            Join your tenant workspace with a local invitation.
           </h1>
           <p className="mt-5 text-base leading-7 text-[#cfc3b7]">
-            Sign in with your local GastroLedger account. Your session remains
-            tenant-scoped and local to this deployment.
+            Paste the token shared by your administrator and set your local password.
+            The token can be used once and expires automatically.
           </p>
           <div className="mt-8 rounded-xl border border-white/10 bg-black/10 p-5">
             <div className="flex items-center gap-3">
-              <ShieldCheck aria-hidden="true" className="size-5 text-[#f0a568]" />
-              <p className="font-semibold">Protected workspace</p>
+              <KeyRound aria-hidden="true" className="size-5 text-[#f0a568]" />
+              <p className="font-semibold">No external identity service</p>
             </div>
             <p className="mt-3 text-sm leading-6 text-[#cfc3b7]">
-              Dashboard and workspace routes validate the session before rendering.
+              GastroLedger accepts the invitation locally and starts a tenant-scoped session.
             </p>
           </div>
         </div>
@@ -71,9 +92,9 @@ export function LoginPage() {
         <header className="flex items-center justify-between px-5 py-5 sm:px-8">
           <Brand className="lg:hidden" />
           <Button asChild variant="ghost" className="ml-auto">
-            <Link href="/">
+            <Link href="/login">
               <ArrowLeft aria-hidden="true" className="size-4" />
-              Back to overview
+              Back to sign in
             </Link>
           </Button>
         </header>
@@ -81,33 +102,25 @@ export function LoginPage() {
           <Card className="w-full max-w-xl shadow-lg">
             <CardHeader>
               <div className="flex size-11 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <LogIn aria-hidden="true" className="size-5" />
+                <UserCheck aria-hidden="true" className="size-5" />
               </div>
-              <CardTitle className="mt-3 text-2xl sm:text-3xl">Sign in to GastroLedger</CardTitle>
+              <CardTitle className="mt-3 text-2xl sm:text-3xl">Accept invitation</CardTitle>
               <CardDescription>
-                Use your local email and password to open the protected workspace.
+                Use the manual token from your administrator and choose a password.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={submit} aria-describedby="login-status" className="space-y-6">
+              <form onSubmit={submit} aria-describedby="accept-invitation-status" className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="manual-share-token">Invitation token</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
+                    id="manual-share-token"
+                    name="manualShareToken"
+                    defaultValue={searchParams.get("token") ?? ""}
+                    autoComplete="one-time-code"
                     required
-                    maxLength={254}
-                    aria-invalid={Boolean(fieldError("email"))}
-                    aria-describedby={fieldError("email") ? "email-detail" : undefined}
-                    placeholder="admin@example.com"
+                    maxLength={256}
                   />
-                  {fieldError("email") ? (
-                    <p id="email-detail" className="text-xs text-red-700">
-                      {fieldError("email")}
-                    </p>
-                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -115,21 +128,14 @@ export function LoginPage() {
                     id="password"
                     name="password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     required
                     maxLength={128}
-                    aria-invalid={Boolean(fieldError("password"))}
-                    aria-describedby={fieldError("password") ? "password-detail" : undefined}
                   />
-                  {fieldError("password") ? (
-                    <p id="password-detail" className="text-xs text-red-700">
-                      {fieldError("password")}
-                    </p>
-                  ) : null}
                 </div>
                 {statusMessage ? (
                   <Alert
-                    id="login-status"
+                    id="accept-invitation-status"
                     className={
                       outcome.kind === "success"
                         ? "border-emerald-200 bg-emerald-50"
@@ -139,29 +145,34 @@ export function LoginPage() {
                     }
                   >
                     <AlertTitle>
-                      {outcome.kind === "success" ? "Session started" : "Login status"}
+                      {outcome.kind === "success" ? "Invitation accepted" : "Invitation status"}
                     </AlertTitle>
-                    <AlertDescription>{statusMessage}</AlertDescription>
+                    <AlertDescription>
+                      {statusMessage}
+                      {"correlationId" in outcome && outcome.correlationId
+                        ? ` Reference: ${outcome.correlationId}`
+                        : ""}
+                    </AlertDescription>
                   </Alert>
                 ) : (
-                  <p id="login-status" role="status" aria-live="polite" className="sr-only" />
+                  <p id="accept-invitation-status" role="status" aria-live="polite" className="sr-only" />
                 )}
                 <Button type="submit" size="lg" className="w-full" disabled={outcome.kind === "submitting"}>
                   {outcome.kind === "submitting" ? (
                     <>
                       <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-                      Signing in...
+                      Accepting...
                     </>
                   ) : (
-                    "Sign in"
+                    "Accept invitation"
                   )}
                 </Button>
               </form>
               <Separator className="my-6" />
               <p className="text-center text-sm text-muted-foreground">
-                Need a tenant workspace?{" "}
-                <Link href="/register" className="font-semibold text-primary underline-offset-4 hover:underline">
-                  Create one first
+                Already accepted?{" "}
+                <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  Sign in
                 </Link>
               </p>
             </CardContent>

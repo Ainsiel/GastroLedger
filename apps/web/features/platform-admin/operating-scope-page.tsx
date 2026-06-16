@@ -3,11 +3,13 @@
 import type {
   BranchRequest,
   BranchResponse,
+  InvitationRequest,
+  InvitationResponse,
   TenantSettingsRequest,
   WarehouseRequest,
   WarehouseResponse,
 } from "@gastroledger/api-contract";
-import { Building2, CheckCircle2, LoaderCircle, Settings2, Warehouse } from "lucide-react";
+import { Building2, CheckCircle2, KeyRound, LoaderCircle, Settings2, UserPlus, Warehouse } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -23,6 +25,7 @@ import {
   type OperatingOutcome,
   type OperatingScopeSnapshot,
 } from "./operating-scope";
+import { createInvitation } from "./user-access";
 
 type Notice = Exclude<OperatingOutcome, { kind: "success" }> | { kind: "success"; message: string };
 
@@ -31,6 +34,7 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
   const [notice, setNotice] = useState<Notice | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [confirmWarehouse, setConfirmWarehouse] = useState<string | null>(null);
+  const [invitation, setInvitation] = useState<InvitationResponse | null>(null);
   const restoreWarehouseFocus = useRef<string | null>(null);
 
   useEffect(() => {
@@ -148,6 +152,33 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
       `${warehouse.name} deactivated. Historical visibility is retained.`,
     );
     if (outcome.kind === "success") setConfirmWarehouse(null);
+  }
+
+  async function inviteUser(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const scope = String(form.get("scope")) as InvitationRequest["scope"];
+    const branchId = String(form.get("branchId") || "");
+    const request: InvitationRequest = {
+      inviteeLogin: String(form.get("inviteeLogin")),
+      role: String(form.get("role")) as InvitationRequest["role"],
+      scope,
+      branchId: scope === "branch" ? branchId : null,
+      ttlHours: Number(form.get("ttlHours")),
+    };
+    setPending("invitation");
+    setNotice(null);
+    setInvitation(null);
+    const outcome = await createInvitation(request);
+    if (outcome.kind === "success") {
+      setInvitation(outcome.data);
+      setNotice({ kind: "success", message: "Invitation generated for manual sharing." });
+    } else if (outcome.kind === "unauthorized") {
+      setSnapshot({ kind: "unauthorized" });
+    } else {
+      setNotice(outcome);
+    }
+    setPending(null);
   }
 
   function cancelWarehouseDeactivation(warehouseId: string) {
@@ -270,6 +301,103 @@ export function OperatingScopePage({ initial }: { initial: OperatingScopeSnapsho
               Create branch
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>User invitations and scoped roles</CardTitle>
+          <CardDescription>
+            Generate a local invitation for manual sharing. GastroLedger does not send email,
+            SMS or external identity messages.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form
+            onSubmit={inviteUser}
+            className="grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto] lg:items-end"
+          >
+            <Field
+              id="invitee-login"
+              label="Invitee email"
+              name="inviteeLogin"
+              type="email"
+              autoComplete="email"
+              placeholder="manager@example.com"
+              maxLength={254}
+              required
+            />
+            <SelectField
+              id="invitation-role"
+              label="Role"
+              name="role"
+              defaultValue="branch_manager"
+              options={[
+                ["branch_manager", "Branch manager"],
+                ["branch_operator", "Branch operator"],
+                ["tenant_operator", "Tenant operator"],
+              ]}
+            />
+            <SelectField
+              id="invitation-scope"
+              label="Scope"
+              name="scope"
+              defaultValue="branch"
+              options={[
+                ["branch", "Branch"],
+                ["tenant", "Tenant"],
+              ]}
+            />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              <SelectField
+                id="invitation-branch"
+                label="Branch"
+                name="branchId"
+                defaultValue={snapshot.branches[0]?.branchId ?? ""}
+                options={[
+                  ["", "Select branch"],
+                  ...snapshot.branches.map((branch) => [branch.branchId, branch.name] as [string, string]),
+                ]}
+              />
+              <Field
+                id="invitation-ttl"
+                label="Hours"
+                name="ttlHours"
+                type="number"
+                min={1}
+                max={168}
+                defaultValue={24}
+                required
+              />
+            </div>
+            <Button type="submit" disabled={pending === "invitation"}>
+              {pending === "invitation" ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : <UserPlus aria-hidden="true" className="size-4" />}
+              Invite
+            </Button>
+          </form>
+
+          {snapshot.branches.length === 0 ? (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertTitle>No branch scope available</AlertTitle>
+              <AlertDescription>
+                Create a branch before issuing branch-scoped invitations.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
+          {invitation ? (
+            <Alert className="border-emerald-200 bg-emerald-50">
+              <KeyRound aria-hidden="true" className="size-4" />
+              <AlertTitle>Manual invitation ready</AlertTitle>
+              <AlertDescription>
+                Share this token through an approved offline channel:
+                <code className="mt-2 block break-all rounded-md bg-white/70 p-2 font-mono text-xs">
+                  {invitation.manualShareToken}
+                </code>
+                It expires at {new Date(invitation.expiresAt).toLocaleString()} and can be used once.
+              </AlertDescription>
+            </Alert>
+          ) : null}
         </CardContent>
       </Card>
 

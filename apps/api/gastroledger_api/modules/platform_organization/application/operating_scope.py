@@ -17,6 +17,7 @@ class OperatingIdentity:
     tenant_id: TenantId
     actor_id: ActorId
     role: str
+    branch_ids: tuple[BranchId, ...] = ()
 
 
 @dataclass(frozen=True)

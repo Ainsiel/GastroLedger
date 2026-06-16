@@ -42,12 +42,13 @@ npm run build
 Delivery evidence: PR #24 merged into `develop`; required root checks and PostgreSQL
 integration evidence passed.
 
-## Candidate 2: GL-002 Local Users, Invitations And Scoped Roles
+## In PR: GL-002 Local Users, Invitations And Scoped Roles
 
 ```text
 work_order_id = GL-002
 feature_branch = feature/GL-002-local-users-scoped-roles
-readiness = ready
+readiness = implemented_in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/28
 ```
 
 Objective: let a tenant administrator generate a manually shared invitation and
@@ -56,28 +57,46 @@ assign a branch-scoped role while preventing privilege escalation.
 This is ready because the session, tenant context and minimum Platform & Organization
 persistence from `GL-001` are accepted.
 
-The work order must include `docs/backlog/frontend-delivery-contract.md`, including
-the `(app)` route, permission-visible states, shadcn/ui usage, accessibility,
-responsive checks and visual QA evidence.
+Delivery evidence: PR #28 implements invitation generation, public invitation
+acceptance, local session creation, scoped role persistence, branch visibility and
+dashboard access. Required root checks and regression-gate passed before merge.
 
-## Candidate 3: GL-003 Tenant Operating Scope
+## Completed: GL-003 Tenant Operating Scope
 
 ```text
 work_order_id = GL-003
 feature_branch = feature/GL-003-tenant-operating-scope
-readiness = ready
+readiness = done
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/26
 ```
 
-Objective: configure tenant settings and create/deactivate branches and warehouses
-with enforced limits and audit evidence.
+Delivered objective: configure tenant settings and create/deactivate branches and
+warehouses with enforced limits and audit evidence.
 
-This is ready after `GL-001`; it unlocks every branch-owned operational slice.
+Delivery evidence: PR #26 merged into `develop`.
 
-The work order must include `docs/backlog/frontend-delivery-contract.md`, including
-the `(app)/settings` route, management states, shadcn/ui usage, accessibility,
-responsive checks and visual QA evidence.
+## Completed: GL-004 Units And Ingredient Catalog
+
+```text
+work_order_id = GL-004
+feature_branch = feature/GL-004-units-ingredient-catalog
+readiness = done
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/27
+```
+
+Delivered objective: manage units, conversion factors and ingredients under the
+Menu Engineering route.
+
+Delivery evidence: PR #27 merged into `develop`.
+
+## Current Ready Candidates
+
+```text
+GL-005 Manage suppliers and effective-dated offers
+GL-006 Approve versioned sub-recipes
+```
 
 ## Approval Contract
 
-These are candidates, not approved work orders. Approval must name one candidate,
+Ready candidates are not approved work orders. Approval must name one candidate,
 its scope and AFK delegation separately before implementation begins.

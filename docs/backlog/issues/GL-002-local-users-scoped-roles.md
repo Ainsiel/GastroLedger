@@ -1,10 +1,10 @@
 ---
 id: GL-002
 title: Manage local users, invitations and scoped roles
-status: draft
-readiness: ready
+status: implemented
+readiness: in_pr
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-001]
 requirements: [FR-003, FR-027, FR-028]
 use_cases: [UC-003]
@@ -50,3 +50,8 @@ and assign local users tenant-wide or branch-scoped capabilities.
 - [ ] Protected actions include actor, reason/correlation and audit evidence.
 - [ ] Frontend authorized/unauthorized states are covered.
 - [ ] Required root quality commands and `regression-gate` pass.
+
+## Delivery Evidence
+
+- Implemented by PR #28: https://github.com/Ainsiel/GastroLedger/pull/28
+- CI is green; issue remains open until merge approval.

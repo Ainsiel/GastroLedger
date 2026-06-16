@@ -1,10 +1,10 @@
 ---
 id: GL-003
 title: Configure tenant settings, branches and warehouses
-status: draft
-readiness: ready
+status: done
+readiness: done
 primary_context: Platform & Organization
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-001]
 requirements: [FR-002, FR-004, FR-027]
 use_cases: [UC-002, UC-004]
@@ -32,12 +32,12 @@ branches and internal warehouses that scope operational work.
 
 ## Acceptance Criteria
 
-- [ ] Valid locale, descriptive base currency and operational limits are saved and
+- [x] Valid locale, descriptive base currency and operational limits are saved and
   audited.
-- [ ] Reducing a limit preserves existing branches but blocks new excess creation.
-- [ ] Branches and warehouses have unique tenant/branch-scoped codes.
-- [ ] A warehouse with no open movements can be deactivated while history remains.
-- [ ] Unsupported settings, duplicate codes and unauthorized actors change nothing.
+- [x] Reducing a limit preserves existing branches but blocks new excess creation.
+- [x] Branches and warehouses have unique tenant/branch-scoped codes.
+- [x] A warehouse with no open movements can be deactivated while history remains.
+- [x] Unsupported settings, duplicate codes and unauthorized actors change nothing.
 
 ## Frontend Delivery Contract
 
@@ -48,7 +48,12 @@ branches and internal warehouses that scope operational work.
 - Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
-- [ ] TC-002-S/A/F and TC-004-S/A/F pass.
-- [ ] UI exposes validation, forbidden and deactivated states.
-- [ ] Tenant isolation and architecture tests remain green.
-- [ ] Required root quality commands and `regression-gate` pass.
+- [x] TC-002-S/A/F and TC-004-S/A/F pass.
+- [x] UI exposes validation, forbidden and deactivated states.
+- [x] Tenant isolation and architecture tests remain green.
+- [x] Required root quality commands and `regression-gate` pass.
+
+## Delivery Evidence
+
+- Completed by PR #26: https://github.com/Ainsiel/GastroLedger/pull/26
+- Merged into `develop` on 2026-06-15.

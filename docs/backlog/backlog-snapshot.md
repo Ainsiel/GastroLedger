@@ -2,9 +2,9 @@
 
 ```text
 run_id = backlog-management-20260614-01
-generated_at = 2026-06-15
+generated_at = 2026-06-16
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published and reconciled
+status = published and reconciled after PR #26/#27 merges and PR #28 delivery
 github_issues_observed = 23
 ```
 
@@ -12,27 +12,29 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Done | 1 |
+| Done | 3 |
+| In PR | 1 |
 | Ready candidate | 2 |
-| Defined, blocked by dependencies | 20 |
+| Defined, blocked by dependencies | 17 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
 
 The repository contains the bootstrap, architecture foundation, delivery
 infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
-SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001 tenant
-registration and isolation is accepted in `develop`.
+SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001, GL-003
+and GL-004 are accepted in `develop`; GL-002 is implemented in PR #28 and awaits
+merge approval.
 
 ## Items
 
 | ID | Outcome | Primary context | Trace | Readiness | Dependencies |
 |---|---|---|---|---|---|
 | [GL-001](https://github.com/Ainsiel/GastroLedger/issues/1) | Register a tenant and prove isolation | Platform & Organization | UC-001 | Done | Foundation |
-| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | Ready | GL-001 |
-| [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Ready | GL-001 |
-| [GL-004](https://github.com/Ainsiel/GastroLedger/issues/4) | Manage units and ingredient catalog | Menu Engineering | UC-005, UC-006 | Blocked | GL-003 |
-| [GL-005](https://github.com/Ainsiel/GastroLedger/issues/5) | Manage suppliers and effective-dated offers | Procurement | UC-007 | Blocked | GL-004 |
-| [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Blocked | GL-004 |
+| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | In PR (#28) | GL-001 |
+| [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Done | GL-001 |
+| [GL-004](https://github.com/Ainsiel/GastroLedger/issues/4) | Manage units and ingredient catalog | Menu Engineering | UC-005, UC-006 | Done | GL-003 |
+| [GL-005](https://github.com/Ainsiel/GastroLedger/issues/5) | Manage suppliers and effective-dated offers | Procurement | UC-007 | Ready | GL-004 |
+| [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Ready | GL-004 |
 | [GL-007](https://github.com/Ainsiel/GastroLedger/issues/7) | Approve menu items and branch margin | Menu Engineering | UC-009 | Blocked | GL-006 |
 | [GL-008](https://github.com/Ainsiel/GastroLedger/issues/8) | Recalculate recipe cost snapshots asynchronously | Menu Engineering | UC-010 | Blocked | GL-007 |
 | [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Blocked | GL-005 |
@@ -85,5 +87,7 @@ evidence.
 - ADR files have documentary status `proposed`, but the user explicitly supplied
   them as approved workflow sources.
 - GitHub publication was explicitly approved on 2026-06-14. On 2026-06-15, issues
-  `#1` through `#23` were reconciled with the frontend delivery contract; GL-001 was
-  completed and GL-002/GL-003 became ready.
+  `#1` through `#23` were reconciled with the frontend delivery contract.
+- On 2026-06-16, PR #26 delivered GL-003 and PR #27 delivered GL-004 into
+  `develop`; both should be closed as completed in GitHub. PR #28 implements GL-002
+  and remains open pending merge approval.

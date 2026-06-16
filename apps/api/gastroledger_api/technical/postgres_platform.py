@@ -37,6 +37,12 @@ from gastroledger_api.modules.platform_organization.application.security import 
     SessionTokenIssuer,
     TenantLoginAmbiguous,
 )
+from gastroledger_api.modules.platform_organization.application.user_access import (
+    AcceptInvitation,
+    InvitationExpired,
+    InvitationNotFound,
+    InvitationSingleUseViolation,
+)
 from gastroledger_api.modules.platform_organization.domain.operating_scope import (
     ValidatedBranch,
     ValidatedTenantSettings,
@@ -45,10 +51,15 @@ from gastroledger_api.modules.platform_organization.domain.operating_scope impor
 from gastroledger_api.modules.platform_organization.domain.registration import (
     ValidatedRegistration,
 )
+from gastroledger_api.modules.platform_organization.domain.user_access import (
+    ValidatedInvitation,
+)
 from gastroledger_api.technical.platform_models import (
     ControlAuditEvent,
     PlatformBranch,
+    PlatformInvitation,
     PlatformMembership,
+    PlatformMembershipRole,
     PlatformSession,
     PlatformTenant,
     PlatformTenantSetting,
@@ -120,6 +131,14 @@ class PostgresPlatformStore:
                             tenant_id=tenant_uuid,
                             user_id=actor_uuid,
                             role="tenant_admin",
+                        ),
+                        PlatformMembershipRole(
+                            id=uuid4(),
+                            tenant_id=tenant_uuid,
+                            user_id=actor_uuid,
+                            role="tenant_admin",
+                            scope="tenant",
+                            branch_id=None,
                         ),
                     ]
                 )
@@ -352,10 +371,19 @@ class PostgresPlatformStore:
             ).scalar_one_or_none()
             if role is None:
                 raise AuthenticationRequired
+            branch_ids = session.execute(
+                select(PlatformMembershipRole.branch_id).where(
+                    PlatformMembershipRole.tenant_id == tenant_id,
+                    PlatformMembershipRole.user_id == actor_id,
+                    PlatformMembershipRole.scope == "branch",
+                    PlatformMembershipRole.branch_id.is_not(None),
+                )
+            ).scalars()
             return OperatingIdentity(
                 tenant_id=TenantId(str(tenant_id)),
                 actor_id=ActorId(str(actor_id)),
                 role=role,
+                branch_ids=tuple(BranchId(str(branch_id)) for branch_id in branch_ids),
             )
 
     def get_settings(self, identity: OperatingIdentity) -> TenantSettingsView:
@@ -376,15 +404,21 @@ class PostgresPlatformStore:
     def list_branches(self, identity: OperatingIdentity) -> tuple[BranchView, ...]:
         with self._open_session() as session, session.begin():
             self._authorize_operating_identity(session, identity)
-            branches = session.execute(
-                select(PlatformBranch)
-                .where(PlatformBranch.tenant_id == UUID(identity.tenant_id))
-                .order_by(PlatformBranch.code)
-            ).scalars()
+            branch_query = select(PlatformBranch).where(
+                PlatformBranch.tenant_id == UUID(identity.tenant_id)
+            )
+            warehouse_query = select(PlatformWarehouse).where(
+                PlatformWarehouse.tenant_id == UUID(identity.tenant_id)
+            )
+            if identity.branch_ids:
+                scoped_branch_ids = [UUID(branch_id) for branch_id in identity.branch_ids]
+                branch_query = branch_query.where(PlatformBranch.id.in_(scoped_branch_ids))
+                warehouse_query = warehouse_query.where(
+                    PlatformWarehouse.branch_id.in_(scoped_branch_ids)
+                )
+            branches = session.execute(branch_query.order_by(PlatformBranch.code)).scalars()
             warehouses = session.execute(
-                select(PlatformWarehouse)
-                .where(PlatformWarehouse.tenant_id == UUID(identity.tenant_id))
-                .order_by(PlatformWarehouse.code)
+                warehouse_query.order_by(PlatformWarehouse.code)
             ).scalars()
             by_branch: dict[UUID, list[WarehouseView]] = {}
             for warehouse in warehouses:
@@ -543,6 +577,162 @@ class PostgresPlatformStore:
         ).scalar_one_or_none()
         if role != "tenant_admin":
             raise OperatingAuthorizationDenied
+
+    def create_invitation(
+        self,
+        identity: OperatingIdentity,
+        invitation: ValidatedInvitation,
+        token_hash: str,
+        expires_at: datetime,
+        correlation_id: str,
+    ) -> dict[str, object]:
+        invitation_uuid = uuid4()
+        with self._open_session() as session, session.begin():
+            self._authorize_operating_identity(session, identity)
+            if invitation.branch_id:
+                branch = session.execute(
+                    select(PlatformBranch.id).where(
+                        PlatformBranch.id == UUID(invitation.branch_id),
+                        PlatformBranch.tenant_id == UUID(identity.tenant_id),
+                    )
+                ).scalar_one_or_none()
+                if branch is None:
+                    raise OperatingNotFound
+            session.add(
+                PlatformInvitation(
+                    id=invitation_uuid,
+                    tenant_id=UUID(identity.tenant_id),
+                    invitee_login=invitation.invitee_login,
+                    token_hash=token_hash,
+                    role=invitation.role,
+                    scope=invitation.scope,
+                    branch_id=UUID(invitation.branch_id) if invitation.branch_id else None,
+                    created_by=UUID(identity.actor_id),
+                    expires_at=expires_at,
+                    accepted_at=None,
+                    created_at=datetime.now(UTC),
+                )
+            )
+            self._audit(
+                session,
+                identity,
+                correlation_id,
+                "user.invitation_created",
+                str(invitation_uuid),
+            )
+        return {
+            "invitationId": str(invitation_uuid),
+            "inviteeLogin": invitation.invitee_login,
+            "role": invitation.role,
+            "scope": invitation.scope,
+            "branchId": invitation.branch_id,
+            "ttlHours": invitation.ttl_hours,
+            "expiresAt": expires_at,
+            "status": "pending",
+        }
+
+    def accept_invitation(
+        self,
+        _command: AcceptInvitation,
+        token_hash: str,
+        password_hash: str,
+        correlation_id: str,
+    ) -> SessionLoginResult:
+        user_uuid = uuid4()
+        session_tokens = SessionTokenIssuer()
+        issued_session = session_tokens.issue()
+        expires_at = datetime.now(UTC) + timedelta(hours=8)
+        with self._open_session() as session, session.begin():
+            session.execute(text("set local role gastroledger_registration"))
+            invitation = session.execute(
+                select(PlatformInvitation)
+                .where(PlatformInvitation.token_hash == token_hash)
+                .with_for_update()
+            ).scalar_one_or_none()
+            if invitation is None:
+                raise InvitationNotFound
+            if invitation.accepted_at is not None:
+                raise InvitationSingleUseViolation
+            if invitation.expires_at <= datetime.now(UTC):
+                raise InvitationExpired
+
+            tenant = session.execute(
+                select(PlatformTenant.name, PlatformTenant.slug).where(
+                    PlatformTenant.id == invitation.tenant_id
+                )
+            ).one()
+            tenant_id = invitation.tenant_id
+            tenant_name, tenant_slug = tenant
+            session.add(
+                PlatformUser(
+                    id=user_uuid,
+                    normalized_login=invitation.invitee_login,
+                    password_hash=password_hash,
+                    created_at=datetime.now(UTC),
+                )
+            )
+            session.flush()
+            session.add_all(
+                [
+                    PlatformMembership(
+                        tenant_id=invitation.tenant_id,
+                        user_id=user_uuid,
+                        role=invitation.role,
+                    ),
+                    PlatformMembershipRole(
+                        id=uuid4(),
+                        tenant_id=invitation.tenant_id,
+                        user_id=user_uuid,
+                        role=invitation.role,
+                        scope=invitation.scope,
+                        branch_id=invitation.branch_id,
+                    ),
+                    PlatformSession(
+                        id=uuid4(),
+                        tenant_id=invitation.tenant_id,
+                        user_id=user_uuid,
+                        token_hash=issued_session.token_hash,
+                        expires_at=expires_at,
+                        revoked_at=None,
+                        created_at=datetime.now(UTC),
+                    ),
+                ]
+            )
+            invitation.accepted_at = datetime.now(UTC)
+            session.add(
+                ControlAuditEvent(
+                    id=uuid4(),
+                    tenant_id=invitation.tenant_id,
+                    actor_id=user_uuid,
+                    correlation_id=correlation_id,
+                    action="user.invitation_accepted",
+                    object_reference=str(invitation.id),
+                    occurred_at=datetime.now(UTC),
+                )
+            )
+        return SessionLoginResult(
+            tenant_id=TenantId(str(tenant_id)),
+            actor_id=ActorId(str(user_uuid)),
+            tenant_name=tenant_name,
+            tenant_slug=tenant_slug,
+            session_token=issued_session.raw_token,
+        )
+
+    def list_visible_branches(self, identity: OperatingIdentity) -> tuple[str, ...]:
+        with self._open_session() as session, session.begin():
+            session.execute(text("set local role gastroledger_app"))
+            session.execute(
+                text("select set_config('app.current_tenant_id', :tenant_id, true)"),
+                {"tenant_id": str(identity.tenant_id)},
+            )
+            branch_query = select(PlatformBranch.id).where(
+                PlatformBranch.tenant_id == UUID(identity.tenant_id)
+            )
+            if identity.branch_ids:
+                branch_query = branch_query.where(
+                    PlatformBranch.id.in_([UUID(branch_id) for branch_id in identity.branch_ids])
+                )
+            return tuple(str(branch_id) for branch_id in session.execute(branch_query).scalars())
 
     @staticmethod
     def _branch_count(session: Session, identity: OperatingIdentity) -> int:

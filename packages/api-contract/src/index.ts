@@ -72,6 +72,35 @@ export interface BranchResponse extends BranchRequest {
   warehouses: WarehouseResponse[];
 }
 
+export type UserRole = "branch_manager" | "branch_operator" | "tenant_operator";
+export type UserRoleScope = "branch" | "tenant";
+
+export interface InvitationRequest {
+  inviteeLogin: string;
+  role: UserRole;
+  scope: UserRoleScope;
+  branchId?: string | null;
+  ttlHours: number;
+}
+
+export interface InvitationResponse extends InvitationRequest {
+  invitationId: string;
+  manualShareToken: string;
+  expiresAt: string;
+  status: "pending";
+}
+
+export interface InvitationAcceptanceRequest {
+  manualShareToken: string;
+  password: string;
+}
+
+export interface InvitationAcceptanceResponse extends TenantIdentityResponse {}
+
+export interface BranchAccessResponse {
+  branchIds: string[];
+}
+
 export type UnitDimension = "mass" | "volume" | "count";
 
 export interface UnitRequest {
