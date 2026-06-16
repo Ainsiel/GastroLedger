@@ -2,9 +2,9 @@
 id: GL-006
 title: Approve versioned sub-recipes
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-004]
 requirements: [FR-007, FR-031]
 use_cases: [UC-008]

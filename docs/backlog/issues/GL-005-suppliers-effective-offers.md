@@ -2,9 +2,9 @@
 id: GL-005
 title: Manage suppliers and effective-dated offers
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-004]
 requirements: [FR-011]
 use_cases: [UC-007]

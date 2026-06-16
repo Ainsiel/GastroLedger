@@ -42,12 +42,12 @@ npm run build
 Delivery evidence: PR #24 merged into `develop`; required root checks and PostgreSQL
 integration evidence passed.
 
-## In PR: GL-002 Local Users, Invitations And Scoped Roles
+## Completed: GL-002 Local Users, Invitations And Scoped Roles
 
 ```text
 work_order_id = GL-002
 feature_branch = feature/GL-002-local-users-scoped-roles
-readiness = implemented_in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/28
 ```
 
@@ -57,9 +57,10 @@ assign a branch-scoped role while preventing privilege escalation.
 This is ready because the session, tenant context and minimum Platform & Organization
 persistence from `GL-001` are accepted.
 
-Delivery evidence: PR #28 implements invitation generation, public invitation
-acceptance, local session creation, scoped role persistence, branch visibility and
-dashboard access. Required root checks and regression-gate passed before merge.
+Delivery evidence: PR #28 merged into `develop` on 2026-06-16 and implements
+invitation generation, public invitation acceptance, local session creation,
+scoped role persistence, branch visibility and dashboard access. Required root
+checks and regression-gate passed before merge.
 
 ## Completed: GL-003 Tenant Operating Scope
 
@@ -94,6 +95,9 @@ Delivery evidence: PR #27 merged into `develop`.
 ```text
 GL-005 Manage suppliers and effective-dated offers
 GL-006 Approve versioned sub-recipes
+GL-016 Apply manual ordering holds
+GL-019 Reconcile an operational cash shift
+GL-020 Plan shifts and record attendance
 ```
 
 ## Approval Contract

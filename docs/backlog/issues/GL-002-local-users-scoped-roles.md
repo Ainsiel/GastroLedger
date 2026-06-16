@@ -1,8 +1,8 @@
 ---
 id: GL-002
 title: Manage local users, invitations and scoped roles
-status: implemented
-readiness: in_pr
+status: done
+readiness: done
 primary_context: Platform & Organization
 labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-001]
@@ -31,11 +31,11 @@ and assign local users tenant-wide or branch-scoped capabilities.
 
 ## Acceptance Criteria
 
-- [ ] A valid scoped role grants only its named tenant or branch capabilities.
-- [ ] A generated invitation is hashed, expiring, manually shareable and usable
+- [x] A valid scoped role grants only its named tenant or branch capabilities.
+- [x] A generated invitation is hashed, expiring, manually shareable and usable
   once.
-- [ ] Expired invitations and privilege escalation are denied and audited.
-- [ ] Other branches and tenants remain hidden from a branch-scoped user.
+- [x] Expired invitations and privilege escalation are denied and audited.
+- [x] Other branches and tenants remain hidden from a branch-scoped user.
 
 ## Frontend Delivery Contract
 
@@ -46,12 +46,13 @@ and assign local users tenant-wide or branch-scoped capabilities.
 - Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
-- [ ] TC-003-S/A/F and IT-004 pass.
-- [ ] Protected actions include actor, reason/correlation and audit evidence.
-- [ ] Frontend authorized/unauthorized states are covered.
-- [ ] Required root quality commands and `regression-gate` pass.
+- [x] TC-003-S/A/F and IT-004 pass.
+- [x] Protected actions include actor, reason/correlation and audit evidence.
+- [x] Frontend authorized/unauthorized states are covered.
+- [x] Required root quality commands and `regression-gate` pass.
 
 ## Delivery Evidence
 
-- Implemented by PR #28: https://github.com/Ainsiel/GastroLedger/pull/28
-- CI is green; issue remains open until merge approval.
+- Completed by PR #28: https://github.com/Ainsiel/GastroLedger/pull/28
+- Merged into `develop` on 2026-06-16 with merge commit `259b3d67feed6d80a52581f80571336d8af87f7c`.
+- CI was green before merge: branch-policy, backend, frontend, integration and regression-gate.

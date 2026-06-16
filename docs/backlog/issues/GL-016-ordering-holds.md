@@ -2,9 +2,9 @@
 id: GL-016
 title: Apply manual ordering holds
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Control & Insights
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-002, GL-003]
 requirements: [FR-025, FR-027]
 use_cases: [UC-024]

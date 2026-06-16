@@ -2,9 +2,9 @@
 id: GL-020
 title: Plan shifts and record attendance
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Store Operations
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-002, GL-003]
 requirements: [FR-024, FR-027]
 use_cases: [UC-023]

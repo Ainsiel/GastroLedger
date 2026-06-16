@@ -4,7 +4,7 @@
 run_id = backlog-management-20260614-01
 generated_at = 2026-06-16
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published and reconciled after PR #26/#27 merges and PR #28 delivery
+status = published and reconciled after PR #26/#27/#28 merges
 github_issues_observed = 23
 ```
 
@@ -12,25 +12,24 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Done | 3 |
-| In PR | 1 |
-| Ready candidate | 2 |
-| Defined, blocked by dependencies | 17 |
+| Done | 4 |
+| In PR | 0 |
+| Ready candidate | 5 |
+| Defined, blocked by dependencies | 14 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
 
 The repository contains the bootstrap, architecture foundation, delivery
 infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
-SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001, GL-003
-and GL-004 are accepted in `develop`; GL-002 is implemented in PR #28 and awaits
-merge approval.
+SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001, GL-002,
+GL-003 and GL-004 are accepted in `develop`.
 
 ## Items
 
 | ID | Outcome | Primary context | Trace | Readiness | Dependencies |
 |---|---|---|---|---|---|
 | [GL-001](https://github.com/Ainsiel/GastroLedger/issues/1) | Register a tenant and prove isolation | Platform & Organization | UC-001 | Done | Foundation |
-| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | In PR (#28) | GL-001 |
+| [GL-002](https://github.com/Ainsiel/GastroLedger/issues/2) | Manage local users, invitations and scoped roles | Platform & Organization | UC-003 | Done | GL-001 |
 | [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Done | GL-001 |
 | [GL-004](https://github.com/Ainsiel/GastroLedger/issues/4) | Manage units and ingredient catalog | Menu Engineering | UC-005, UC-006 | Done | GL-003 |
 | [GL-005](https://github.com/Ainsiel/GastroLedger/issues/5) | Manage suppliers and effective-dated offers | Procurement | UC-007 | Ready | GL-004 |
@@ -44,11 +43,11 @@ merge approval.
 | [GL-013](https://github.com/Ainsiel/GastroLedger/issues/13) | Create and acknowledge expiry alerts | Inventory & Production | UC-019 | Blocked | GL-008, GL-009 |
 | [GL-014](https://github.com/Ainsiel/GastroLedger/issues/14) | Perform a blind count and reconcile variance | Inventory & Production | UC-020 | Blocked | GL-002, GL-009 |
 | [GL-015](https://github.com/Ainsiel/GastroLedger/issues/15) | Import sales and resolve allocation exceptions | Store Operations | UC-021 | Blocked | GL-008, GL-009 |
-| [GL-016](https://github.com/Ainsiel/GastroLedger/issues/16) | Apply manual ordering holds | Control & Insights | UC-024, flows A/F | Blocked | GL-002, GL-003 |
+| [GL-016](https://github.com/Ainsiel/GastroLedger/issues/16) | Apply manual ordering holds | Control & Insights | UC-024, flows A/F | Ready | GL-002, GL-003 |
 | [GL-017](https://github.com/Ainsiel/GastroLedger/issues/17) | Create approved purchase orders | Procurement | UC-012 | Blocked | GL-009, GL-016 |
 | [GL-018](https://github.com/Ainsiel/GastroLedger/issues/18) | Record supplier return and expected adjustment | Procurement | UC-014 | Blocked | GL-009 |
-| [GL-019](https://github.com/Ainsiel/GastroLedger/issues/19) | Reconcile an operational cash shift | Store Operations | UC-022 | Blocked | GL-002, GL-003 |
-| [GL-020](https://github.com/Ainsiel/GastroLedger/issues/20) | Plan shifts and record attendance | Store Operations | UC-023 | Blocked | GL-002, GL-003 |
+| [GL-019](https://github.com/Ainsiel/GastroLedger/issues/19) | Reconcile an operational cash shift | Store Operations | UC-022 | Ready | GL-002, GL-003 |
+| [GL-020](https://github.com/Ainsiel/GastroLedger/issues/20) | Plan shifts and record attendance | Store Operations | UC-023 | Ready | GL-002, GL-003 |
 | [GL-021](https://github.com/Ainsiel/GastroLedger/issues/21) | Calculate non-financial royalty estimates | Control & Insights | UC-024, flow S | Blocked | GL-015 |
 | [GL-022](https://github.com/Ainsiel/GastroLedger/issues/22) | Analyze cost variance and menu profitability | Control & Insights | UC-025 | Blocked | GL-014, GL-015 |
 | [GL-023](https://github.com/Ainsiel/GastroLedger/issues/23) | Export tenant data in open formats | Platform & Organization | FR-032, IT-025 | Blocked | Terminal V1 slices |
@@ -88,6 +87,6 @@ evidence.
   them as approved workflow sources.
 - GitHub publication was explicitly approved on 2026-06-14. On 2026-06-15, issues
   `#1` through `#23` were reconciled with the frontend delivery contract.
-- On 2026-06-16, PR #26 delivered GL-003 and PR #27 delivered GL-004 into
-  `develop`; both should be closed as completed in GitHub. PR #28 implements GL-002
-  and remains open pending merge approval.
+- On 2026-06-16, PR #26 delivered GL-003, PR #27 delivered GL-004 and PR #28
+  delivered GL-002 into `develop`; issues #2, #3 and #4 are closed as completed
+  in GitHub.

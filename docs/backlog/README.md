@@ -40,5 +40,5 @@ Every issue:
 - satisfies `frontend-delivery-contract.md` whenever frontend scope exists.
 
 The initial tracer slice `GL-001` delivered tenant registration with a scoped local
-session and proven tenant isolation. `GL-002` and `GL-003` are the current ready
-candidates.
+session and proven tenant isolation. `GL-001` through `GL-004` are complete in
+`develop`; the current ready candidates are tracked in `work-order-candidates.md`.
