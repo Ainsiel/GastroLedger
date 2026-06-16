@@ -2,9 +2,9 @@
 id: GL-009
 title: Receive a supplier delivery into the inventory ledger
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-005]
 requirements: [FR-013, FR-020, FR-027]
 use_cases: [UC-013]

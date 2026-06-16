@@ -1,8 +1,8 @@
 ---
 id: GL-005
 title: Manage suppliers and effective-dated offers
-status: implemented
-readiness: in_pr
+status: done
+readiness: done
 primary_context: Procurement
 labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-004]
@@ -32,11 +32,11 @@ ingredient offers with visible price history.
 
 ## Acceptance Criteria
 
-- [ ] A valid offer links one tenant supplier, ingredient, purchase unit, price and
+- [x] A valid offer links one tenant supplier, ingredient, purchase unit, price and
   validity.
-- [ ] Future offers preserve the current active offer until effective.
-- [ ] Overlap and cross-tenant references are rejected without changes.
-- [ ] Price history remains visible and immutable as operational evidence.
+- [x] Future offers preserve the current active offer until effective.
+- [x] Overlap and cross-tenant references are rejected without changes.
+- [x] Price history remains visible and immutable as operational evidence.
 
 ## Frontend Delivery Contract
 
@@ -47,12 +47,13 @@ ingredient offers with visible price history.
 - Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
-- [ ] TC-007-S/A/F pass.
-- [ ] Informational amounts cannot be mistaken for payment truth.
-- [ ] Procurement consumes ingredient identity through an approved contract.
-- [ ] Required root quality commands and `regression-gate` pass.
+- [x] TC-007-S/A/F pass.
+- [x] Informational amounts cannot be mistaken for payment truth.
+- [x] Procurement consumes ingredient identity through an approved contract.
+- [x] Required root quality commands and `regression-gate` pass.
 
 ## Delivery Evidence
 
-- Implemented by PR #29: https://github.com/Ainsiel/GastroLedger/pull/29
-- CI is pending; issue remains open until merge approval.
+- Completed by PR #29: https://github.com/Ainsiel/GastroLedger/pull/29
+- Merged into `develop` on 2026-06-16 with merge commit `b457a3edaa8ac14c9e1a5ea0ba9ae669cb0129b0`.
+- CI was green before merge: branch-policy, backend, frontend, integration and regression-gate.

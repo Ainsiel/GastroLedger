@@ -2,9 +2,8 @@
 
 ## Delivery Sequence
 
-Current state: GL-001, GL-002, GL-003 and GL-004 are complete in `develop`.
-GL-005 is implemented in PR #29 and awaits merge approval. GL-006, GL-016, GL-019
-and GL-020 are the next dependency-unlocked ready candidates.
+Current state: GL-001 through GL-005 are complete in `develop`. GL-006, GL-009,
+GL-016, GL-019 and GL-020 are the next dependency-unlocked ready candidates.
 
 | Order | Issue | Why At This Point |
 |---:|---|---|
