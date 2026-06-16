@@ -140,6 +140,30 @@ export interface IngredientResponse extends IngredientRequest {
   availableForNewUse: boolean;
 }
 
+export interface SupplierRequest {
+  name: string;
+  code: string;
+}
+
+export interface SupplierResponse extends SupplierRequest {
+  supplierId: string;
+  status: "active" | "inactive";
+}
+
+export interface SupplierOfferRequest {
+  supplierId: string;
+  ingredientId: string;
+  purchaseUnitId: string;
+  price: string;
+  currency: string;
+  effectiveFrom: string;
+  effectiveUntil?: string | null;
+}
+
+export interface SupplierOfferResponse extends SupplierOfferRequest {
+  supplierOfferId: string;
+}
+
 export interface ApiProblem {
   type: string;
   title: string;

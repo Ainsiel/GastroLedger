@@ -28,7 +28,11 @@ describe("tenant dashboard", () => {
     expect(screen.getByRole("link", { name: /open menu catalog/i }).getAttribute("href")).toBe(
       "/menu",
     );
+    expect(screen.getByRole("link", { name: /open suppliers/i }).getAttribute("href")).toBe(
+      "/procurement",
+    );
     expect(screen.getByText(/menu engineering/i)).toBeTruthy();
+    expect(screen.getByText(/effective-dated ingredient offers/i)).toBeTruthy();
     expect(screen.getByText(/control & insights/i)).toBeTruthy();
   });
 });

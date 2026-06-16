@@ -18,6 +18,7 @@ from gastroledger_api.technical.health import router as health_router
 from gastroledger_api.technical.menu_routes import create_menu_router
 from gastroledger_api.technical.platform_routes import create_platform_router
 from gastroledger_api.technical.problems import configure_problem_handlers
+from gastroledger_api.technical.procurement_routes import create_procurement_router
 from gastroledger_api.technical.registration_rate_limit import (
     RegistrationPayloadLimitMiddleware,
     RegistrationRateLimiter,
@@ -52,6 +53,10 @@ OPENAPI_TAGS = [
         "name": "menu-engineering",
         "description": "Tenant units, conversions and ingredient catalog operations.",
     },
+    {
+        "name": "procurement",
+        "description": "Tenant suppliers and effective-dated ingredient offer operations.",
+    },
 ]
 
 
@@ -84,6 +89,7 @@ def create_application(
     application.include_router(health_router)
     application.include_router(create_platform_router(database_url))
     application.include_router(create_menu_router(database_url))
+    application.include_router(create_procurement_router(database_url))
     application.state.module_boundaries = MODULE_BOUNDARIES
     return application
 

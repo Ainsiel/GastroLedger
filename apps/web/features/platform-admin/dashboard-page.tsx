@@ -30,10 +30,10 @@ const sections = [
   },
   {
     title: "Procurement",
-    description: "Supplier ordering and receiving workflows are planned.",
+    description: "Manage suppliers and effective-dated ingredient offers.",
     href: "/procurement",
     icon: ClipboardList,
-    status: "Planned",
+    status: "Available",
   },
   {
     title: "Inventory & production",
@@ -77,6 +77,9 @@ export function DashboardPage({ tenant }: { tenant: TenantIdentityResponse }) {
           </Button>
           <Button asChild variant="outline">
             <Link href="/menu">Open menu catalog</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/procurement">Open suppliers</Link>
           </Button>
         </div>
       </section>
