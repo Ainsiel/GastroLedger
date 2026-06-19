@@ -159,6 +159,15 @@ export interface SubRecipeVersionRequest {
   components: RecipeComponentRequest[];
 }
 
+export interface MenuItemVersionRequest extends SubRecipeVersionRequest {}
+
+export interface BranchMenuPriceRequest {
+  branchId: string;
+  price: string;
+  currency: string;
+  effectiveFrom: string;
+}
+
 export interface RecipeComponentResponse extends RecipeComponentRequest {}
 
 export interface CostSnapshotResponse {
@@ -173,6 +182,25 @@ export interface SubRecipeVersionResponse extends SubRecipeVersionRequest {
   isActive: boolean;
   costSnapshot: CostSnapshotResponse;
   components: RecipeComponentResponse[];
+}
+
+export interface BranchMenuMarginResponse extends BranchMenuPriceRequest {
+  branchPriceId: string;
+  menuItemVersionId: string;
+  theoreticalCost: string;
+  contributionMargin: string;
+  marginPercent: string;
+  suggestedPrice: string;
+}
+
+export interface MenuItemVersionResponse extends MenuItemVersionRequest {
+  recipeId: string;
+  recipeVersionId: string;
+  status: "approved" | "scheduled";
+  isActive: boolean;
+  costSnapshot: CostSnapshotResponse;
+  components: RecipeComponentResponse[];
+  branchMargins: BranchMenuMarginResponse[];
 }
 
 export interface SupplierRequest {

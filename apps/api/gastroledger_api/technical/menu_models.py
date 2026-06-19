@@ -181,3 +181,28 @@ class MenuCostSnapshot(Base):
     as_of: Mapped[date] = mapped_column(Date)
     total_cost: Mapped[Decimal] = mapped_column(Numeric(24, 10))
     status: Mapped[str] = mapped_column(Text)
+
+
+class MenuItemBranchPrice(Base):
+    __tablename__ = "menu_item_branch_prices"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["recipe_version_id", "tenant_id"],
+            ["menu_recipe_versions.id", "menu_recipe_versions.tenant_id"],
+        ),
+        ForeignKeyConstraint(
+            ["branch_id", "tenant_id"],
+            ["platform_branches.id", "platform_branches.tenant_id"],
+        ),
+        CheckConstraint("price > 0"),
+        CheckConstraint("currency ~ '^[A-Z]{3}$'"),
+        UniqueConstraint("tenant_id", "recipe_version_id", "branch_id", "effective_from"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    recipe_version_id: Mapped[UUID] = mapped_column(Uuid)
+    branch_id: Mapped[UUID] = mapped_column(Uuid)
+    price: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    currency: Mapped[str] = mapped_column(Text)
+    effective_from: Mapped[date] = mapped_column(Date)

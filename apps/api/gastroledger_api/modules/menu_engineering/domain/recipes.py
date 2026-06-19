@@ -31,7 +31,27 @@ class ValidatedSubRecipeVersion:
     components: tuple[ValidatedRecipeComponent, ...]
 
 
-def validate_sub_recipe_version(
+@dataclass(frozen=True)
+class ValidatedMenuItemVersion:
+    name: str
+    code: str
+    version: str
+    yield_quantity: Decimal
+    yield_unit_id: str
+    effective_from: date
+    components: tuple[ValidatedRecipeComponent, ...]
+
+
+@dataclass(frozen=True)
+class ValidatedBranchMenuPrice:
+    menu_item_version_id: str
+    branch_id: str
+    price: Decimal
+    currency: str
+    effective_from: date
+
+
+def _validate_recipe_version(
     *,
     name: str,
     code: str,
@@ -40,7 +60,7 @@ def validate_sub_recipe_version(
     yield_unit_id: str,
     effective_from: date,
     components: tuple[object, ...],
-) -> ValidatedSubRecipeVersion:
+) -> tuple[str, str, str, Decimal, str, tuple[ValidatedRecipeComponent, ...]]:
     details: list[MenuValidationDetail] = []
     normalized_name = name.strip()
     normalized_code = code.strip().upper()
@@ -91,12 +111,117 @@ def validate_sub_recipe_version(
             )
     if details:
         raise MenuValidationError(tuple(details))
+    return (
+        normalized_name,
+        normalized_code,
+        normalized_version,
+        parsed_yield or Decimal("0"),
+        normalized_yield_unit,
+        tuple(validated_components),
+    )
+
+
+def validate_sub_recipe_version(
+    *,
+    name: str,
+    code: str,
+    version: str,
+    yield_quantity: str,
+    yield_unit_id: str,
+    effective_from: date,
+    components: tuple[object, ...],
+) -> ValidatedSubRecipeVersion:
+    (
+        normalized_name,
+        normalized_code,
+        normalized_version,
+        parsed_yield,
+        normalized_yield_unit,
+        validated_components,
+    ) = _validate_recipe_version(
+        name=name,
+        code=code,
+        version=version,
+        yield_quantity=yield_quantity,
+        yield_unit_id=yield_unit_id,
+        effective_from=effective_from,
+        components=components,
+    )
     return ValidatedSubRecipeVersion(
         name=normalized_name,
         code=normalized_code,
         version=normalized_version,
-        yield_quantity=parsed_yield or Decimal("0"),
+        yield_quantity=parsed_yield,
         yield_unit_id=normalized_yield_unit,
         effective_from=effective_from,
-        components=tuple(validated_components),
+        components=validated_components,
+    )
+
+
+def validate_menu_item_version(
+    *,
+    name: str,
+    code: str,
+    version: str,
+    yield_quantity: str,
+    yield_unit_id: str,
+    effective_from: date,
+    components: tuple[object, ...],
+) -> ValidatedMenuItemVersion:
+    (
+        normalized_name,
+        normalized_code,
+        normalized_version,
+        parsed_yield,
+        normalized_yield_unit,
+        validated_components,
+    ) = _validate_recipe_version(
+        name=name,
+        code=code,
+        version=version,
+        yield_quantity=yield_quantity,
+        yield_unit_id=yield_unit_id,
+        effective_from=effective_from,
+        components=components,
+    )
+    return ValidatedMenuItemVersion(
+        name=normalized_name,
+        code=normalized_code,
+        version=normalized_version,
+        yield_quantity=parsed_yield,
+        yield_unit_id=normalized_yield_unit,
+        effective_from=effective_from,
+        components=validated_components,
+    )
+
+
+def validate_branch_menu_price(
+    *,
+    menu_item_version_id: str,
+    branch_id: str,
+    price: str,
+    currency: str,
+    effective_from: date,
+) -> ValidatedBranchMenuPrice:
+    details: list[MenuValidationDetail] = []
+    normalized_version_id = menu_item_version_id.strip()
+    normalized_branch_id = branch_id.strip()
+    normalized_currency = currency.strip().upper()
+    if not normalized_version_id:
+        details.append(MenuValidationDetail("menuItemVersionId", "required"))
+    if not normalized_branch_id:
+        details.append(MenuValidationDetail("branchId", "required"))
+    if len(normalized_currency) != 3 or not normalized_currency.isalpha():
+        details.append(MenuValidationDetail("currency", "invalid"))
+    parsed_price, price_error = _parse_positive_decimal(price, "price")
+    if price_error:
+        details.append(price_error)
+    if details:
+        raise MenuValidationError(tuple(details))
+    return ValidatedBranchMenuPrice(
+        menu_item_version_id=normalized_version_id,
+        branch_id=normalized_branch_id,
+        price=parsed_price or Decimal("0"),
+        currency=normalized_currency,
+        effective_from=effective_from,
     )
