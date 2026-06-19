@@ -2,8 +2,9 @@
 
 ## Delivery Sequence
 
-Current state: GL-001 through GL-006 are complete in `develop`. GL-007, GL-009,
-GL-016, GL-019 and GL-020 are the next dependency-unlocked ready candidates.
+Current state: GL-001 through GL-006 are complete in `develop`; GL-007 is in PR
+#31. GL-009, GL-016, GL-019 and GL-020 are the next dependency-unlocked ready
+candidates.
 
 | Order | Issue | Why At This Point |
 |---:|---|---|
