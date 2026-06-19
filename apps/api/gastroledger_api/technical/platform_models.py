@@ -1,7 +1,15 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, ForeignKeyConstraint, Integer, Text, Uuid
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Integer,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -88,6 +96,7 @@ class PlatformWarehouse(Base):
             ["branch_id", "tenant_id"],
             ["platform_branches.id", "platform_branches.tenant_id"],
         ),
+        UniqueConstraint("id", "tenant_id"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)

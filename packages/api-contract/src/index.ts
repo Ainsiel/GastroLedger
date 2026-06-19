@@ -235,6 +235,47 @@ export interface SupplierOfferResponse extends SupplierOfferRequest {
   supplierOfferId: string;
 }
 
+export interface SupplierReceiptLineRequest {
+  ingredientId: string;
+  purchaseUnitId: string;
+  lotCode: string;
+  orderedQuantity: string;
+  deliveredQuantity: string;
+  unitCost: string;
+  expiryDate: string;
+  temperature: string;
+  minimumTemperature: string;
+  maximumTemperature: string;
+  tolerancePercent: string;
+}
+
+export interface SupplierReceiptRequest {
+  orderReference: string;
+  supplierId: string;
+  warehouseId: string;
+  receivedOn: string;
+  lines: SupplierReceiptLineRequest[];
+}
+
+export interface SupplierReceiptLineResponse {
+  receiptLineId: string;
+  lotId: string | null;
+  lotCode: string;
+  acceptedQuantity: string;
+  remainingQuantity: string;
+  status: "accepted" | "partial" | "rejected";
+  rejectionReason: string | null;
+}
+
+export interface SupplierReceiptResponse {
+  receiptId: string;
+  inventoryTransactionId: string | null;
+  idempotencyKey: string;
+  orderReference: string;
+  status: "accepted" | "partial" | "rejected";
+  lines: SupplierReceiptLineResponse[];
+}
+
 export interface ApiProblem {
   type: string;
   title: string;
