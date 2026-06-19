@@ -1,8 +1,8 @@
 ---
 id: GL-006
 title: Approve versioned sub-recipes
-status: in_pr
-readiness: in_pr
+status: done
+readiness: done
 primary_context: Menu Engineering
 labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-004]
@@ -32,11 +32,11 @@ and a reproducible theoretical cost snapshot.
 
 ## Acceptance Criteria
 
-- [ ] Valid ingredients, quantities and yield produce an approved immutable version
+- [x] Valid ingredients, quantities and yield produce an approved immutable version
   and cost snapshot.
-- [ ] A future version does not replace the active version early.
-- [ ] Cycle, invalid yield, incompatible units and excessive depth are rejected.
-- [ ] Concurrent approval yields one accepted immutable version.
+- [x] A future version does not replace the active version early.
+- [x] Cycle, invalid yield, incompatible units and excessive depth are rejected.
+- [x] Concurrent approval yields one accepted immutable version.
 
 ## Frontend Delivery Contract
 
@@ -47,14 +47,17 @@ and a reproducible theoretical cost snapshot.
 - Record component or feature tests, integrated route evidence and visual QA evidence. No external UI assets, APIs or services are allowed.
 ## Definition Of Done
 
-- [ ] TC-008-S/A/F and IT-006/007 pass.
-- [ ] Frontend preserves draft input after recoverable errors.
-- [ ] Historical approved versions cannot be edited.
-- [ ] Required root quality commands and `regression-gate` pass.
+- [x] TC-008-S/A/F and IT-006/007 pass.
+- [x] Frontend preserves draft input after recoverable errors.
+- [x] Historical approved versions cannot be edited.
+- [x] Required root quality commands and `regression-gate` pass.
 
 ## Delivery Evidence
 
 Pull request: https://github.com/Ainsiel/GastroLedger/pull/30
+
+Completed by PR #30, merged into `develop` on 2026-06-19 with merge commit
+`fd61d6bb017b101e40b73f99db4f2f25e67c5db7`. Required CI passed before merge.
 
 Local TDD evidence recorded on 2026-06-19:
 

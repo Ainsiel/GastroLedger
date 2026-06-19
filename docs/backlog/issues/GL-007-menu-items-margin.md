@@ -2,9 +2,9 @@
 id: GL-007
 title: Approve menu items and branch margin
 status: draft
-readiness: blocked
+readiness: ready
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-006]
 requirements: [FR-008, FR-009, FR-031]
 use_cases: [UC-009]

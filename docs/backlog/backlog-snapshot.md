@@ -4,7 +4,7 @@
 run_id = backlog-management-20260614-01
 generated_at = 2026-06-19
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published and reconciled after PR #30 creation
+status = published and reconciled after PR #30 merge
 github_issues_observed = 23
 ```
 
@@ -12,17 +12,17 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Done | 5 |
-| In PR | 1 |
-| Ready candidate | 4 |
-| Defined, blocked by dependencies | 13 |
+| Done | 6 |
+| In PR | 0 |
+| Ready candidate | 5 |
+| Defined, blocked by dependencies | 12 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
 
 The repository contains the bootstrap, architecture foundation, delivery
 infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
 SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001 through
-GL-005 are accepted in `develop`.
+GL-006 are accepted in `develop`.
 
 ## Items
 
@@ -33,8 +33,8 @@ GL-005 are accepted in `develop`.
 | [GL-003](https://github.com/Ainsiel/GastroLedger/issues/3) | Configure tenant settings, branches and warehouses | Platform & Organization | UC-002, UC-004 | Done | GL-001 |
 | [GL-004](https://github.com/Ainsiel/GastroLedger/issues/4) | Manage units and ingredient catalog | Menu Engineering | UC-005, UC-006 | Done | GL-003 |
 | [GL-005](https://github.com/Ainsiel/GastroLedger/issues/5) | Manage suppliers and effective-dated offers | Procurement | UC-007 | Done | GL-004 |
-| [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | In PR | GL-004 |
-| [GL-007](https://github.com/Ainsiel/GastroLedger/issues/7) | Approve menu items and branch margin | Menu Engineering | UC-009 | Blocked | GL-006 |
+| [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Done | GL-004 |
+| [GL-007](https://github.com/Ainsiel/GastroLedger/issues/7) | Approve menu items and branch margin | Menu Engineering | UC-009 | Ready | GL-006 |
 | [GL-008](https://github.com/Ainsiel/GastroLedger/issues/8) | Recalculate recipe cost snapshots asynchronously | Menu Engineering | UC-010 | Blocked | GL-007 |
 | [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Ready | GL-005 |
 | [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Blocked | GL-006, GL-009 |
@@ -92,5 +92,5 @@ evidence.
   in GitHub.
 - On 2026-06-16, PR #29 delivered GL-005 into `develop`; issue #5 is closed as
   completed in GitHub and GL-009 is now ready.
-- On 2026-06-19, PR #30 was opened for GL-006; issue #6 is in PR and no longer
-  listed as ready.
+- On 2026-06-19, PR #30 delivered GL-006 into `develop`; issue #6 is closed as
+  completed in GitHub and GL-007 is now ready.

@@ -94,24 +94,24 @@ Delivery evidence: PR #27 merged into `develop`.
 
 ```text
 GL-009 Receive a supplier delivery into the inventory ledger
+GL-007 Approve menu items and branch margin
 GL-016 Apply manual ordering holds
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-006 Versioned Sub-Recipes
+## Completed: GL-006 Versioned Sub-Recipes
 
 ```text
 work_order_id = GL-006
 feature_branch = feature/GL-006-versioned-sub-recipes
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/30
 ```
 
-Delivery evidence: PR #30 opened on 2026-06-19 and implements immutable sub-recipe
-version approval, initial theoretical cost snapshots and scheduled version handling.
-Focused backend, frontend and PostgreSQL integration tests passed locally. Visual QA
-was skipped by direct user instruction.
+Delivery evidence: PR #30 merged into `develop` on 2026-06-19 and implements
+immutable sub-recipe version approval, initial theoretical cost snapshots and
+scheduled version handling. Required CI and regression-gate passed before merge.
 
 ## Completed: GL-005 Suppliers And Effective Offers
 
