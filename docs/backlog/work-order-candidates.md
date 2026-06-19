@@ -93,24 +93,26 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
+GL-008 Recalculate recipe cost snapshots asynchronously
 GL-009 Receive a supplier delivery into the inventory ledger
 GL-016 Apply manual ordering holds
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-007 Menu Items And Branch Margin
+## Completed: GL-007 Menu Items And Branch Margin
 
 ```text
 work_order_id = GL-007
 feature_branch = feature/GL-007-menu-items-margin
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/31
 ```
 
-Delivery evidence so far: PR #31 is open against `develop` and implements menu-item
-approval, immutable cost snapshots and effective-dated branch margin views. Visual
-QA is intentionally skipped per user instruction.
+Delivery evidence: PR #31 merged into `develop` on 2026-06-19 and implements
+menu-item approval, immutable cost snapshots and effective-dated branch margin
+views. Required CI and regression-gate passed before merge. Visual QA was
+intentionally skipped per user instruction.
 
 ## Completed: GL-006 Versioned Sub-Recipes
 

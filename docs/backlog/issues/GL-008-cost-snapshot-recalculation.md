@@ -1,10 +1,10 @@
 ---
 id: GL-008
 title: Recalculate recipe cost snapshots asynchronously
-status: draft
-readiness: blocked
+status: ready
+readiness: ready
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-007]
 requirements: [FR-010, FR-031]
 use_cases: [UC-010]

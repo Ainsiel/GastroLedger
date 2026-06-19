@@ -1,12 +1,14 @@
 ---
 id: GL-007
 title: Approve menu items and branch margin
-status: in_pr
-readiness: ready
+status: done
+readiness: done
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical, status:in-pr]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-006]
 pull_request: https://github.com/Ainsiel/GastroLedger/pull/31
+merged_at: 2026-06-19T17:14:59Z
+merge_commit: 74753f54d634a964599478ae4cf655d235ca3560
 requirements: [FR-008, FR-009, FR-031]
 use_cases: [UC-009]
 test_cases: [TC-009-S, TC-009-A, TC-009-F]
