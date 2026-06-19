@@ -10,10 +10,13 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from gastroledger_api.modules.menu_engineering.public import (
     ArchiveIngredient,
+    BranchMenuMarginView,
     ConversionFactorView,
     CostSnapshotView,
+    CreateBranchMenuPrice,
     CreateConversionFactor,
     CreateIngredient,
+    CreateMenuItemVersion,
     CreateRecipeComponent,
     CreateSubRecipeVersion,
     CreateUnit,
@@ -24,6 +27,7 @@ from gastroledger_api.modules.menu_engineering.public import (
     MenuCatalogService,
     MenuCodeConflict,
     MenuIdentity,
+    MenuItemVersionView,
     MenuNotFound,
     MenuRecipeService,
     MenuValidationError,
@@ -108,6 +112,27 @@ class SubRecipeVersionRequest(BaseModel):
     components: list[RecipeComponentRequest] = Field(min_length=1)
 
 
+class MenuItemVersionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    code: str = Field(min_length=1, max_length=63)
+    version: str = Field(min_length=1, max_length=40)
+    yieldQuantity: str = Field(min_length=1, max_length=50)
+    yieldUnitId: str = Field(min_length=1)
+    effectiveFrom: date
+    components: list[RecipeComponentRequest] = Field(min_length=1)
+
+
+class BranchMenuPriceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    branchId: str = Field(min_length=1)
+    price: str = Field(min_length=1, max_length=50)
+    currency: str = Field(min_length=3, max_length=3)
+    effectiveFrom: date
+
+
 class ConversionFactorResponse(BaseModel):
     conversionFactorId: str
     sourceUnitId: str
@@ -161,6 +186,35 @@ class SubRecipeVersionResponse(BaseModel):
     isActive: bool
     components: list[RecipeComponentResponse]
     costSnapshot: CostSnapshotResponse
+
+
+class BranchMenuMarginResponse(BaseModel):
+    branchPriceId: str
+    menuItemVersionId: str
+    branchId: str
+    price: str
+    currency: str
+    theoreticalCost: str
+    contributionMargin: str
+    marginPercent: str
+    suggestedPrice: str
+    effectiveFrom: date
+
+
+class MenuItemVersionResponse(BaseModel):
+    recipeId: str
+    recipeVersionId: str
+    name: str
+    code: str
+    version: str
+    yieldQuantity: str
+    yieldUnitId: str
+    effectiveFrom: date
+    status: str
+    isActive: bool
+    components: list[RecipeComponentResponse]
+    costSnapshot: CostSnapshotResponse
+    branchMargins: list[BranchMenuMarginResponse]
 
 
 def conversion_response(conversion: ConversionFactorView) -> ConversionFactorResponse:
@@ -227,6 +281,39 @@ def sub_recipe_response(recipe: SubRecipeVersionView) -> SubRecipeVersionRespons
         isActive=recipe.is_active,
         components=[component_response(component) for component in recipe.components],
         costSnapshot=cost_snapshot_response(recipe.cost_snapshot),
+    )
+
+
+def branch_margin_response(margin: BranchMenuMarginView) -> BranchMenuMarginResponse:
+    return BranchMenuMarginResponse(
+        branchPriceId=margin.branch_price_id,
+        menuItemVersionId=margin.menu_item_version_id,
+        branchId=margin.branch_id,
+        price=format(margin.price.normalize(), "f"),
+        currency=margin.currency,
+        theoreticalCost=format(margin.theoretical_cost.normalize(), "f"),
+        contributionMargin=format(margin.contribution_margin.normalize(), "f"),
+        marginPercent=format(margin.margin_percent.normalize(), "f"),
+        suggestedPrice=format(margin.suggested_price.normalize(), "f"),
+        effectiveFrom=margin.effective_from,
+    )
+
+
+def menu_item_response(recipe: MenuItemVersionView) -> MenuItemVersionResponse:
+    return MenuItemVersionResponse(
+        recipeId=recipe.recipe_id,
+        recipeVersionId=recipe.recipe_version_id,
+        name=recipe.name,
+        code=recipe.code,
+        version=recipe.version,
+        yieldQuantity=format(recipe.yield_quantity.normalize(), "f"),
+        yieldUnitId=recipe.yield_unit_id,
+        effectiveFrom=recipe.effective_from,
+        status=recipe.status,
+        isActive=recipe.is_active,
+        components=[component_response(component) for component in recipe.components],
+        costSnapshot=cost_snapshot_response(recipe.cost_snapshot),
+        branchMargins=[branch_margin_response(margin) for margin in recipe.branch_margins],
     )
 
 
@@ -548,6 +635,120 @@ def create_menu_router(database_url: str | None = None) -> APIRouter:
             RecipeVersionConflict,
             RecipeGraphViolation,
             RecipeMissingCost,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return menu_problem(error, correlation_id)
+
+    @router.get(
+        "/recipes/menu-items",
+        response_model=list[MenuItemVersionResponse],
+        operation_id="listMenuItemVersions",
+        summary="List tenant menu item versions and branch margins",
+        responses=MENU_RESPONSES,
+    )
+    def list_menu_items(gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            return [
+                menu_item_response(recipe)
+                for recipe in recipes.list_menu_items(menu_identity(gl_session))
+            ]
+        except (
+            AuthenticationRequired,
+            MenuAuthorizationDenied,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return menu_problem(error, correlation_id)
+
+    @router.post(
+        "/recipes/menu-items",
+        response_model=MenuItemVersionResponse,
+        status_code=201,
+        operation_id="approveMenuItemVersion",
+        summary="Approve an immutable menu item version",
+        responses=MENU_RESPONSES,
+    )
+    def approve_menu_item_version(
+        request: MenuItemVersionRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return menu_item_response(
+                recipes.approve_menu_item_version(
+                    menu_identity(gl_session),
+                    CreateMenuItemVersion(
+                        name=request.name,
+                        code=request.code,
+                        version=request.version,
+                        yield_quantity=request.yieldQuantity,
+                        yield_unit_id=request.yieldUnitId,
+                        effective_from=request.effectiveFrom,
+                        components=tuple(
+                            CreateRecipeComponent(
+                                component_type=component.componentType,
+                                component_id=component.componentId,
+                                quantity=component.quantity,
+                                unit_id=component.unitId,
+                            )
+                            for component in request.components
+                        ),
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            MenuAuthorizationDenied,
+            MenuValidationError,
+            MenuNotFound,
+            UnitConversionUnavailable,
+            UnitDimensionMismatch,
+            RecipeCodeConflict,
+            RecipeVersionConflict,
+            RecipeGraphViolation,
+            RecipeMissingCost,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return menu_problem(error, correlation_id)
+
+    @router.post(
+        "/recipes/menu-items/{recipeVersionId}/branch-prices",
+        response_model=BranchMenuMarginResponse,
+        status_code=201,
+        operation_id="createMenuItemBranchPrice",
+        summary="Create an informational branch menu item price and margin",
+        responses=MENU_RESPONSES,
+    )
+    def create_menu_item_branch_price(
+        recipeVersionId: UUID,
+        request: BranchMenuPriceRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return branch_margin_response(
+                recipes.create_branch_price(
+                    menu_identity(gl_session),
+                    CreateBranchMenuPrice(
+                        menu_item_version_id=str(recipeVersionId),
+                        branch_id=request.branchId,
+                        price=request.price,
+                        currency=request.currency,
+                        effective_from=request.effectiveFrom,
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            MenuAuthorizationDenied,
+            MenuValidationError,
+            MenuNotFound,
+            RecipeVersionConflict,
             psycopg.Error,
             SQLAlchemyError,
         ) as error:

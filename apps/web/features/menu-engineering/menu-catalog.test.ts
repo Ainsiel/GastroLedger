@@ -33,20 +33,39 @@ describe("menu catalog API consumption", () => {
           },
         ]);
       }
+      if (String(input).endsWith("/menu/recipes/sub-recipes")) {
+        return Response.json([
+          {
+            recipeId: "recipe-1",
+            recipeVersionId: "version-1",
+            name: "Sofrito base",
+            code: "SOFRITO-BASE",
+            version: "v1",
+            yieldQuantity: "2",
+            yieldUnitId: "unit-1",
+            effectiveFrom: "2026-06-19",
+            status: "approved",
+            isActive: true,
+            components: [],
+            costSnapshot: { totalCost: "14", status: "current" },
+          },
+        ]);
+      }
       return Response.json([
         {
-          recipeId: "recipe-1",
-          recipeVersionId: "version-1",
-          name: "Sofrito base",
-          code: "SOFRITO-BASE",
+          recipeId: "menu-item-1",
+          recipeVersionId: "menu-version-1",
+          name: "Lunch Bowl",
+          code: "LUNCH-BOWL",
           version: "v1",
-          yieldQuantity: "2",
+          yieldQuantity: "1",
           yieldUnitId: "unit-1",
           effectiveFrom: "2026-06-19",
           status: "approved",
           isActive: true,
           components: [],
-          costSnapshot: { totalCost: "14", status: "current" },
+          costSnapshot: { totalCost: "4", status: "current" },
+          branchMargins: [],
         },
       ]);
     };
@@ -59,7 +78,9 @@ describe("menu catalog API consumption", () => {
       "/api/v1/menu/units",
       "/api/v1/menu/ingredients",
       "/api/v1/menu/recipes/sub-recipes",
+      "/api/v1/menu/recipes/menu-items",
     ]);
+    expect(result.kind === "ready" && result.menuItems[0].code).toBe("LUNCH-BOWL");
   });
 
   it("normalizes duplicate and validation problems into visible outcomes", async () => {

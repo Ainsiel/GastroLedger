@@ -1,6 +1,7 @@
 import type {
   ApiProblem,
   IngredientResponse,
+  MenuItemVersionResponse,
   SubRecipeVersionResponse,
   UnitResponse,
 } from "@gastroledger/api-contract";
@@ -11,6 +12,7 @@ export type MenuCatalogSnapshot =
       units: UnitResponse[];
       ingredients: IngredientResponse[];
       subRecipes: SubRecipeVersionResponse[];
+      menuItems: MenuItemVersionResponse[];
     }
   | { kind: "unauthorized" }
   | { kind: "unexpected"; correlationId?: string };
@@ -113,10 +115,21 @@ export async function loadMenuCatalog(
     return { kind: "unexpected", correlationId: subRecipes.correlationId };
   }
 
+  const menuItems = await menuCatalogRequest<MenuItemVersionResponse[]>(
+    "/api/v1/menu/recipes/menu-items",
+    { cache: "no-store" },
+    fetcher,
+  );
+  if (menuItems.kind === "unauthorized") return { kind: "unauthorized" };
+  if (menuItems.kind !== "success") {
+    return { kind: "unexpected", correlationId: menuItems.correlationId };
+  }
+
   return {
     kind: "ready",
     units: units.data,
     ingredients: ingredients.data,
     subRecipes: subRecipes.data,
+    menuItems: menuItems.data,
   };
 }

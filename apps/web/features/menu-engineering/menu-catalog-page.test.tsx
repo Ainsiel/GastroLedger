@@ -13,7 +13,7 @@ describe("menu catalog experience", () => {
   });
 
   it("exposes accessible unit and ingredient catalog states", () => {
-    render(<MenuCatalogPage initial={{ kind: "ready", units: [], ingredients: [], subRecipes: [] }} />);
+    render(<MenuCatalogPage initial={{ kind: "ready", units: [], ingredients: [], subRecipes: [], menuItems: [] }} />);
 
     expect(screen.getByRole("heading", { name: /menu engineering/i })).toBeTruthy();
     expect(screen.getByLabelText(/unit name/i)).toBeTruthy();
@@ -51,6 +51,7 @@ describe("menu catalog experience", () => {
             },
           ],
           subRecipes: [],
+          menuItems: [],
         }}
       />,
     );
@@ -94,6 +95,7 @@ describe("menu catalog experience", () => {
       .mockResolvedValueOnce(Response.json(archivedIngredient))
       .mockResolvedValueOnce(Response.json(units))
       .mockResolvedValueOnce(Response.json([archivedIngredient]))
+      .mockResolvedValueOnce(Response.json([]))
       .mockResolvedValueOnce(Response.json([]));
     vi.stubGlobal("fetch", fetcher);
     render(
@@ -103,6 +105,7 @@ describe("menu catalog experience", () => {
           units,
           ingredients: [{ ...archivedIngredient, status: "active", availableForNewUse: true }],
           subRecipes: [],
+          menuItems: [],
         }}
       />,
     );
@@ -157,6 +160,7 @@ describe("menu catalog experience", () => {
           units: [unit],
           ingredients: [ingredient],
           subRecipes: [],
+          menuItems: [],
         }}
       />,
     );
@@ -172,5 +176,68 @@ describe("menu catalog experience", () => {
     expect(await screen.findByText(/approved nesting depth/i)).toBeTruthy();
     expect((screen.getByLabelText(/sub-recipe name/i) as HTMLInputElement).value).toBe("Tomato base");
     expect((screen.getByLabelText(/component quantity/i) as HTMLInputElement).value).toBe("4");
+  });
+
+  it("shows menu item approval and branch margin controls", async () => {
+    const user = userEvent.setup();
+    const unit = {
+      unitId: "unit-1",
+      name: "Serving",
+      code: "EA",
+      dimension: "count" as const,
+      conversions: [],
+    };
+    const subRecipe = {
+      recipeId: "recipe-1",
+      recipeVersionId: "sub-version-1",
+      name: "Tomato base",
+      code: "TOMATO-BASE",
+      version: "v1",
+      yieldQuantity: "1",
+      yieldUnitId: "unit-1",
+      effectiveFrom: "2026-06-19",
+      status: "approved" as const,
+      isActive: true,
+      components: [],
+      costSnapshot: { totalCost: "4", status: "current" as const },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json(
+          {
+            type: "menu.recipe_missing_cost",
+            title: "The request could not be completed",
+            status: 409,
+            correlationId: "missing-cost",
+            errors: [],
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    render(
+      <MenuCatalogPage
+        initial={{
+          kind: "ready",
+          units: [unit],
+          ingredients: [],
+          subRecipes: [subRecipe],
+          menuItems: [],
+        }}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/menu item name/i), "Lunch Bowl");
+    await user.type(screen.getByLabelText(/menu item code/i), "lunch-bowl");
+    await user.type(screen.getByLabelText(/menu item version/i), "v1");
+    await user.type(screen.getByLabelText(/menu item serving quantity/i), "1");
+    await user.type(screen.getByLabelText(/menu item sub-recipe quantity/i), "1");
+    await user.type(document.querySelector("#menu-item-effective") as HTMLInputElement, "2026-06-19");
+    await user.click(screen.getByRole("button", { name: /approve menu item/i }));
+
+    expect(await screen.findByText(/supplier offer cost evidence/i)).toBeTruthy();
+    expect((screen.getByLabelText(/menu item name/i) as HTMLInputElement).value).toBe("Lunch Bowl");
   });
 });

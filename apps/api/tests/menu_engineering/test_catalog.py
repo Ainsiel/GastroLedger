@@ -5,8 +5,10 @@ import pytest
 
 from gastroledger_api.modules.menu_engineering.public import (
     ArchiveIngredient,
+    CreateBranchMenuPrice,
     CreateConversionFactor,
     CreateIngredient,
+    CreateMenuItemVersion,
     CreateRecipeComponent,
     CreateSubRecipeVersion,
     CreateUnit,
@@ -17,10 +19,12 @@ from gastroledger_api.modules.menu_engineering.public import (
     MenuRecipeService,
     MenuValidationError,
     RecipeGraphViolation,
+    RecipeMissingCost,
     UnitConversionUnavailable,
     UnitDimensionMismatch,
     validate_conversion_factor,
     validate_ingredient,
+    validate_menu_item_version,
     validate_sub_recipe_version,
     validate_unit,
 )
@@ -247,10 +251,16 @@ def test_archived_ingredient_is_reported_as_not_available_for_new_use() -> None:
 class RecordingRecipeStore:
     def __init__(self) -> None:
         self.approved: list[object] = []
+        self.menu_items: list[object] = []
+        self.branch_prices: list[object] = []
         self.reject_graph = False
+        self.reject_missing_cost = False
 
     def list_sub_recipes(self, _identity: MenuIdentity) -> tuple[object, ...]:
         return tuple(self.approved)
+
+    def list_menu_items(self, _identity: MenuIdentity) -> tuple[object, ...]:
+        return tuple(self.menu_items)
 
     def approve_sub_recipe_version(
         self,
@@ -275,6 +285,53 @@ class RecordingRecipeStore:
             "components": recipe.components,
             "cost_snapshot": {"total_cost": recipe.yield_quantity, "status": "current"},
         }
+
+    def approve_menu_item_version(
+        self,
+        _identity: MenuIdentity,
+        recipe: object,
+        _correlation_id: str,
+    ) -> object:
+        if self.reject_missing_cost:
+            raise RecipeMissingCost
+        view = {
+            "recipe_id": "menu-item-1",
+            "recipe_version_id": "menu-item-version-1",
+            "code": recipe.code,
+            "name": recipe.name,
+            "version": recipe.version,
+            "status": "approved",
+            "is_active": True,
+            "yield_quantity": recipe.yield_quantity,
+            "yield_unit_id": recipe.yield_unit_id,
+            "effective_from": recipe.effective_from,
+            "components": recipe.components,
+            "cost_snapshot": {"total_cost": recipe.yield_quantity, "status": "current"},
+            "branch_margins": tuple(),
+        }
+        self.menu_items.append(view)
+        return view
+
+    def create_branch_price(
+        self,
+        _identity: MenuIdentity,
+        price: object,
+        _correlation_id: str,
+    ) -> object:
+        view = {
+            "branch_price_id": "branch-price-1",
+            "menu_item_version_id": price.menu_item_version_id,
+            "branch_id": price.branch_id,
+            "price": price.price,
+            "currency": price.currency,
+            "theoretical_cost": Decimal("4"),
+            "contribution_margin": price.price - Decimal("4"),
+            "margin_percent": Decimal("60"),
+            "suggested_price": Decimal("12"),
+            "effective_from": price.effective_from,
+        }
+        self.branch_prices.append(view)
+        return view
 
 
 def test_sub_recipe_version_validation_normalizes_and_requires_positive_values() -> None:
@@ -317,6 +374,29 @@ def test_sub_recipe_version_validation_normalizes_and_requires_positive_values()
     assert ("components", "required") in [
         (detail.field, detail.code) for detail in error.value.details
     ]
+
+
+def test_menu_item_version_validation_allows_sub_recipe_components() -> None:
+    version = validate_menu_item_version(
+        name="  Lunch Bowl  ",
+        code=" lunch-bowl ",
+        version=" v1 ",
+        yield_quantity="1",
+        yield_unit_id="unit-serving",
+        effective_from=date(2026, 6, 19),
+        components=(
+            CreateRecipeComponent(
+                component_type="sub_recipe",
+                component_id="sub-recipe-1",
+                quantity="0.25",
+                unit_id="unit-kg",
+            ),
+        ),
+    )
+
+    assert version.name == "Lunch Bowl"
+    assert version.code == "LUNCH-BOWL"
+    assert version.components[0].component_type == "sub_recipe"
 
 
 def test_menu_engineer_approves_sub_recipe_version_and_surfaces_graph_rejection() -> None:
@@ -368,4 +448,69 @@ def test_menu_engineer_approves_sub_recipe_version_and_surfaces_graph_rejection(
                 ),
             ),
             correlation_id="recipe-cycle",
+        )
+
+
+def test_menu_engineer_approves_menu_item_and_records_branch_margin() -> None:
+    store = RecordingRecipeStore()
+    service = MenuRecipeService(store=store)
+
+    approved = service.approve_menu_item_version(
+        admin_identity(),
+        CreateMenuItemVersion(
+            name="Lunch Bowl",
+            code="lunch-bowl",
+            version="v1",
+            yield_quantity="1",
+            yield_unit_id="unit-serving",
+            effective_from=date(2026, 6, 19),
+            components=(
+                CreateRecipeComponent(
+                    component_type="sub_recipe",
+                    component_id="sub-recipe-1",
+                    quantity="1",
+                    unit_id="unit-serving",
+                ),
+            ),
+        ),
+        correlation_id="menu-item-approve",
+    )
+    margin = service.create_branch_price(
+        admin_identity(),
+        CreateBranchMenuPrice(
+            menu_item_version_id="menu-item-version-1",
+            branch_id="branch-1",
+            price="10",
+            currency="usd",
+            effective_from=date(2026, 6, 19),
+        ),
+        correlation_id="branch-price",
+    )
+
+    assert approved["code"] == "LUNCH-BOWL"
+    assert approved["status"] == "approved"
+    assert margin["currency"] == "USD"
+    assert margin["contribution_margin"] == Decimal("6")
+
+    store.reject_missing_cost = True
+    with pytest.raises(RecipeMissingCost):
+        service.approve_menu_item_version(
+            admin_identity(),
+            CreateMenuItemVersion(
+                name="No cost bowl",
+                code="no-cost-bowl",
+                version="v1",
+                yield_quantity="1",
+                yield_unit_id="unit-serving",
+                effective_from=date(2026, 6, 19),
+                components=(
+                    CreateRecipeComponent(
+                        component_type="ingredient",
+                        component_id="ingredient-missing",
+                        quantity="1",
+                        unit_id="unit-serving",
+                    ),
+                ),
+            ),
+            correlation_id="menu-item-missing-cost",
         )
