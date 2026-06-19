@@ -4,7 +4,7 @@
 run_id = backlog-management-20260614-01
 generated_at = 2026-06-19
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published and reconciled after PR #32 merge
+status = published; GL-009 in PR #33
 github_issues_observed = 23
 ```
 
@@ -13,8 +13,8 @@ github_issues_observed = 23
 | Readiness | Count |
 |---|---:|
 | Done | 8 |
-| In PR | 0 |
-| Ready candidate | 4 |
+| In PR | 1 |
+| Ready candidate | 3 |
 | Defined, blocked by dependencies | 11 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
@@ -36,7 +36,7 @@ GL-008 are accepted in `develop`.
 | [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Done | GL-004 |
 | [GL-007](https://github.com/Ainsiel/GastroLedger/issues/7) | Approve menu items and branch margin | Menu Engineering | UC-009 | Done | GL-006 |
 | [GL-008](https://github.com/Ainsiel/GastroLedger/issues/8) | Recalculate recipe cost snapshots asynchronously | Menu Engineering | UC-010 | Done | GL-007 |
-| [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Ready | GL-005 |
+| [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | In PR ([#33](https://github.com/Ainsiel/GastroLedger/pull/33)) | GL-005 |
 | [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Blocked | GL-006, GL-009 |
 | [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | Blocked | GL-009 |
 | [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | Blocked | GL-009 |
@@ -98,3 +98,5 @@ evidence.
   completed in GitHub and GL-008 is now ready.
 - On 2026-06-19, PR #32 delivered GL-008 into `develop`; issue #8 is closed as
   completed in GitHub. GL-013 and GL-015 remain blocked by GL-009.
+- On 2026-06-19, PR #33 opened for GL-009 and issue #9 is marked `status:in-pr`
+  in GitHub.
