@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Protocol
 
@@ -87,6 +87,13 @@ class CostSnapshotView:
 
 
 @dataclass(frozen=True)
+class CostProjectionView:
+    status: str
+    updated_at: datetime
+    last_error: str | None
+
+
+@dataclass(frozen=True)
 class BranchMenuMarginView:
     branch_price_id: str
     menu_item_version_id: str
@@ -114,6 +121,7 @@ class SubRecipeVersionView:
     is_active: bool
     components: tuple[RecipeComponentView, ...]
     cost_snapshot: CostSnapshotView
+    cost_projection: CostProjectionView | None = None
 
 
 @dataclass(frozen=True)
@@ -131,6 +139,7 @@ class MenuItemVersionView:
     components: tuple[RecipeComponentView, ...]
     cost_snapshot: CostSnapshotView
     branch_margins: tuple[BranchMenuMarginView, ...]
+    cost_projection: CostProjectionView | None = None
 
 
 class MenuRecipeStore(Protocol):

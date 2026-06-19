@@ -549,6 +549,7 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
                     Yield: {recipe.yieldQuantity} / Cost snapshot:{" "}
                     {recipe.costSnapshot.totalCost}
                   </p>
+                  <CostProjectionStatus projection={recipe.costProjection} />
                 </div>
               ))}
             </div>
@@ -633,6 +634,7 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
                   <p className="mt-3 text-sm text-muted-foreground">
                     Theoretical cost: {recipe.costSnapshot.totalCost}
                   </p>
+                  <CostProjectionStatus projection={recipe.costProjection} />
                   <div className="mt-3 space-y-2">
                     {recipe.branchMargins.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No branch prices saved.</p>
@@ -797,6 +799,30 @@ function EmptyState({
         <p className="font-semibold">{title}</p>
         <p className="mt-1 text-sm text-muted-foreground">{text}</p>
       </div>
+    </div>
+  );
+}
+
+function CostProjectionStatus({
+  projection,
+}: {
+  projection?:
+    | MenuItemVersionResponse["costProjection"]
+    | SubRecipeVersionResponse["costProjection"];
+}) {
+  if (!projection || projection.status === "current") return null;
+  const label =
+    projection.status === "failed"
+      ? "Recalculation failed"
+      : projection.status === "pending"
+        ? "Recalculation pending"
+        : "Cost snapshot stale";
+  return (
+    <div role="status" className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+      <p className="text-xs font-semibold">{label}</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Previous cost remains active while the projection is resolved.
+      </p>
     </div>
   );
 }

@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 
 from psycopg import errors
 from sqlalchemy import create_engine, or_, select, text
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -22,7 +23,16 @@ from gastroledger_api.modules.procurement.domain.suppliers import (
     ValidatedSupplier,
     ValidatedSupplierOffer,
 )
-from gastroledger_api.technical.menu_models import MenuIngredient
+from gastroledger_api.technical.cost_projection_models import (
+    ControlJob,
+    ControlOutboxEvent,
+    MenuCostProjectionState,
+)
+from gastroledger_api.technical.menu_models import (
+    MenuIngredient,
+    MenuRecipeComponent,
+    MenuRecipeVersion,
+)
 from gastroledger_api.technical.platform_models import ControlAuditEvent, PlatformMembership
 from gastroledger_api.technical.postgres_platform import sqlalchemy_database_url
 from gastroledger_api.technical.procurement_models import (
@@ -137,6 +147,13 @@ class PostgresProcurementStore:
                     "procurement.offer.created",
                     str(offer_uuid),
                 )
+                self._enqueue_cost_recalculation(
+                    session,
+                    identity,
+                    ingredient_id=record.ingredient_id,
+                    offer_id=record.id,
+                    correlation_id=correlation_id,
+                )
                 return self._offer_view(record)
         except IntegrityError as error:
             if isinstance(error.orig, errors.UniqueViolation):
@@ -238,6 +255,93 @@ class PostgresProcurementStore:
                 occurred_at=datetime.now(UTC),
             )
         )
+
+    @staticmethod
+    def _enqueue_cost_recalculation(
+        session: Session,
+        identity: SupplierIdentity,
+        *,
+        ingredient_id: UUID,
+        offer_id: UUID,
+        correlation_id: str,
+    ) -> None:
+        now = datetime.now(UTC)
+        tenant_id = UUID(identity.tenant_id)
+        payload = {"ingredientId": str(ingredient_id), "offerId": str(offer_id)}
+        session.add(
+            ControlOutboxEvent(
+                id=uuid4(),
+                tenant_id=tenant_id,
+                event_type="procurement.supplier_offer.accepted",
+                aggregate_id=offer_id,
+                payload=payload,
+                correlation_id=correlation_id,
+                status="pending",
+                attempts=0,
+                available_at=now,
+                created_at=now,
+                processed_at=None,
+                last_error=None,
+            )
+        )
+        active_job = session.execute(
+            select(ControlJob).where(
+                ControlJob.tenant_id == tenant_id,
+                ControlJob.job_type == "menu.cost_recalculation",
+                ControlJob.dedup_key == str(ingredient_id),
+                ControlJob.status.in_(("queued", "leased")),
+            )
+        ).scalar_one_or_none()
+        if active_job is None:
+            session.add(
+                ControlJob(
+                    id=uuid4(),
+                    tenant_id=tenant_id,
+                    job_type="menu.cost_recalculation",
+                    dedup_key=str(ingredient_id),
+                    payload=payload,
+                    correlation_id=correlation_id,
+                    status="queued",
+                    attempts=0,
+                    available_at=now,
+                    lease_until=None,
+                    leased_by=None,
+                    last_error=None,
+                    created_at=now,
+                    updated_at=now,
+                )
+            )
+        else:
+            active_job.payload = payload
+            active_job.correlation_id = correlation_id
+            active_job.updated_at = now
+
+        affected_versions = session.execute(
+            select(MenuRecipeVersion.id)
+            .join(
+                MenuRecipeComponent,
+                MenuRecipeComponent.recipe_version_id == MenuRecipeVersion.id,
+            )
+            .where(
+                MenuRecipeVersion.tenant_id == tenant_id,
+                MenuRecipeVersion.status == "approved",
+                MenuRecipeComponent.ingredient_id == ingredient_id,
+            )
+        ).scalars()
+        for recipe_version_id in set(affected_versions):
+            statement = insert(MenuCostProjectionState).values(
+                recipe_version_id=recipe_version_id,
+                tenant_id=tenant_id,
+                status="pending",
+                updated_at=now,
+                last_error=None,
+            )
+            session.execute(
+                statement.on_conflict_do_update(
+                    index_elements=[MenuCostProjectionState.recipe_version_id],
+                    set_={"status": "stale", "updated_at": now, "last_error": None},
+                )
+            )
 
     @staticmethod
     def _supplier_view(supplier: ProcurementSupplier) -> SupplierView:

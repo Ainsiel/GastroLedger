@@ -240,4 +240,37 @@ describe("menu catalog experience", () => {
     expect(await screen.findByText(/supplier offer cost evidence/i)).toBeTruthy();
     expect((screen.getByLabelText(/menu item name/i) as HTMLInputElement).value).toBe("Lunch Bowl");
   });
+
+  it("shows stale and failed cost projection states without hiding the prior cost", () => {
+    const recipe = {
+      recipeId: "recipe-1",
+      recipeVersionId: "version-1",
+      name: "Lunch Bowl",
+      code: "LUNCH-BOWL",
+      version: "v1",
+      yieldQuantity: "1",
+      yieldUnitId: "unit-1",
+      effectiveFrom: "2026-06-19",
+      status: "approved" as const,
+      isActive: true,
+      components: [],
+      costSnapshot: { totalCost: "4", status: "current" as const },
+      costProjection: {
+        status: "failed" as const,
+        updatedAt: "2026-06-19T17:00:00Z",
+        lastError: "missing_cost",
+      },
+      branchMargins: [],
+    };
+
+    render(
+      <MenuCatalogPage
+        initial={{ kind: "ready", units: [], ingredients: [], subRecipes: [], menuItems: [recipe] }}
+      />,
+    );
+
+    expect(screen.getByText(/theoretical cost: 4/i)).toBeTruthy();
+    expect(screen.getByText(/recalculation failed/i)).toBeTruthy();
+    expect(screen.getByText(/previous cost remains active/i)).toBeTruthy();
+  });
 });

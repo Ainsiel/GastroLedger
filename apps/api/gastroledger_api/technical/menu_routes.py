@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID, uuid4
 
 import psycopg
@@ -12,6 +12,7 @@ from gastroledger_api.modules.menu_engineering.public import (
     ArchiveIngredient,
     BranchMenuMarginView,
     ConversionFactorView,
+    CostProjectionView,
     CostSnapshotView,
     CreateBranchMenuPrice,
     CreateConversionFactor,
@@ -173,6 +174,12 @@ class CostSnapshotResponse(BaseModel):
     status: str
 
 
+class CostProjectionResponse(BaseModel):
+    status: str
+    updatedAt: datetime
+    lastError: str | None = None
+
+
 class SubRecipeVersionResponse(BaseModel):
     recipeId: str
     recipeVersionId: str
@@ -186,6 +193,7 @@ class SubRecipeVersionResponse(BaseModel):
     isActive: bool
     components: list[RecipeComponentResponse]
     costSnapshot: CostSnapshotResponse
+    costProjection: CostProjectionResponse | None = None
 
 
 class BranchMenuMarginResponse(BaseModel):
@@ -215,6 +223,7 @@ class MenuItemVersionResponse(BaseModel):
     components: list[RecipeComponentResponse]
     costSnapshot: CostSnapshotResponse
     branchMargins: list[BranchMenuMarginResponse]
+    costProjection: CostProjectionResponse | None = None
 
 
 def conversion_response(conversion: ConversionFactorView) -> ConversionFactorResponse:
@@ -267,6 +276,18 @@ def cost_snapshot_response(snapshot: CostSnapshotView) -> CostSnapshotResponse:
     )
 
 
+def cost_projection_response(
+    projection: CostProjectionView | None,
+) -> CostProjectionResponse | None:
+    if projection is None:
+        return None
+    return CostProjectionResponse(
+        status=projection.status,
+        updatedAt=projection.updated_at,
+        lastError=projection.last_error,
+    )
+
+
 def sub_recipe_response(recipe: SubRecipeVersionView) -> SubRecipeVersionResponse:
     return SubRecipeVersionResponse(
         recipeId=recipe.recipe_id,
@@ -281,6 +302,7 @@ def sub_recipe_response(recipe: SubRecipeVersionView) -> SubRecipeVersionRespons
         isActive=recipe.is_active,
         components=[component_response(component) for component in recipe.components],
         costSnapshot=cost_snapshot_response(recipe.cost_snapshot),
+        costProjection=cost_projection_response(recipe.cost_projection),
     )
 
 
@@ -314,6 +336,7 @@ def menu_item_response(recipe: MenuItemVersionView) -> MenuItemVersionResponse:
         components=[component_response(component) for component in recipe.components],
         costSnapshot=cost_snapshot_response(recipe.cost_snapshot),
         branchMargins=[branch_margin_response(margin) for margin in recipe.branch_margins],
+        costProjection=cost_projection_response(recipe.cost_projection),
     )
 
 

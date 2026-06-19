@@ -175,12 +175,19 @@ export interface CostSnapshotResponse {
   status: "current" | "missing_cost";
 }
 
+export interface CostProjectionResponse {
+  status: "current" | "pending" | "stale" | "failed";
+  updatedAt: string;
+  lastError?: string | null;
+}
+
 export interface SubRecipeVersionResponse extends SubRecipeVersionRequest {
   recipeId: string;
   recipeVersionId: string;
   status: "approved" | "scheduled";
   isActive: boolean;
   costSnapshot: CostSnapshotResponse;
+  costProjection?: CostProjectionResponse;
   components: RecipeComponentResponse[];
 }
 
@@ -199,6 +206,7 @@ export interface MenuItemVersionResponse extends MenuItemVersionRequest {
   status: "approved" | "scheduled";
   isActive: boolean;
   costSnapshot: CostSnapshotResponse;
+  costProjection?: CostProjectionResponse;
   components: RecipeComponentResponse[];
   branchMargins: BranchMenuMarginResponse[];
 }
