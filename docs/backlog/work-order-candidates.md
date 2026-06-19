@@ -99,18 +99,19 @@ GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-008 Cost Snapshot Recalculation
+## Completed: GL-008 Cost Snapshot Recalculation
 
 ```text
 work_order_id = GL-008
 feature_branch = feature/GL-008-cost-snapshot-recalculation
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/32
 ```
 
-Delivery evidence so far: PR #32 is open against `develop` and implements
+Delivery evidence: PR #32 merged into `develop` on 2026-06-19 and implements
 PostgreSQL outbox/jobs, idempotent cost projections, retry evidence and visible
-snapshot state. Visual QA is intentionally skipped per user instruction.
+snapshot state. Required CI and regression-gate passed before merge. Visual QA
+was intentionally skipped per user instruction.
 
 ## Completed: GL-007 Menu Items And Branch Margin
 
