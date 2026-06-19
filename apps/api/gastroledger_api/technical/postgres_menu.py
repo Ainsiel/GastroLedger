@@ -25,6 +25,7 @@ from gastroledger_api.modules.menu_engineering.application.catalog import (
 )
 from gastroledger_api.modules.menu_engineering.application.recipes import (
     BranchMenuMarginView,
+    CostProjectionView,
     CostSnapshotView,
     MenuItemVersionView,
     RecipeCodeConflict,
@@ -38,6 +39,10 @@ from gastroledger_api.modules.menu_engineering.domain.catalog import (
     ValidatedConversionFactor,
     ValidatedIngredient,
     ValidatedUnit,
+)
+from gastroledger_api.technical.cost_projection_models import (
+    MenuCostProjectionSnapshot,
+    MenuCostProjectionState,
 )
 from gastroledger_api.technical.menu_models import (
     MenuConversionFactor,
@@ -826,6 +831,9 @@ class PostgresMenuCatalogStore:
         snapshot = session.execute(
             select(MenuCostSnapshot).where(MenuCostSnapshot.recipe_version_id == version.id)
         ).scalar_one()
+        effective_cost = PostgresMenuCatalogStore._latest_cost_total(
+            session, version.id, snapshot.total_cost
+        )
         return SubRecipeVersionView(
             recipe_id=str(recipe.id),
             recipe_version_id=str(version.id),
@@ -849,9 +857,10 @@ class PostgresMenuCatalogStore:
                 for component in components
             ),
             cost_snapshot=CostSnapshotView(
-                total_cost=snapshot.total_cost,
+                total_cost=effective_cost,
                 status=snapshot.status,
             ),
+            cost_projection=PostgresMenuCatalogStore._projection_view(session, version.id),
         )
 
     @staticmethod
@@ -870,6 +879,9 @@ class PostgresMenuCatalogStore:
         snapshot = session.execute(
             select(MenuCostSnapshot).where(MenuCostSnapshot.recipe_version_id == version.id)
         ).scalar_one()
+        effective_cost = PostgresMenuCatalogStore._latest_cost_total(
+            session, version.id, snapshot.total_cost
+        )
         branch_prices = session.execute(
             select(MenuItemBranchPrice)
             .where(MenuItemBranchPrice.recipe_version_id == version.id)
@@ -896,13 +908,14 @@ class PostgresMenuCatalogStore:
                 for component in components
             ),
             cost_snapshot=CostSnapshotView(
-                total_cost=snapshot.total_cost,
+                total_cost=effective_cost,
                 status=snapshot.status,
             ),
             branch_margins=tuple(
                 PostgresMenuCatalogStore._branch_margin_view(session, branch_price)
                 for branch_price in branch_prices
             ),
+            cost_projection=PostgresMenuCatalogStore._projection_view(session, version.id),
         )
 
     @staticmethod
@@ -915,7 +928,10 @@ class PostgresMenuCatalogStore:
                 MenuCostSnapshot.recipe_version_id == branch_price.recipe_version_id
             )
         ).scalar_one()
-        contribution_margin = branch_price.price - snapshot.total_cost
+        theoretical_cost = PostgresMenuCatalogStore._latest_cost_total(
+            session, branch_price.recipe_version_id, snapshot.total_cost
+        )
+        contribution_margin = branch_price.price - theoretical_cost
         margin_percent = (
             contribution_margin / branch_price.price * Decimal("100")
             if branch_price.price > 0
@@ -927,11 +943,43 @@ class PostgresMenuCatalogStore:
             branch_id=str(branch_price.branch_id),
             price=branch_price.price,
             currency=branch_price.currency,
-            theoretical_cost=snapshot.total_cost,
+            theoretical_cost=theoretical_cost,
             contribution_margin=contribution_margin,
             margin_percent=margin_percent,
-            suggested_price=snapshot.total_cost * Decimal("3"),
+            suggested_price=theoretical_cost * Decimal("3"),
             effective_from=branch_price.effective_from,
+        )
+
+    @staticmethod
+    def _latest_cost_total(
+        session: Session,
+        recipe_version_id: UUID,
+        fallback: Decimal,
+    ) -> Decimal:
+        projected = session.execute(
+            select(MenuCostProjectionSnapshot.total_cost)
+            .where(MenuCostProjectionSnapshot.recipe_version_id == recipe_version_id)
+            .order_by(desc(MenuCostProjectionSnapshot.calculated_at))
+            .limit(1)
+        ).scalar_one_or_none()
+        return projected if projected is not None else fallback
+
+    @staticmethod
+    def _projection_view(
+        session: Session,
+        recipe_version_id: UUID,
+    ) -> CostProjectionView | None:
+        state = session.execute(
+            select(MenuCostProjectionState).where(
+                MenuCostProjectionState.recipe_version_id == recipe_version_id
+            )
+        ).scalar_one_or_none()
+        if state is None:
+            return None
+        return CostProjectionView(
+            status=state.status,
+            updated_at=state.updated_at,
+            last_error=state.last_error,
         )
 
     @staticmethod

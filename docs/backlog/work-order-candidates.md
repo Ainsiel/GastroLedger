@@ -93,12 +93,24 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-008 Recalculate recipe cost snapshots asynchronously
 GL-009 Receive a supplier delivery into the inventory ledger
 GL-016 Apply manual ordering holds
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-008 Cost Snapshot Recalculation
+
+```text
+work_order_id = GL-008
+feature_branch = feature/GL-008-cost-snapshot-recalculation
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/32
+```
+
+Delivery evidence so far: PR #32 is open against `develop` and implements
+PostgreSQL outbox/jobs, idempotent cost projections, retry evidence and visible
+snapshot state. Visual QA is intentionally skipped per user instruction.
 
 ## Completed: GL-007 Menu Items And Branch Margin
 

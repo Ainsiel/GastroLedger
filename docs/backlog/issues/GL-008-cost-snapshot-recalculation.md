@@ -1,11 +1,12 @@
 ---
 id: GL-008
 title: Recalculate recipe cost snapshots asynchronously
-status: ready
+status: in_pr
 readiness: ready
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical, status:in-pr]
 dependencies: [GL-007]
+pull_request: https://github.com/Ainsiel/GastroLedger/pull/32
 requirements: [FR-010, FR-031]
 use_cases: [UC-010]
 test_cases: [TC-010-S, TC-010-A, TC-010-F, IT-003, IT-018, IT-019, IT-020]

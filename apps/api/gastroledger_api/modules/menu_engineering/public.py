@@ -23,6 +23,7 @@ from gastroledger_api.modules.menu_engineering.application.catalog import (
 )
 from gastroledger_api.modules.menu_engineering.application.recipes import (
     BranchMenuMarginView,
+    CostProjectionView,
     CostSnapshotView,
     CreateBranchMenuPrice,
     CreateMenuItemVersion,
@@ -76,6 +77,7 @@ __all__ = [
     "ApprovedRecipeVersionReference",
     "ApprovedRecipeVersionSnapshot",
     "BranchMenuMarginView",
+    "CostProjectionView",
     "ConversionFactorView",
     "CostSnapshotView",
     "CreateBranchMenuPrice",
