@@ -1,11 +1,17 @@
 import type {
   ApiProblem,
   IngredientResponse,
+  SubRecipeVersionResponse,
   UnitResponse,
 } from "@gastroledger/api-contract";
 
 export type MenuCatalogSnapshot =
-  | { kind: "ready"; units: UnitResponse[]; ingredients: IngredientResponse[] }
+  | {
+      kind: "ready";
+      units: UnitResponse[];
+      ingredients: IngredientResponse[];
+      subRecipes: SubRecipeVersionResponse[];
+    }
   | { kind: "unauthorized" }
   | { kind: "unexpected"; correlationId?: string };
 
@@ -35,6 +41,12 @@ function problemOutcome(problem: ApiProblem): Exclude<MenuCatalogOutcome, { kind
     const message =
       problem.type === "menu.conversion_unavailable"
         ? "Add a current compatible conversion factor before using that unit mapping."
+        : problem.type === "menu.recipe_graph_invalid"
+          ? "Recipe approval would create a cycle or exceed the approved nesting depth."
+          : problem.type === "menu.recipe_missing_cost"
+            ? "Add current supplier offer cost evidence before approving this recipe."
+            : problem.type === "menu.recipe_version_conflict"
+              ? "That recipe version is already approved and immutable."
         : problem.type === "menu.ingredient_archived"
           ? "This ingredient is already archived."
           : "That code or effective-dated factor already exists.";
@@ -91,5 +103,20 @@ export async function loadMenuCatalog(
     return { kind: "unexpected", correlationId: ingredients.correlationId };
   }
 
-  return { kind: "ready", units: units.data, ingredients: ingredients.data };
+  const subRecipes = await menuCatalogRequest<SubRecipeVersionResponse[]>(
+    "/api/v1/menu/recipes/sub-recipes",
+    { cache: "no-store" },
+    fetcher,
+  );
+  if (subRecipes.kind === "unauthorized") return { kind: "unauthorized" };
+  if (subRecipes.kind !== "success") {
+    return { kind: "unexpected", correlationId: subRecipes.correlationId };
+  }
+
+  return {
+    kind: "ready",
+    units: units.data,
+    ingredients: ingredients.data,
+    subRecipes: subRecipes.data,
+  };
 }

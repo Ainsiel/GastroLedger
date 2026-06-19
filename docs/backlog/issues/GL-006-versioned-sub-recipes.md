@@ -1,10 +1,10 @@
 ---
 id: GL-006
 title: Approve versioned sub-recipes
-status: draft
-readiness: ready
+status: in_pr
+readiness: in_pr
 primary_context: Menu Engineering
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-004]
 requirements: [FR-007, FR-031]
 use_cases: [UC-008]
@@ -51,3 +51,16 @@ and a reproducible theoretical cost snapshot.
 - [ ] Frontend preserves draft input after recoverable errors.
 - [ ] Historical approved versions cannot be edited.
 - [ ] Required root quality commands and `regression-gate` pass.
+
+## Delivery Evidence
+
+Pull request: https://github.com/Ainsiel/GastroLedger/pull/30
+
+Local TDD evidence recorded on 2026-06-19:
+
+- Backend Menu Engineering unit tests passed.
+- Frontend Menu Engineering feature tests passed.
+- PostgreSQL recipe integration tests passed.
+- `npm run lint` passed.
+- Web and API contract builds passed.
+- Visual QA was skipped by direct user instruction.

@@ -13,7 +13,7 @@ describe("menu catalog experience", () => {
   });
 
   it("exposes accessible unit and ingredient catalog states", () => {
-    render(<MenuCatalogPage initial={{ kind: "ready", units: [], ingredients: [] }} />);
+    render(<MenuCatalogPage initial={{ kind: "ready", units: [], ingredients: [], subRecipes: [] }} />);
 
     expect(screen.getByRole("heading", { name: /menu engineering/i })).toBeTruthy();
     expect(screen.getByLabelText(/unit name/i)).toBeTruthy();
@@ -50,6 +50,7 @@ describe("menu catalog experience", () => {
               availableForNewUse: true,
             },
           ],
+          subRecipes: [],
         }}
       />,
     );
@@ -92,7 +93,8 @@ describe("menu catalog experience", () => {
     const fetcher = vi.fn()
       .mockResolvedValueOnce(Response.json(archivedIngredient))
       .mockResolvedValueOnce(Response.json(units))
-      .mockResolvedValueOnce(Response.json([archivedIngredient]));
+      .mockResolvedValueOnce(Response.json([archivedIngredient]))
+      .mockResolvedValueOnce(Response.json([]));
     vi.stubGlobal("fetch", fetcher);
     render(
       <MenuCatalogPage
@@ -100,6 +102,7 @@ describe("menu catalog experience", () => {
           kind: "ready",
           units,
           ingredients: [{ ...archivedIngredient, status: "active", availableForNewUse: true }],
+          subRecipes: [],
         }}
       />,
     );
@@ -109,5 +112,65 @@ describe("menu catalog experience", () => {
 
     const result = (await screen.findByText("Saved")).closest('[role="alert"]');
     await waitFor(() => expect(document.activeElement).toBe(result));
+  });
+
+  it("preserves sub-recipe draft input after recoverable approval errors", async () => {
+    const user = userEvent.setup();
+    const unit = {
+      unitId: "unit-1",
+      name: "Kilogram",
+      code: "KG",
+      dimension: "mass" as const,
+      conversions: [],
+    };
+    const ingredient = {
+      ingredientId: "ingredient-1",
+      name: "Tomato",
+      code: "TOMATO",
+      purchaseUnitId: "unit-1",
+      consumptionUnitId: "unit-1",
+      shelfLifeDays: 12,
+      criticalStockQuantity: "5",
+      status: "active" as const,
+      availableForNewUse: true,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json(
+          {
+            type: "menu.recipe_graph_invalid",
+            title: "The request could not be completed",
+            status: 409,
+            correlationId: "recipe-conflict",
+            errors: [],
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    render(
+      <MenuCatalogPage
+        initial={{
+          kind: "ready",
+          units: [unit],
+          ingredients: [ingredient],
+          subRecipes: [],
+        }}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/sub-recipe name/i), "Tomato base");
+    await user.type(screen.getByLabelText(/sub-recipe code/i), "tomato-base");
+    await user.type(screen.getByLabelText(/^version$/i), "v1");
+    await user.type(screen.getByLabelText(/yield quantity/i), "2");
+    await user.type(screen.getByLabelText(/component quantity/i), "4");
+    await user.type(document.querySelector("#sub-recipe-effective") as HTMLInputElement, "2026-06-19");
+    await user.click(screen.getByRole("button", { name: /approve sub-recipe/i }));
+
+    expect(await screen.findByText(/approved nesting depth/i)).toBeTruthy();
+    expect((screen.getByLabelText(/sub-recipe name/i) as HTMLInputElement).value).toBe("Tomato base");
+    expect((screen.getByLabelText(/component quantity/i) as HTMLInputElement).value).toBe("4");
   });
 });

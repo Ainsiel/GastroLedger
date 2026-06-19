@@ -21,11 +21,26 @@ from gastroledger_api.modules.menu_engineering.application.catalog import (
     UnitDimensionMismatch,
     UnitView,
 )
+from gastroledger_api.modules.menu_engineering.application.recipes import (
+    CostSnapshotView,
+    CreateRecipeComponent,
+    CreateSubRecipeVersion,
+    MenuRecipeService,
+    RecipeCodeConflict,
+    RecipeComponentView,
+    RecipeGraphViolation,
+    RecipeMissingCost,
+    RecipeVersionConflict,
+    SubRecipeVersionView,
+)
 from gastroledger_api.modules.menu_engineering.domain.catalog import (
     MenuValidationError,
     validate_conversion_factor,
     validate_ingredient,
     validate_unit,
+)
+from gastroledger_api.modules.menu_engineering.domain.recipes import (
+    validate_sub_recipe_version,
 )
 
 MODULE_ID = "menu_engineering"
@@ -56,8 +71,11 @@ __all__ = [
     "ApprovedRecipeVersionReference",
     "ApprovedRecipeVersionSnapshot",
     "ConversionFactorView",
+    "CostSnapshotView",
     "CreateConversionFactor",
     "CreateIngredient",
+    "CreateRecipeComponent",
+    "CreateSubRecipeVersion",
     "CreateUnit",
     "IngredientArchived",
     "IngredientCodeConflict",
@@ -68,7 +86,14 @@ __all__ = [
     "MenuCodeConflict",
     "MenuIdentity",
     "MenuNotFound",
+    "MenuRecipeService",
     "MenuValidationError",
+    "RecipeCodeConflict",
+    "RecipeComponentView",
+    "RecipeGraphViolation",
+    "RecipeMissingCost",
+    "RecipeVersionConflict",
+    "SubRecipeVersionView",
     "UnitConversionResult",
     "UnitConversionRequest",
     "UnitConversionUnavailable",
@@ -76,5 +101,6 @@ __all__ = [
     "UnitView",
     "validate_conversion_factor",
     "validate_ingredient",
+    "validate_sub_recipe_version",
     "validate_unit",
 ]

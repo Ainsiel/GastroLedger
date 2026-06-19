@@ -3,7 +3,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from psycopg import errors
-from sqlalchemy import create_engine, desc, select, text
+from sqlalchemy import create_engine, desc, or_, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -23,6 +23,15 @@ from gastroledger_api.modules.menu_engineering.application.catalog import (
     UnitDimensionMismatch,
     UnitView,
 )
+from gastroledger_api.modules.menu_engineering.application.recipes import (
+    CostSnapshotView,
+    RecipeCodeConflict,
+    RecipeComponentView,
+    RecipeGraphViolation,
+    RecipeMissingCost,
+    RecipeVersionConflict,
+    SubRecipeVersionView,
+)
 from gastroledger_api.modules.menu_engineering.domain.catalog import (
     ValidatedConversionFactor,
     ValidatedIngredient,
@@ -30,11 +39,16 @@ from gastroledger_api.modules.menu_engineering.domain.catalog import (
 )
 from gastroledger_api.technical.menu_models import (
     MenuConversionFactor,
+    MenuCostSnapshot,
     MenuIngredient,
+    MenuRecipe,
+    MenuRecipeComponent,
+    MenuRecipeVersion,
     MenuUnit,
 )
 from gastroledger_api.technical.platform_models import ControlAuditEvent, PlatformMembership
 from gastroledger_api.technical.postgres_platform import sqlalchemy_database_url
+from gastroledger_api.technical.procurement_models import ProcurementSupplierOffer
 
 
 class PostgresMenuCatalogStore:
@@ -274,6 +288,122 @@ class PostgresMenuCatalogStore:
             )
             return self._ingredient_view(ingredient)
 
+    def list_sub_recipes(self, identity: MenuIdentity) -> tuple[SubRecipeVersionView, ...]:
+        with self._open_session() as session, session.begin():
+            self._authorize_menu_identity(session, identity)
+            versions = session.execute(
+                select(MenuRecipeVersion)
+                .join(MenuRecipe, MenuRecipeVersion.recipe_id == MenuRecipe.id)
+                .where(
+                    MenuRecipeVersion.tenant_id == UUID(identity.tenant_id),
+                    MenuRecipe.recipe_type == "sub_recipe",
+                )
+                .order_by(MenuRecipe.code, MenuRecipeVersion.effective_from)
+            ).scalars()
+            return tuple(self._sub_recipe_view(session, version) for version in versions)
+
+    def approve_sub_recipe_version(
+        self,
+        identity: MenuIdentity,
+        recipe: object,
+        correlation_id: str,
+    ) -> SubRecipeVersionView:
+        recipe_uuid = uuid4()
+        version_uuid = uuid4()
+        try:
+            with self._open_session() as session, session.begin():
+                self._authorize_menu_identity(session, identity)
+                tenant_uuid = UUID(identity.tenant_id)
+                yield_unit = self._unit(session, identity, recipe.yield_unit_id)
+                record = session.execute(
+                    select(MenuRecipe)
+                    .where(MenuRecipe.tenant_id == tenant_uuid, MenuRecipe.code == recipe.code)
+                ).scalar_one_or_none()
+                if record is None:
+                    record = MenuRecipe(
+                        id=recipe_uuid,
+                        tenant_id=tenant_uuid,
+                        code=recipe.code,
+                        name=recipe.name,
+                        recipe_type="sub_recipe",
+                    )
+                    session.add(record)
+                    session.flush()
+                elif record.recipe_type != "sub_recipe":
+                    raise RecipeCodeConflict
+
+                self._ensure_recipe_graph_allowed(session, identity, record.id, recipe)
+                status = "scheduled" if recipe.effective_from > date.today() else "approved"
+                version = MenuRecipeVersion(
+                    id=version_uuid,
+                    tenant_id=tenant_uuid,
+                    recipe_id=record.id,
+                    version=recipe.version,
+                    yield_quantity=recipe.yield_quantity,
+                    yield_unit_id=yield_unit.id,
+                    effective_from=recipe.effective_from,
+                    status=status,
+                    approved_at=datetime.now(UTC),
+                )
+                session.add(version)
+                total_cost = Decimal("0")
+                for component in recipe.components:
+                    unit = self._unit(session, identity, component.unit_id)
+                    if unit.dimension != yield_unit.dimension:
+                        raise UnitDimensionMismatch
+                    if component.component_type == "sub_recipe":
+                        raise RecipeGraphViolation("sub_recipe_depth")
+                    ingredient = self._active_ingredient(
+                        session,
+                        identity,
+                        component.component_id,
+                    )
+                    if ingredient.consumption_unit_id != unit.id:
+                        raise UnitConversionUnavailable
+                    offer_price = self._current_offer_price(
+                        session,
+                        identity,
+                        ingredient.id,
+                        unit.id,
+                        recipe.effective_from,
+                    )
+                    total_cost += component.quantity * offer_price
+                    session.add(
+                        MenuRecipeComponent(
+                            id=uuid4(),
+                            tenant_id=tenant_uuid,
+                            recipe_version_id=version.id,
+                            component_type="ingredient",
+                            ingredient_id=ingredient.id,
+                            component_recipe_id=None,
+                            quantity=component.quantity,
+                            unit_id=unit.id,
+                        )
+                    )
+                session.add(
+                    MenuCostSnapshot(
+                        id=uuid4(),
+                        tenant_id=tenant_uuid,
+                        recipe_version_id=version.id,
+                        as_of=recipe.effective_from,
+                        total_cost=total_cost,
+                        status="current",
+                    )
+                )
+                session.flush()
+                self._audit(
+                    session,
+                    identity,
+                    correlation_id,
+                    "menu.sub_recipe_version.approved",
+                    str(version.id),
+                )
+                return self._sub_recipe_view(session, version)
+        except IntegrityError as error:
+            if isinstance(error.orig, errors.UniqueViolation):
+                raise RecipeVersionConflict from error
+            raise
+
     @staticmethod
     def _authorize_menu_identity(session: Session, identity: MenuIdentity) -> None:
         session.execute(text("set local role gastroledger_app"))
@@ -352,6 +482,130 @@ class PostgresMenuCatalogStore:
             return by_id[UUID(source_unit_id)], by_id[UUID(target_unit_id)]
         except KeyError as error:
             raise MenuNotFound from error
+
+    @staticmethod
+    def _unit(session: Session, identity: MenuIdentity, unit_id: str) -> MenuUnit:
+        unit = session.execute(
+            select(MenuUnit).where(
+                MenuUnit.tenant_id == UUID(identity.tenant_id),
+                MenuUnit.id == UUID(unit_id),
+            )
+        ).scalar_one_or_none()
+        if unit is None:
+            raise MenuNotFound
+        return unit
+
+    @staticmethod
+    def _active_ingredient(
+        session: Session,
+        identity: MenuIdentity,
+        ingredient_id: str,
+    ) -> MenuIngredient:
+        ingredient = session.execute(
+            select(MenuIngredient).where(
+                MenuIngredient.tenant_id == UUID(identity.tenant_id),
+                MenuIngredient.id == UUID(ingredient_id),
+                MenuIngredient.status == "active",
+            )
+        ).scalar_one_or_none()
+        if ingredient is None:
+            raise MenuNotFound
+        return ingredient
+
+    @staticmethod
+    def _ensure_recipe_graph_allowed(
+        session: Session,
+        identity: MenuIdentity,
+        recipe_id: UUID,
+        recipe: object,
+    ) -> None:
+        for component in recipe.components:
+            if component.component_type != "sub_recipe":
+                continue
+            component_recipe_id = UUID(component.component_id)
+            if component_recipe_id == recipe_id:
+                raise RecipeGraphViolation("cycle")
+            exists = session.execute(
+                select(MenuRecipe.id).where(
+                    MenuRecipe.tenant_id == UUID(identity.tenant_id),
+                    MenuRecipe.id == component_recipe_id,
+                    MenuRecipe.recipe_type == "sub_recipe",
+                )
+            ).scalar_one_or_none()
+            if exists is None:
+                raise MenuNotFound
+            raise RecipeGraphViolation("sub_recipe_depth")
+
+    @staticmethod
+    def _current_offer_price(
+        session: Session,
+        identity: MenuIdentity,
+        ingredient_id: UUID,
+        unit_id: UUID,
+        as_of: date,
+    ) -> Decimal:
+        price = session.execute(
+            select(ProcurementSupplierOffer.price)
+            .where(
+                ProcurementSupplierOffer.tenant_id == UUID(identity.tenant_id),
+                ProcurementSupplierOffer.ingredient_id == ingredient_id,
+                ProcurementSupplierOffer.purchase_unit_id == unit_id,
+                ProcurementSupplierOffer.effective_from <= as_of,
+                or_(
+                    ProcurementSupplierOffer.effective_until.is_(None),
+                    ProcurementSupplierOffer.effective_until >= as_of,
+                ),
+            )
+            .order_by(ProcurementSupplierOffer.price, desc(ProcurementSupplierOffer.effective_from))
+            .limit(1)
+        ).scalar_one_or_none()
+        if price is None:
+            raise RecipeMissingCost
+        return price
+
+    @staticmethod
+    def _sub_recipe_view(
+        session: Session,
+        version: MenuRecipeVersion,
+    ) -> SubRecipeVersionView:
+        recipe = session.execute(
+            select(MenuRecipe).where(MenuRecipe.id == version.recipe_id)
+        ).scalar_one()
+        components = session.execute(
+            select(MenuRecipeComponent)
+            .where(MenuRecipeComponent.recipe_version_id == version.id)
+            .order_by(MenuRecipeComponent.id)
+        ).scalars()
+        snapshot = session.execute(
+            select(MenuCostSnapshot).where(MenuCostSnapshot.recipe_version_id == version.id)
+        ).scalar_one()
+        return SubRecipeVersionView(
+            recipe_id=str(recipe.id),
+            recipe_version_id=str(version.id),
+            name=recipe.name,
+            code=recipe.code,
+            version=version.version,
+            yield_quantity=version.yield_quantity,
+            yield_unit_id=str(version.yield_unit_id),
+            effective_from=version.effective_from,
+            status=version.status,
+            is_active=version.status == "approved" and version.effective_from <= date.today(),
+            components=tuple(
+                RecipeComponentView(
+                    component_type=component.component_type,
+                    component_id=str(
+                        component.ingredient_id or component.component_recipe_id
+                    ),
+                    quantity=component.quantity,
+                    unit_id=str(component.unit_id),
+                )
+                for component in components
+            ),
+            cost_snapshot=CostSnapshotView(
+                total_cost=snapshot.total_cost,
+                status=snapshot.status,
+            ),
+        )
 
     @staticmethod
     def _current_factor(

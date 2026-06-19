@@ -140,6 +140,41 @@ export interface IngredientResponse extends IngredientRequest {
   availableForNewUse: boolean;
 }
 
+export type RecipeComponentType = "ingredient" | "sub_recipe";
+
+export interface RecipeComponentRequest {
+  componentType: RecipeComponentType;
+  componentId: string;
+  quantity: string;
+  unitId: string;
+}
+
+export interface SubRecipeVersionRequest {
+  name: string;
+  code: string;
+  version: string;
+  yieldQuantity: string;
+  yieldUnitId: string;
+  effectiveFrom: string;
+  components: RecipeComponentRequest[];
+}
+
+export interface RecipeComponentResponse extends RecipeComponentRequest {}
+
+export interface CostSnapshotResponse {
+  totalCost: string;
+  status: "current" | "missing_cost";
+}
+
+export interface SubRecipeVersionResponse extends SubRecipeVersionRequest {
+  recipeId: string;
+  recipeVersionId: string;
+  status: "approved" | "scheduled";
+  isActive: boolean;
+  costSnapshot: CostSnapshotResponse;
+  components: RecipeComponentResponse[];
+}
+
 export interface SupplierRequest {
   name: string;
   code: string;
