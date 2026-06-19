@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 from psycopg import errors
@@ -9,6 +10,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
+from gastroledger_api.modules.procurement.application.receipts import (
+    SupplierReceiptLineView,
+    SupplierReceiptView,
+)
 from gastroledger_api.modules.procurement.application.suppliers import (
     ProcurementAuthorizationDenied,
     ProcurementCodeConflict,
@@ -19,6 +24,7 @@ from gastroledger_api.modules.procurement.application.suppliers import (
     SupplierOfferView,
     SupplierView,
 )
+from gastroledger_api.modules.procurement.domain.receipts import ValidatedSupplierReceipt
 from gastroledger_api.modules.procurement.domain.suppliers import (
     ValidatedSupplier,
     ValidatedSupplierOffer,
@@ -28,16 +34,28 @@ from gastroledger_api.technical.cost_projection_models import (
     ControlOutboxEvent,
     MenuCostProjectionState,
 )
+from gastroledger_api.technical.inventory_models import (
+    InventoryEntry,
+    InventoryLot,
+    InventoryStockBalance,
+    InventoryTransaction,
+)
 from gastroledger_api.technical.menu_models import (
     MenuIngredient,
     MenuRecipeComponent,
     MenuRecipeVersion,
 )
-from gastroledger_api.technical.platform_models import ControlAuditEvent, PlatformMembership
+from gastroledger_api.technical.platform_models import (
+    ControlAuditEvent,
+    PlatformMembership,
+    PlatformWarehouse,
+)
 from gastroledger_api.technical.postgres_platform import sqlalchemy_database_url
 from gastroledger_api.technical.procurement_models import (
     ProcurementSupplier,
     ProcurementSupplierOffer,
+    ProcurementSupplierReceipt,
+    ProcurementSupplierReceiptLine,
 )
 
 
@@ -160,6 +178,185 @@ class PostgresProcurementStore:
                 raise ProcurementCodeConflict from error
             raise
 
+    def accept_supplier_receipt(
+        self,
+        identity: SupplierIdentity,
+        receipt: ValidatedSupplierReceipt,
+        correlation_id: str,
+    ) -> SupplierReceiptView:
+        now = datetime.now(UTC)
+        tenant_id = UUID(identity.tenant_id)
+        with self._open_session() as session, session.begin():
+            self._authorize_procurement_identity(session, identity)
+            existing = session.execute(
+                select(ProcurementSupplierReceipt).where(
+                    ProcurementSupplierReceipt.tenant_id == tenant_id,
+                    ProcurementSupplierReceipt.idempotency_key == receipt.idempotency_key,
+                )
+            ).scalar_one_or_none()
+            if existing is not None:
+                return self._receipt_view(session, existing)
+            self._ensure_supplier(session, identity, receipt.supplier_id)
+            warehouse = session.execute(
+                select(PlatformWarehouse).where(
+                    PlatformWarehouse.tenant_id == tenant_id,
+                    PlatformWarehouse.id == UUID(receipt.warehouse_id),
+                    PlatformWarehouse.status == "active",
+                )
+            ).scalar_one_or_none()
+            if warehouse is None:
+                raise ProcurementNotFound
+
+            receipt_id = uuid4()
+            accepted_lines: list[tuple[ProcurementSupplierReceiptLine, object]] = []
+            line_records: list[ProcurementSupplierReceiptLine] = []
+            seen_lot_codes: set[str] = set()
+            for line in receipt.lines:
+                self._ensure_ingredient_unit(
+                    session, identity, line.ingredient_id, line.purchase_unit_id
+                )
+                status = line.status
+                rejection_reason = line.rejection_reason
+                duplicate = session.execute(
+                    select(InventoryLot.id).where(
+                        InventoryLot.tenant_id == tenant_id,
+                        InventoryLot.warehouse_id == warehouse.id,
+                        InventoryLot.lot_code == line.lot_code,
+                    )
+                ).scalar_one_or_none()
+                if duplicate is not None or line.lot_code in seen_lot_codes:
+                    status = "rejected"
+                    rejection_reason = "duplicate_lot"
+                seen_lot_codes.add(line.lot_code)
+                accepted_quantity = (
+                    line.accepted_quantity if status != "rejected" else Decimal("0")
+                )
+                line_record = ProcurementSupplierReceiptLine(
+                    id=uuid4(),
+                    tenant_id=tenant_id,
+                    receipt_id=receipt_id,
+                    ingredient_id=UUID(line.ingredient_id),
+                    purchase_unit_id=UUID(line.purchase_unit_id),
+                    lot_code=line.lot_code,
+                    ordered_quantity=line.ordered_quantity,
+                    delivered_quantity=line.delivered_quantity,
+                    accepted_quantity=accepted_quantity,
+                    remaining_quantity=line.ordered_quantity - accepted_quantity,
+                    unit_cost=line.unit_cost,
+                    expiry_date=line.expiry_date,
+                    temperature=line.temperature,
+                    status=status,
+                    rejection_reason=rejection_reason,
+                )
+                line_records.append(line_record)
+                if status != "rejected":
+                    accepted_lines.append((line_record, line))
+
+            statuses = {line.status for line in line_records}
+            overall_status = (
+                "rejected"
+                if not accepted_lines
+                else "accepted"
+                if statuses == {"accepted"}
+                else "partial"
+            )
+            receipt_record = ProcurementSupplierReceipt(
+                id=receipt_id,
+                tenant_id=tenant_id,
+                idempotency_key=receipt.idempotency_key,
+                order_reference=receipt.order_reference,
+                supplier_id=UUID(receipt.supplier_id),
+                warehouse_id=warehouse.id,
+                received_on=receipt.received_on,
+                status=overall_status,
+                actor_id=UUID(identity.actor_id),
+                correlation_id=correlation_id,
+                accepted_at=now,
+            )
+            session.add(receipt_record)
+            session.add_all(line_records)
+            session.flush()
+            transaction_id: UUID | None = None
+            if accepted_lines:
+                transaction_id = uuid4()
+                session.add(
+                    InventoryTransaction(
+                        id=transaction_id,
+                        tenant_id=tenant_id,
+                        warehouse_id=warehouse.id,
+                        source_receipt_id=receipt_id,
+                        transaction_type="supplier_receipt",
+                        actor_id=UUID(identity.actor_id),
+                        correlation_id=correlation_id,
+                        occurred_at=now,
+                    )
+                )
+                session.flush()
+                for line_record, line in accepted_lines:
+                    lot_id = uuid4()
+                    session.add(
+                        InventoryLot(
+                            id=lot_id,
+                            tenant_id=tenant_id,
+                            warehouse_id=warehouse.id,
+                            ingredient_id=line_record.ingredient_id,
+                            unit_id=line_record.purchase_unit_id,
+                            lot_code=line_record.lot_code,
+                            expiry_date=line_record.expiry_date,
+                            unit_cost=line_record.unit_cost,
+                            source_receipt_line_id=line_record.id,
+                            created_at=now,
+                        )
+                    )
+                    session.flush()
+                    session.add(
+                        InventoryEntry(
+                            id=uuid4(),
+                            tenant_id=tenant_id,
+                            transaction_id=transaction_id,
+                            lot_id=lot_id,
+                            quantity=line.accepted_quantity,
+                            unit_cost=line.unit_cost,
+                        )
+                    )
+                    session.add(
+                        InventoryStockBalance(
+                            lot_id=lot_id,
+                            tenant_id=tenant_id,
+                            warehouse_id=warehouse.id,
+                            quantity=line.accepted_quantity,
+                            updated_at=now,
+                        )
+                    )
+                session.add(
+                    ControlOutboxEvent(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        event_type="procurement.supplier_receipt.accepted",
+                        aggregate_id=receipt_id,
+                        payload={
+                            "receiptId": str(receipt_id),
+                            "inventoryTransactionId": str(transaction_id),
+                        },
+                        correlation_id=correlation_id,
+                        status="pending",
+                        attempts=0,
+                        available_at=now,
+                        created_at=now,
+                        processed_at=None,
+                        last_error=None,
+                    )
+                )
+            session.flush()
+            self._audit(
+                session,
+                identity,
+                correlation_id,
+                "procurement.supplier_receipt.accepted",
+                str(receipt_id),
+            )
+            return self._receipt_view(session, receipt_record, transaction_id)
+
     @staticmethod
     def _authorize_procurement_identity(session: Session, identity: SupplierIdentity) -> None:
         session.execute(text("set local role gastroledger_app"))
@@ -173,7 +370,7 @@ class PostgresProcurementStore:
                 PlatformMembership.user_id == UUID(identity.actor_id),
             )
         ).scalar_one_or_none()
-        if role != "tenant_admin":
+        if role not in {"tenant_admin", "branch_manager", "branch_operator"}:
             raise ProcurementAuthorizationDenied
 
     @staticmethod
@@ -363,4 +560,51 @@ class PostgresProcurementStore:
             currency=offer.currency,
             effective_from=offer.effective_from,
             effective_until=offer.effective_until,
+        )
+
+    @staticmethod
+    def _receipt_view(
+        session: Session,
+        receipt: ProcurementSupplierReceipt,
+        transaction_id: UUID | None = None,
+    ) -> SupplierReceiptView:
+        lines = tuple(
+            session.execute(
+                select(ProcurementSupplierReceiptLine)
+                .where(ProcurementSupplierReceiptLine.receipt_id == receipt.id)
+                .order_by(ProcurementSupplierReceiptLine.id)
+            ).scalars()
+        )
+        if transaction_id is None:
+            transaction_id = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.source_receipt_id == receipt.id
+                )
+            ).scalar_one_or_none()
+        lot_by_line = {
+            lot.source_receipt_line_id: lot
+            for lot in session.execute(
+                select(InventoryLot).where(
+                    InventoryLot.source_receipt_line_id.in_([line.id for line in lines])
+                )
+            ).scalars()
+        }
+        return SupplierReceiptView(
+            receipt_id=str(receipt.id),
+            inventory_transaction_id=str(transaction_id) if transaction_id else None,
+            idempotency_key=receipt.idempotency_key,
+            order_reference=receipt.order_reference,
+            status=receipt.status,
+            lines=tuple(
+                SupplierReceiptLineView(
+                    receipt_line_id=str(line.id),
+                    lot_id=str(lot_by_line[line.id].id) if line.id in lot_by_line else None,
+                    lot_code=line.lot_code,
+                    accepted_quantity=line.accepted_quantity,
+                    remaining_quantity=line.remaining_quantity,
+                    status=line.status,
+                    rejection_reason=line.rejection_reason,
+                )
+                for line in lines
+            ),
         )

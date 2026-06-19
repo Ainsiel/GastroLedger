@@ -35,6 +35,8 @@ function problemOutcome(problem: ApiProblem): Exclude<ProcurementOutcome, { kind
     const message =
       problem.type === "procurement.offer_overlap"
         ? "That supplier offer overlaps an existing effective date range."
+        : problem.type === "procurement.receipt_rejected"
+          ? "Temperature, duplicate lot or tolerance rules rejected this delivery line."
         : "That supplier code already exists.";
     return { kind: "conflict", message, correlationId: problem.correlationId };
   }

@@ -12,15 +12,20 @@ from gastroledger_api.modules.platform_organization.public import Authentication
 from gastroledger_api.modules.procurement.public import (
     CreateSupplier,
     CreateSupplierOffer,
+    CreateSupplierReceipt,
+    CreateSupplierReceiptLine,
     ProcurementAuthorizationDenied,
     ProcurementCodeConflict,
     ProcurementDateOverlap,
     ProcurementNotFound,
+    ProcurementReceiptService,
     ProcurementService,
     ProcurementUnitMismatch,
     ProcurementValidationError,
     SupplierIdentity,
     SupplierOfferView,
+    SupplierReceiptLineView,
+    SupplierReceiptView,
     SupplierView,
 )
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
@@ -63,6 +68,32 @@ class SupplierOfferRequest(BaseModel):
     effectiveUntil: date | None = None
 
 
+class SupplierReceiptLineRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ingredientId: str = Field(min_length=1)
+    purchaseUnitId: str = Field(min_length=1)
+    lotCode: str = Field(min_length=1, max_length=80)
+    orderedQuantity: str = Field(min_length=1, max_length=50)
+    deliveredQuantity: str = Field(min_length=1, max_length=50)
+    unitCost: str = Field(min_length=1, max_length=50)
+    expiryDate: date
+    temperature: str = Field(min_length=1, max_length=30)
+    minimumTemperature: str = Field(min_length=1, max_length=30)
+    maximumTemperature: str = Field(min_length=1, max_length=30)
+    tolerancePercent: str = Field(min_length=1, max_length=30)
+
+
+class SupplierReceiptRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    orderReference: str = Field(min_length=1, max_length=120)
+    supplierId: str = Field(min_length=1)
+    warehouseId: str = Field(min_length=1)
+    receivedOn: date
+    lines: list[SupplierReceiptLineRequest] = Field(min_length=1)
+
+
 class SupplierResponse(BaseModel):
     supplierId: str
     name: str
@@ -79,6 +110,25 @@ class SupplierOfferResponse(BaseModel):
     currency: str
     effectiveFrom: date
     effectiveUntil: date | None
+
+
+class SupplierReceiptLineResponse(BaseModel):
+    receiptLineId: str
+    lotId: str | None
+    lotCode: str
+    acceptedQuantity: str
+    remainingQuantity: str
+    status: str
+    rejectionReason: str | None
+
+
+class SupplierReceiptResponse(BaseModel):
+    receiptId: str
+    inventoryTransactionId: str | None
+    idempotencyKey: str
+    orderReference: str
+    status: str
+    lines: list[SupplierReceiptLineResponse]
 
 
 def supplier_response(supplier: SupplierView) -> SupplierResponse:
@@ -103,11 +153,37 @@ def offer_response(offer: SupplierOfferView) -> SupplierOfferResponse:
     )
 
 
+def receipt_line_response(line: SupplierReceiptLineView) -> SupplierReceiptLineResponse:
+    return SupplierReceiptLineResponse(
+        receiptLineId=line.receipt_line_id,
+        lotId=line.lot_id,
+        lotCode=line.lot_code,
+        acceptedQuantity=format(line.accepted_quantity.normalize(), "f"),
+        remainingQuantity=format(line.remaining_quantity.normalize(), "f"),
+        status=line.status,
+        rejectionReason=line.rejection_reason,
+    )
+
+
+def receipt_response(receipt: SupplierReceiptView) -> SupplierReceiptResponse:
+    return SupplierReceiptResponse(
+        receiptId=receipt.receipt_id,
+        inventoryTransactionId=receipt.inventory_transaction_id,
+        idempotencyKey=receipt.idempotency_key,
+        orderReference=receipt.order_reference,
+        status=receipt.status,
+        lines=[receipt_line_response(line) for line in receipt.lines],
+    )
+
+
 def create_procurement_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/procurement", tags=["procurement"])
     resolved_database_url = database_url or os.environ.get("DATABASE_URL", "")
     platform_store = PostgresPlatformStore(resolved_database_url)
     service = ProcurementService(store=PostgresProcurementStore(resolved_database_url))
+    receipts = ProcurementReceiptService(
+        store=PostgresProcurementStore(resolved_database_url)
+    )
 
     def procurement_identity(gl_session: str | None) -> SupplierIdentity:
         if not gl_session:
@@ -260,6 +336,62 @@ def create_procurement_router(database_url: str | None = None) -> APIRouter:
             ProcurementNotFound,
             ProcurementUnitMismatch,
             ProcurementDateOverlap,
+            ProcurementCodeConflict,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return procurement_problem(error, correlation_id)
+
+    @router.post(
+        "/supplier-receipts/{receiptId}/accept",
+        response_model=SupplierReceiptResponse,
+        status_code=201,
+        operation_id="acceptSupplierReceipt",
+        summary="Accept a supplier receipt into the immutable inventory ledger",
+        responses=PROCUREMENT_RESPONSES,
+    )
+    def accept_supplier_receipt(
+        receiptId: str,
+        request: SupplierReceiptRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return receipt_response(
+                receipts.accept_supplier_receipt(
+                    procurement_identity(gl_session),
+                    CreateSupplierReceipt(
+                        idempotency_key=receiptId,
+                        order_reference=request.orderReference,
+                        supplier_id=request.supplierId,
+                        warehouse_id=request.warehouseId,
+                        received_on=request.receivedOn,
+                        lines=tuple(
+                            CreateSupplierReceiptLine(
+                                ingredient_id=line.ingredientId,
+                                purchase_unit_id=line.purchaseUnitId,
+                                lot_code=line.lotCode,
+                                ordered_quantity=line.orderedQuantity,
+                                delivered_quantity=line.deliveredQuantity,
+                                unit_cost=line.unitCost,
+                                expiry_date=line.expiryDate,
+                                temperature=line.temperature,
+                                minimum_temperature=line.minimumTemperature,
+                                maximum_temperature=line.maximumTemperature,
+                                tolerance_percent=line.tolerancePercent,
+                            )
+                            for line in request.lines
+                        ),
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            ProcurementAuthorizationDenied,
+            ProcurementValidationError,
+            ProcurementNotFound,
+            ProcurementUnitMismatch,
             ProcurementCodeConflict,
             psycopg.Error,
             SQLAlchemyError,

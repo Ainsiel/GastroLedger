@@ -93,11 +93,23 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-009 Receive a supplier delivery into the inventory ledger
 GL-016 Apply manual ordering holds
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-009 Supplier Receipt Inventory Ledger
+
+```text
+work_order_id = GL-009
+feature_branch = feature/GL-009-supplier-receipt-inventory-ledger
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/33
+```
+
+Delivery evidence so far: PR #33 is open against `develop` and implements atomic,
+idempotent supplier receipts, traceable lots, immutable entries and non-negative
+balance projections. Visual QA is intentionally skipped per user instruction.
 
 ## Completed: GL-008 Cost Snapshot Recalculation
 
