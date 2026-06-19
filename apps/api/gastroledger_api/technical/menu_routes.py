@@ -11,8 +11,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from gastroledger_api.modules.menu_engineering.public import (
     ArchiveIngredient,
     ConversionFactorView,
+    CostSnapshotView,
     CreateConversionFactor,
     CreateIngredient,
+    CreateRecipeComponent,
+    CreateSubRecipeVersion,
     CreateUnit,
     IngredientArchived,
     IngredientCodeConflict,
@@ -22,7 +25,14 @@ from gastroledger_api.modules.menu_engineering.public import (
     MenuCodeConflict,
     MenuIdentity,
     MenuNotFound,
+    MenuRecipeService,
     MenuValidationError,
+    RecipeCodeConflict,
+    RecipeComponentView,
+    RecipeGraphViolation,
+    RecipeMissingCost,
+    RecipeVersionConflict,
+    SubRecipeVersionView,
     UnitConversionUnavailable,
     UnitDimensionMismatch,
     UnitView,
@@ -77,6 +87,27 @@ class IngredientRequest(BaseModel):
     criticalStockQuantity: str = Field(min_length=1, max_length=50)
 
 
+class RecipeComponentRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    componentType: str = Field(min_length=1, max_length=20)
+    componentId: str = Field(min_length=1)
+    quantity: str = Field(min_length=1, max_length=50)
+    unitId: str = Field(min_length=1)
+
+
+class SubRecipeVersionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    code: str = Field(min_length=1, max_length=63)
+    version: str = Field(min_length=1, max_length=40)
+    yieldQuantity: str = Field(min_length=1, max_length=50)
+    yieldUnitId: str = Field(min_length=1)
+    effectiveFrom: date
+    components: list[RecipeComponentRequest] = Field(min_length=1)
+
+
 class ConversionFactorResponse(BaseModel):
     conversionFactorId: str
     sourceUnitId: str
@@ -103,6 +134,33 @@ class IngredientResponse(BaseModel):
     criticalStockQuantity: str
     status: str
     availableForNewUse: bool
+
+
+class RecipeComponentResponse(BaseModel):
+    componentType: str
+    componentId: str
+    quantity: str
+    unitId: str
+
+
+class CostSnapshotResponse(BaseModel):
+    totalCost: str
+    status: str
+
+
+class SubRecipeVersionResponse(BaseModel):
+    recipeId: str
+    recipeVersionId: str
+    name: str
+    code: str
+    version: str
+    yieldQuantity: str
+    yieldUnitId: str
+    effectiveFrom: date
+    status: str
+    isActive: bool
+    components: list[RecipeComponentResponse]
+    costSnapshot: CostSnapshotResponse
 
 
 def conversion_response(conversion: ConversionFactorView) -> ConversionFactorResponse:
@@ -139,11 +197,46 @@ def ingredient_response(ingredient: IngredientView) -> IngredientResponse:
     )
 
 
+def component_response(component: RecipeComponentView) -> RecipeComponentResponse:
+    return RecipeComponentResponse(
+        componentType=component.component_type,
+        componentId=component.component_id,
+        quantity=format(component.quantity.normalize(), "f"),
+        unitId=component.unit_id,
+    )
+
+
+def cost_snapshot_response(snapshot: CostSnapshotView) -> CostSnapshotResponse:
+    return CostSnapshotResponse(
+        totalCost=format(snapshot.total_cost.normalize(), "f"),
+        status=snapshot.status,
+    )
+
+
+def sub_recipe_response(recipe: SubRecipeVersionView) -> SubRecipeVersionResponse:
+    return SubRecipeVersionResponse(
+        recipeId=recipe.recipe_id,
+        recipeVersionId=recipe.recipe_version_id,
+        name=recipe.name,
+        code=recipe.code,
+        version=recipe.version,
+        yieldQuantity=format(recipe.yield_quantity.normalize(), "f"),
+        yieldUnitId=recipe.yield_unit_id,
+        effectiveFrom=recipe.effective_from,
+        status=recipe.status,
+        isActive=recipe.is_active,
+        components=[component_response(component) for component in recipe.components],
+        costSnapshot=cost_snapshot_response(recipe.cost_snapshot),
+    )
+
+
 def create_menu_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/menu", tags=["menu-engineering"])
     resolved_database_url = database_url or os.environ.get("DATABASE_URL", "")
     platform_store = PostgresPlatformStore(resolved_database_url)
-    catalog = MenuCatalogService(store=PostgresMenuCatalogStore(resolved_database_url))
+    menu_store = PostgresMenuCatalogStore(resolved_database_url)
+    catalog = MenuCatalogService(store=menu_store)
+    recipes = MenuRecipeService(store=menu_store)
 
     def menu_identity(gl_session: str | None) -> MenuIdentity:
         if not gl_session:
@@ -190,6 +283,17 @@ def create_menu_router(database_url: str | None = None) -> APIRouter:
             return problem_response(409, "menu.code_conflict", correlation_id, [])
         if isinstance(error, IngredientArchived):
             return problem_response(409, "menu.ingredient_archived", correlation_id, [])
+        if isinstance(error, (RecipeCodeConflict, RecipeVersionConflict)):
+            return problem_response(409, "menu.recipe_version_conflict", correlation_id, [])
+        if isinstance(error, RecipeGraphViolation):
+            return problem_response(409, "menu.recipe_graph_invalid", correlation_id, [])
+        if isinstance(error, RecipeMissingCost):
+            return problem_response(
+                409,
+                "menu.recipe_missing_cost",
+                correlation_id,
+                [{"field": "components", "code": "missing_cost", "detail": "add offer"}],
+            )
         return problem_response(500, "menu.catalog_failed", correlation_id, [])
 
     @router.get(
@@ -369,6 +473,81 @@ def create_menu_router(database_url: str | None = None) -> APIRouter:
             MenuAuthorizationDenied,
             MenuNotFound,
             IngredientArchived,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return menu_problem(error, correlation_id)
+
+    @router.get(
+        "/recipes/sub-recipes",
+        response_model=list[SubRecipeVersionResponse],
+        operation_id="listSubRecipeVersions",
+        summary="List tenant sub-recipe versions",
+        responses=MENU_RESPONSES,
+    )
+    def list_sub_recipes(gl_session: str | None = Security(session_cookie)):
+        correlation_id = str(uuid4())
+        try:
+            return [
+                sub_recipe_response(recipe)
+                for recipe in recipes.list_sub_recipes(menu_identity(gl_session))
+            ]
+        except (
+            AuthenticationRequired,
+            MenuAuthorizationDenied,
+            psycopg.Error,
+            SQLAlchemyError,
+        ) as error:
+            return menu_problem(error, correlation_id)
+
+    @router.post(
+        "/recipes/sub-recipes",
+        response_model=SubRecipeVersionResponse,
+        status_code=201,
+        operation_id="approveSubRecipeVersion",
+        summary="Approve an immutable sub-recipe version",
+        responses=MENU_RESPONSES,
+    )
+    def approve_sub_recipe_version(
+        request: SubRecipeVersionRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return sub_recipe_response(
+                recipes.approve_sub_recipe_version(
+                    menu_identity(gl_session),
+                    CreateSubRecipeVersion(
+                        name=request.name,
+                        code=request.code,
+                        version=request.version,
+                        yield_quantity=request.yieldQuantity,
+                        yield_unit_id=request.yieldUnitId,
+                        effective_from=request.effectiveFrom,
+                        components=tuple(
+                            CreateRecipeComponent(
+                                component_type=component.componentType,
+                                component_id=component.componentId,
+                                quantity=component.quantity,
+                                unit_id=component.unitId,
+                            )
+                            for component in request.components
+                        ),
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except (
+            AuthenticationRequired,
+            MenuAuthorizationDenied,
+            MenuValidationError,
+            MenuNotFound,
+            UnitConversionUnavailable,
+            UnitDimensionMismatch,
+            RecipeCodeConflict,
+            RecipeVersionConflict,
+            RecipeGraphViolation,
+            RecipeMissingCost,
             psycopg.Error,
             SQLAlchemyError,
         ) as error:

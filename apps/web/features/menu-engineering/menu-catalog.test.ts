@@ -18,17 +18,35 @@ describe("menu catalog API consumption", () => {
           },
         ]);
       }
+      if (String(input).endsWith("/menu/ingredients")) {
+        return Response.json([
+          {
+            ingredientId: "ingredient-1",
+            name: "Flour",
+            code: "FLOUR",
+            purchaseUnitId: "unit-1",
+            consumptionUnitId: "unit-1",
+            shelfLifeDays: 180,
+            criticalStockQuantity: "10",
+            status: "active",
+            availableForNewUse: true,
+          },
+        ]);
+      }
       return Response.json([
         {
-          ingredientId: "ingredient-1",
-          name: "Flour",
-          code: "FLOUR",
-          purchaseUnitId: "unit-1",
-          consumptionUnitId: "unit-1",
-          shelfLifeDays: 180,
-          criticalStockQuantity: "10",
-          status: "active",
-          availableForNewUse: true,
+          recipeId: "recipe-1",
+          recipeVersionId: "version-1",
+          name: "Sofrito base",
+          code: "SOFRITO-BASE",
+          version: "v1",
+          yieldQuantity: "2",
+          yieldUnitId: "unit-1",
+          effectiveFrom: "2026-06-19",
+          status: "approved",
+          isActive: true,
+          components: [],
+          costSnapshot: { totalCost: "14", status: "current" },
         },
       ]);
     };
@@ -37,7 +55,11 @@ describe("menu catalog API consumption", () => {
 
     expect(result.kind).toBe("ready");
     expect(result.kind === "ready" && result.units[0].code).toBe("KG");
-    expect(calls).toEqual(["/api/v1/menu/units", "/api/v1/menu/ingredients"]);
+    expect(calls).toEqual([
+      "/api/v1/menu/units",
+      "/api/v1/menu/ingredients",
+      "/api/v1/menu/recipes/sub-recipes",
+    ]);
   });
 
   it("normalizes duplicate and validation problems into visible outcomes", async () => {
@@ -61,6 +83,28 @@ describe("menu catalog API consumption", () => {
       kind: "conflict",
       message: "That code or effective-dated factor already exists.",
       correlationId: "conflict-1",
+    });
+
+    const graph = await menuCatalogRequest(
+      "/api/v1/menu/recipes/sub-recipes",
+      { method: "POST", body: JSON.stringify({}) },
+      async () =>
+        Response.json(
+          {
+            type: "menu.recipe_graph_invalid",
+            title: "The request could not be completed",
+            status: 409,
+            correlationId: "graph-1",
+            errors: [],
+          },
+          { status: 409 },
+        ),
+    );
+
+    expect(graph).toEqual({
+      kind: "conflict",
+      message: "Recipe approval would create a cycle or exceed the approved nesting depth.",
+      correlationId: "graph-1",
     });
   });
 });

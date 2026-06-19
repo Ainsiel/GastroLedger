@@ -7,16 +7,21 @@ from gastroledger_api.modules.menu_engineering.public import (
     ArchiveIngredient,
     CreateConversionFactor,
     CreateIngredient,
+    CreateRecipeComponent,
+    CreateSubRecipeVersion,
     CreateUnit,
     IngredientArchived,
     MenuAuthorizationDenied,
     MenuCatalogService,
     MenuIdentity,
+    MenuRecipeService,
     MenuValidationError,
+    RecipeGraphViolation,
     UnitConversionUnavailable,
     UnitDimensionMismatch,
     validate_conversion_factor,
     validate_ingredient,
+    validate_sub_recipe_version,
     validate_unit,
 )
 
@@ -237,3 +242,130 @@ def test_archived_ingredient_is_reported_as_not_available_for_new_use() -> None:
 
     assert archived["status"] == "archived"
     assert store.archived == ["ingredient-1"]
+
+
+class RecordingRecipeStore:
+    def __init__(self) -> None:
+        self.approved: list[object] = []
+        self.reject_graph = False
+
+    def list_sub_recipes(self, _identity: MenuIdentity) -> tuple[object, ...]:
+        return tuple(self.approved)
+
+    def approve_sub_recipe_version(
+        self,
+        _identity: MenuIdentity,
+        recipe: object,
+        _correlation_id: str,
+    ) -> object:
+        if self.reject_graph:
+            raise RecipeGraphViolation("cycle")
+        self.approved.append(recipe)
+        return {
+            "recipe_id": "recipe-1",
+            "recipe_version_id": "version-1",
+            "code": recipe.code,
+            "name": recipe.name,
+            "version": recipe.version,
+            "status": "approved",
+            "is_active": True,
+            "yield_quantity": recipe.yield_quantity,
+            "yield_unit_id": recipe.yield_unit_id,
+            "effective_from": recipe.effective_from,
+            "components": recipe.components,
+            "cost_snapshot": {"total_cost": recipe.yield_quantity, "status": "current"},
+        }
+
+
+def test_sub_recipe_version_validation_normalizes_and_requires_positive_values() -> None:
+    version = validate_sub_recipe_version(
+        name="  Sofrito base  ",
+        code=" sofrito-base ",
+        version=" v1 ",
+        yield_quantity="2.5",
+        yield_unit_id="unit-kg",
+        effective_from=date(2026, 6, 19),
+        components=(
+            CreateRecipeComponent(
+                component_type="ingredient",
+                component_id="ingredient-onion",
+                quantity="1.25",
+                unit_id="unit-kg",
+            ),
+        ),
+    )
+
+    assert version.name == "Sofrito base"
+    assert version.code == "SOFRITO-BASE"
+    assert version.yield_quantity == Decimal("2.5")
+    assert version.components[0].quantity == Decimal("1.25")
+
+    with pytest.raises(MenuValidationError) as error:
+        validate_sub_recipe_version(
+            name="Sofrito base",
+            code="sofrito-base",
+            version="v1",
+            yield_quantity="0",
+            yield_unit_id="unit-kg",
+            effective_from=date(2026, 6, 19),
+            components=(),
+        )
+
+    assert ("yieldQuantity", "positive_required") in [
+        (detail.field, detail.code) for detail in error.value.details
+    ]
+    assert ("components", "required") in [
+        (detail.field, detail.code) for detail in error.value.details
+    ]
+
+
+def test_menu_engineer_approves_sub_recipe_version_and_surfaces_graph_rejection() -> None:
+    store = RecordingRecipeStore()
+    service = MenuRecipeService(store=store)
+
+    approved = service.approve_sub_recipe_version(
+        admin_identity(),
+        CreateSubRecipeVersion(
+            name="Sofrito base",
+            code="sofrito-base",
+            version="v1",
+            yield_quantity="2",
+            yield_unit_id="unit-kg",
+            effective_from=date(2026, 6, 19),
+            components=(
+                CreateRecipeComponent(
+                    component_type="ingredient",
+                    component_id="ingredient-onion",
+                    quantity="1",
+                    unit_id="unit-kg",
+                ),
+            ),
+        ),
+        correlation_id="recipe-approve",
+    )
+
+    assert approved["code"] == "SOFRITO-BASE"
+    assert approved["status"] == "approved"
+
+    store.reject_graph = True
+    with pytest.raises(RecipeGraphViolation):
+        service.approve_sub_recipe_version(
+            admin_identity(),
+            CreateSubRecipeVersion(
+                name="Nested sauce",
+                code="nested-sauce",
+                version="v1",
+                yield_quantity="1",
+                yield_unit_id="unit-kg",
+                effective_from=date(2026, 6, 19),
+                components=(
+                    CreateRecipeComponent(
+                        component_type="sub_recipe",
+                        component_id="recipe-1",
+                        quantity="1",
+                        unit_id="unit-kg",
+                    ),
+                ),
+            ),
+            correlation_id="recipe-cycle",
+        )

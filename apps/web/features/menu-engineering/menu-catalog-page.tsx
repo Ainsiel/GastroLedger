@@ -5,12 +5,15 @@ import type {
   ConversionFactorResponse,
   IngredientRequest,
   IngredientResponse,
+  SubRecipeVersionRequest,
+  SubRecipeVersionResponse,
   UnitDimension,
   UnitRequest,
   UnitResponse,
 } from "@gastroledger/api-contract";
 import {
   Archive,
+  BookOpenCheck,
   CheckCircle2,
   CookingPot,
   LoaderCircle,
@@ -159,6 +162,33 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
     );
   }
 
+  async function approveSubRecipe(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const request: SubRecipeVersionRequest = {
+      name: String(form.get("name")),
+      code: String(form.get("code")),
+      version: String(form.get("version")),
+      yieldQuantity: String(form.get("yieldQuantity")),
+      yieldUnitId: String(form.get("yieldUnitId")),
+      effectiveFrom: String(form.get("effectiveFrom")),
+      components: [
+        {
+          componentType: "ingredient",
+          componentId: String(form.get("componentId")),
+          quantity: String(form.get("componentQuantity")),
+          unitId: String(form.get("componentUnitId")),
+        },
+      ],
+    };
+    await mutate<SubRecipeVersionResponse>(
+      "sub-recipe",
+      "/api/v1/menu/recipes/sub-recipes",
+      { method: "POST", body: JSON.stringify(request) },
+      "Sub-recipe version approved.",
+    );
+  }
+
   async function archiveIngredient(ingredient: IngredientResponse) {
     const outcome = await mutate<IngredientResponse>(
       `archive-${ingredient.ingredientId}`,
@@ -175,6 +205,8 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
   }
 
   const canCreateIngredient = snapshot.units.length > 0;
+  const activeIngredients = snapshot.ingredients.filter((ingredient) => ingredient.availableForNewUse);
+  const canApproveSubRecipe = snapshot.units.length > 0 && activeIngredients.length > 0;
 
   return (
     <div className="min-w-0 space-y-6 overflow-hidden">
@@ -191,7 +223,8 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
           </p>
         </div>
         <Badge variant="outline">
-          {snapshot.units.length} units / {snapshot.ingredients.length} ingredients
+          {snapshot.units.length} units / {snapshot.ingredients.length} ingredients /{" "}
+          {snapshot.subRecipes.length} recipes
         </Badge>
       </header>
 
@@ -402,6 +435,74 @@ export function MenuCatalogPage({ initial }: { initial: MenuCatalogSnapshot }) {
           )}
         </CardContent>
       </Card>
+
+      <Card className="min-w-0 overflow-hidden">
+        <CardHeader>
+          <CardTitle>Sub-recipes</CardTitle>
+          <CardDescription>
+            Approved versions are immutable and preserve their initial theoretical cost snapshot.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="min-w-0 space-y-5">
+          {!canApproveSubRecipe ? (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertTitle>Ingredients and units are required</AlertTitle>
+              <AlertDescription>
+                Add at least one active ingredient with current local offer cost evidence before
+                approving a sub-recipe.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          <form
+            onSubmit={approveSubRecipe}
+            className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.8fr_0.8fr_1fr_1fr_1fr_1fr_auto] xl:items-end"
+          >
+            <Field id="sub-recipe-name" label="Sub-recipe name" name="name" placeholder="Tomato base" maxLength={120} required />
+            <Field id="sub-recipe-code" label="Sub-recipe code" name="code" placeholder="TOMATO-BASE" maxLength={63} required />
+            <Field id="sub-recipe-version" label="Version" name="version" placeholder="v1" maxLength={40} required />
+            <Field id="sub-recipe-yield" label="Yield quantity" name="yieldQuantity" inputMode="decimal" placeholder="2" required />
+            <UnitSelect id="sub-recipe-yield-unit" label="Yield unit" name="yieldUnitId" units={snapshot.units} />
+            <IngredientSelect id="sub-recipe-component" label="Component ingredient" name="componentId" ingredients={activeIngredients} />
+            <Field id="sub-recipe-component-quantity" label="Component quantity" name="componentQuantity" inputMode="decimal" placeholder="4" required />
+            <UnitSelect id="sub-recipe-component-unit" label="Component unit" name="componentUnitId" units={snapshot.units} />
+            <Field id="sub-recipe-effective" label="Effective from" name="effectiveFrom" type="date" required className="xl:col-start-5" />
+            <Button
+              type="submit"
+              className="w-full xl:w-auto"
+              disabled={pending === "sub-recipe" || !canApproveSubRecipe}
+            >
+              {pending === "sub-recipe" ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
+              Approve sub-recipe
+            </Button>
+          </form>
+
+          {snapshot.subRecipes.length === 0 ? (
+            <EmptyState icon={BookOpenCheck} title="No sub-recipes approved" text="Approved sub-recipes will show version, status and preserved theoretical cost." />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {snapshot.subRecipes.map((recipe) => (
+                <div key={recipe.recipeVersionId} className="rounded-lg border bg-muted/30 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{recipe.name}</p>
+                      <p className="mt-1 text-xs uppercase text-muted-foreground">
+                        {recipe.code} / {recipe.version}
+                      </p>
+                    </div>
+                    <Badge variant={recipe.isActive ? "default" : "outline"}>
+                      {recipe.isActive ? "active" : recipe.status}
+                    </Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Yield: {recipe.yieldQuantity} / Cost snapshot:{" "}
+                    {recipe.costSnapshot.totalCost}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -462,6 +563,27 @@ function UnitSelect({
       label={label}
       name={name}
       options={units.map((unit) => [unit.unitId, `${unit.code} - ${unit.name}`])}
+    />
+  );
+}
+
+function IngredientSelect({
+  id,
+  label,
+  name,
+  ingredients,
+}: {
+  id: string;
+  label: string;
+  name: string;
+  ingredients: IngredientResponse[];
+}) {
+  return (
+    <SelectField
+      id={id}
+      label={label}
+      name={name}
+      options={ingredients.map((ingredient) => [ingredient.ingredientId, `${ingredient.code} - ${ingredient.name}`])}
     />
   );
 }
