@@ -14,12 +14,8 @@ from gastroledger_api.modules.inventory_production.domain.production import (
 def test_allocation_uses_fefo_then_fifo_for_lots_without_expiry() -> None:
     lots = (
         StockLot("fifo-old", Decimal("4"), None, datetime(2026, 1, 1, tzinfo=UTC)),
-        StockLot(
-            "later", Decimal("5"), date(2026, 8, 1), datetime(2026, 1, 2, tzinfo=UTC)
-        ),
-        StockLot(
-            "sooner", Decimal("3"), date(2026, 7, 1), datetime(2026, 1, 3, tzinfo=UTC)
-        ),
+        StockLot("later", Decimal("5"), date(2026, 8, 1), datetime(2026, 1, 2, tzinfo=UTC)),
+        StockLot("sooner", Decimal("3"), date(2026, 7, 1), datetime(2026, 1, 3, tzinfo=UTC)),
     )
 
     allocations = allocate_stock(lots, Decimal("10"))

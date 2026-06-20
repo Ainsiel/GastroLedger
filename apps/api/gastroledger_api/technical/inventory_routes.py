@@ -18,6 +18,15 @@ from gastroledger_api.modules.inventory_production.public import (
     ProductionNotFound,
     ProductionService,
     ProductionValidationError,
+    RequestTransfer,
+    TransferAuthorizationDenied,
+    TransferConflict,
+    TransferIdentity,
+    TransferInsufficientStock,
+    TransferNotFound,
+    TransferService,
+    TransferValidationError,
+    TransferView,
 )
 from gastroledger_api.modules.platform_organization.public import AuthenticationRequired
 from gastroledger_api.technical.postgres_inventory import PostgresInventoryStore
@@ -62,6 +71,47 @@ class ProductionBatchResponse(BaseModel):
     consumedQuantity: str
 
 
+class TransferRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    transferNumber: str
+    sourceWarehouseId: str
+    destinationWarehouseId: str
+    itemType: str
+    itemId: str
+    unitId: str
+    requestedQuantity: str
+
+
+class TransferApprovalRequest(BaseModel):
+    approvedQuantity: str
+
+
+class TransferDispatchRequest(BaseModel):
+    dispatchQuantity: str
+
+
+class TransferReceiptRequest(BaseModel):
+    receivedQuantity: str
+    lossQuantity: str = "0"
+    lossReason: str = ""
+
+
+class TransferResponse(BaseModel):
+    transferId: str
+    transferNumber: str
+    status: str
+    sourceWarehouseId: str
+    destinationWarehouseId: str
+    itemType: str
+    itemId: str
+    unitId: str
+    requestedQuantity: str
+    approvedQuantity: str
+    dispatchedQuantity: str
+    receivedQuantity: str
+    lossQuantity: str
+
+
 def production_response(batch: ProductionBatchView) -> ProductionBatchResponse:
     return ProductionBatchResponse(
         productionBatchId=batch.production_batch_id,
@@ -78,17 +128,42 @@ def production_response(batch: ProductionBatchView) -> ProductionBatchResponse:
     )
 
 
+def transfer_response(value: TransferView) -> TransferResponse:
+    def amount(number):
+        return format(number.normalize(), "f")
+    return TransferResponse(
+        transferId=value.transfer_id,
+        transferNumber=value.transfer_number,
+        status=value.status,
+        sourceWarehouseId=value.source_warehouse_id,
+        destinationWarehouseId=value.destination_warehouse_id,
+        itemType=value.item_type,
+        itemId=value.item_id,
+        unitId=value.unit_id,
+        requestedQuantity=amount(value.requested_quantity),
+        approvedQuantity=amount(value.approved_quantity),
+        dispatchedQuantity=amount(value.dispatched_quantity),
+        receivedQuantity=amount(value.received_quantity),
+        lossQuantity=amount(value.loss_quantity),
+    )
+
+
 def create_inventory_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/inventory", tags=["inventory-production"])
     resolved_database_url = database_url or os.environ.get("DATABASE_URL", "")
     platform_store = PostgresPlatformStore(resolved_database_url)
     service = ProductionService(store=PostgresInventoryStore(resolved_database_url))
+    transfers = TransferService(store=PostgresInventoryStore(resolved_database_url))
 
     def identity(gl_session: str | None) -> ProductionIdentity:
         if not gl_session:
             raise AuthenticationRequired
         operating = platform_store.resolve_operating_identity(gl_session)
         return ProductionIdentity(operating.tenant_id, operating.actor_id, operating.role)
+
+    def transfer_identity(gl_session: str | None) -> TransferIdentity:
+        value = identity(gl_session)
+        return TransferIdentity(value.tenant_id, value.actor_id, value.role)
 
     def inventory_problem(error: Exception, correlation_id: str):
         if isinstance(error, AuthenticationRequired):
@@ -103,6 +178,28 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
             return problem_response(409, "inventory.insufficient_stock", correlation_id, [])
         if isinstance(error, ProductionConflict):
             return problem_response(409, "inventory.production_conflict", correlation_id, [])
+        if isinstance(error, TransferAuthorizationDenied):
+            return problem_response(
+                403, "inventory.transfer_authorization_denied", correlation_id, []
+            )
+        if isinstance(error, TransferNotFound):
+            return problem_response(404, "inventory.transfer_not_found", correlation_id, [])
+        if isinstance(error, TransferInsufficientStock):
+            return problem_response(
+                409, "inventory.transfer_insufficient_stock", correlation_id, []
+            )
+        if isinstance(error, TransferConflict):
+            return problem_response(409, "inventory.transfer_conflict", correlation_id, [])
+        if isinstance(error, TransferValidationError):
+            return problem_response(
+                422,
+                "inventory.transfer_invalid",
+                correlation_id,
+                [
+                    {"field": detail.field, "code": detail.code, "detail": "review field"}
+                    for detail in error.details
+                ],
+            )
         if isinstance(error, ProductionValidationError):
             return problem_response(
                 422,
@@ -157,6 +254,105 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
             psycopg.Error,
             SQLAlchemyError,
         ) as error:
+            return inventory_problem(error, correlation_id)
+
+    transfer_errors = (
+        AuthenticationRequired,
+        TransferAuthorizationDenied,
+        TransferNotFound,
+        TransferInsufficientStock,
+        TransferConflict,
+        TransferValidationError,
+        ValueError,
+        psycopg.Error,
+        SQLAlchemyError,
+    )
+
+    @router.post("/transfers", response_model=TransferResponse, status_code=201)
+    def request_transfer(
+        request: TransferRequest, gl_session: str | None = Security(session_cookie)
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return transfer_response(
+                transfers.request_transfer(
+                    transfer_identity(gl_session),
+                    RequestTransfer(
+                        request.transferNumber,
+                        request.sourceWarehouseId,
+                        request.destinationWarehouseId,
+                        request.itemType,
+                        request.itemId,
+                        request.unitId,
+                        request.requestedQuantity,
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except transfer_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/transfers/{transferId}/approve", response_model=TransferResponse)
+    def approve_transfer_route(
+        transferId: str,
+        request: TransferApprovalRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return transfer_response(
+                transfers.approve_transfer(
+                    transfer_identity(gl_session),
+                    transferId,
+                    request.approvedQuantity,
+                    correlation_id=correlation_id,
+                )
+            )
+        except transfer_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/transfers/{transferId}/dispatch/{commandId}", response_model=TransferResponse)
+    def dispatch_transfer_route(
+        transferId: str,
+        commandId: str,
+        request: TransferDispatchRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return transfer_response(
+                transfers.dispatch_transfer(
+                    transfer_identity(gl_session),
+                    transferId,
+                    commandId,
+                    request.dispatchQuantity,
+                    correlation_id=correlation_id,
+                )
+            )
+        except transfer_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/transfers/{transferId}/receive/{commandId}", response_model=TransferResponse)
+    def receive_transfer_route(
+        transferId: str,
+        commandId: str,
+        request: TransferReceiptRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return transfer_response(
+                transfers.receive_transfer(
+                    transfer_identity(gl_session),
+                    transferId,
+                    commandId,
+                    request.receivedQuantity,
+                    request.lossQuantity,
+                    request.lossReason,
+                    correlation_id=correlation_id,
+                )
+            )
+        except transfer_errors as error:
             return inventory_problem(error, correlation_id)
 
     return router

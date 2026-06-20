@@ -33,14 +33,22 @@ class InventoryTransaction(Base):
             ["source_production_batch_id", "tenant_id"],
             ["inventory_production_batches.id", "inventory_production_batches.tenant_id"],
         ),
+        ForeignKeyConstraint(
+            ["source_transfer_id", "tenant_id"],
+            ["inventory_transfers.id", "inventory_transfers.tenant_id"],
+        ),
         CheckConstraint(
             "(transaction_type = 'supplier_receipt' AND source_receipt_id IS NOT NULL "
             "AND source_production_batch_id IS NULL) OR "
             "(transaction_type = 'production' AND source_receipt_id IS NULL "
-            "AND source_production_batch_id IS NOT NULL)"
+            "AND source_production_batch_id IS NOT NULL AND source_transfer_id IS NULL) OR "
+            "(transaction_type IN ('transfer_dispatch', 'transfer_receipt') "
+            "AND source_receipt_id IS NULL AND source_production_batch_id IS NULL "
+            "AND source_transfer_id IS NOT NULL)"
         ),
         UniqueConstraint("tenant_id", "source_receipt_id"),
         UniqueConstraint("tenant_id", "source_production_batch_id"),
+        UniqueConstraint("tenant_id", "command_key"),
         UniqueConstraint("id", "tenant_id"),
     )
 
@@ -49,6 +57,8 @@ class InventoryTransaction(Base):
     warehouse_id: Mapped[UUID] = mapped_column(Uuid)
     source_receipt_id: Mapped[UUID | None] = mapped_column(Uuid)
     source_production_batch_id: Mapped[UUID | None] = mapped_column(Uuid)
+    source_transfer_id: Mapped[UUID | None] = mapped_column(Uuid)
+    command_key: Mapped[str | None] = mapped_column(Text)
     transaction_type: Mapped[str] = mapped_column(Text)
     actor_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_users.id"))
     correlation_id: Mapped[str] = mapped_column(Text)
@@ -85,13 +95,23 @@ class InventoryLot(Base):
             ["source_production_batch_id", "tenant_id"],
             ["inventory_production_batches.id", "inventory_production_batches.tenant_id"],
         ),
+        ForeignKeyConstraint(
+            ["source_transfer_id", "tenant_id"],
+            ["inventory_transfers.id", "inventory_transfers.tenant_id"],
+        ),
+        ForeignKeyConstraint(
+            ["source_lot_id", "tenant_id"], ["inventory_lots.id", "inventory_lots.tenant_id"]
+        ),
         CheckConstraint(
             "(ingredient_id IS NOT NULL AND prepared_recipe_version_id IS NULL) OR "
             "(ingredient_id IS NULL AND prepared_recipe_version_id IS NOT NULL)"
         ),
         CheckConstraint(
             "(source_receipt_line_id IS NOT NULL AND source_production_batch_id IS NULL) OR "
-            "(source_receipt_line_id IS NULL AND source_production_batch_id IS NOT NULL)"
+            "(source_receipt_line_id IS NULL AND source_production_batch_id IS NOT NULL "
+            "AND source_transfer_id IS NULL) OR "
+            "(source_receipt_line_id IS NULL AND source_production_batch_id IS NULL "
+            "AND source_transfer_id IS NOT NULL)"
         ),
         CheckConstraint("unit_cost > 0"),
         UniqueConstraint("tenant_id", "warehouse_id", "lot_code"),
@@ -109,6 +129,8 @@ class InventoryLot(Base):
     unit_cost: Mapped[Decimal] = mapped_column(Numeric(24, 10))
     source_receipt_line_id: Mapped[UUID | None] = mapped_column(Uuid)
     source_production_batch_id: Mapped[UUID | None] = mapped_column(Uuid)
+    source_transfer_id: Mapped[UUID | None] = mapped_column(Uuid)
+    source_lot_id: Mapped[UUID | None] = mapped_column(Uuid)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -192,3 +214,65 @@ class InventoryProductionBatch(Base):
     actor_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_users.id"))
     correlation_id: Mapped[str] = mapped_column(Text)
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class InventoryTransfer(Base):
+    __tablename__ = "inventory_transfers"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["source_warehouse_id", "tenant_id"],
+            ["platform_warehouses.id", "platform_warehouses.tenant_id"],
+        ),
+        ForeignKeyConstraint(
+            ["destination_warehouse_id", "tenant_id"],
+            ["platform_warehouses.id", "platform_warehouses.tenant_id"],
+        ),
+        CheckConstraint("source_warehouse_id <> destination_warehouse_id"),
+        UniqueConstraint("tenant_id", "transfer_number"),
+        UniqueConstraint("id", "tenant_id"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    transfer_number: Mapped[str] = mapped_column(Text)
+    source_warehouse_id: Mapped[UUID] = mapped_column(Uuid)
+    destination_warehouse_id: Mapped[UUID] = mapped_column(Uuid)
+    status: Mapped[str] = mapped_column(Text)
+    requested_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_users.id"))
+    approved_by: Mapped[UUID | None] = mapped_column(Uuid, ForeignKey("platform_users.id"))
+    correlation_id: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class InventoryTransferLine(Base):
+    __tablename__ = "inventory_transfer_lines"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["transfer_id", "tenant_id"],
+            ["inventory_transfers.id", "inventory_transfers.tenant_id"],
+        ),
+        CheckConstraint("item_type IN ('ingredient', 'prepared_recipe')"),
+        CheckConstraint(
+            "requested_quantity > 0 AND approved_quantity >= 0 "
+            "AND dispatched_quantity >= 0 AND received_quantity >= 0 "
+            "AND loss_quantity >= 0"
+        ),
+        CheckConstraint(
+            "approved_quantity <= requested_quantity "
+            "AND dispatched_quantity <= approved_quantity "
+            "AND received_quantity + loss_quantity <= dispatched_quantity"
+        ),
+        UniqueConstraint("transfer_id"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    transfer_id: Mapped[UUID] = mapped_column(Uuid)
+    item_type: Mapped[str] = mapped_column(Text)
+    item_id: Mapped[UUID] = mapped_column(Uuid)
+    unit_id: Mapped[UUID] = mapped_column(Uuid)
+    requested_quantity: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    approved_quantity: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    dispatched_quantity: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    received_quantity: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    loss_quantity: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    loss_reason: Mapped[str | None] = mapped_column(Text)
