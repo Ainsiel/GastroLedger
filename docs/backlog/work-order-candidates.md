@@ -104,16 +104,16 @@ GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-010 Production Batch
+## Completed: GL-010 Production Batch
 
 ```text
 work_order_id = GL-010
 feature_branch = feature/GL-010-production-batch
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/34
 ```
 
-Delivery evidence so far: PR #34 is open against `develop` and implements atomic
+Delivery evidence: PR #34 merged into `develop` on 2026-06-20 and implements atomic
 FEFO/FIFO input allocation, immutable production entries, prepared-lot lineage and
 visible yield/shortage states. Visual QA is intentionally skipped per user instruction.
 
