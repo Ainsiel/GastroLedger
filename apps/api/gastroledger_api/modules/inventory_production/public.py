@@ -2,6 +2,19 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from gastroledger_api.application.identifiers import EventId, TenantId, WarehouseId
+from gastroledger_api.modules.inventory_production.application.production import (
+    PostProductionBatch,
+    ProductionAuthorizationDenied,
+    ProductionBatchView,
+    ProductionConflict,
+    ProductionIdentity,
+    ProductionInsufficientStock,
+    ProductionNotFound,
+    ProductionService,
+)
+from gastroledger_api.modules.inventory_production.domain.production import (
+    ProductionValidationError,
+)
 
 MODULE_ID = "inventory_production"
 
@@ -53,3 +66,23 @@ class InventoryCountFact:
     tenant_id: TenantId
     count_id: str
 
+
+__all__ = [
+    "AllocationOutcome",
+    "AllocationRequest",
+    "IngredientCostChanged",
+    "InventoryCountFact",
+    "InventoryMovementFact",
+    "InventoryPosting",
+    "InventoryTransactionReference",
+    "MODULE_ID",
+    "PostProductionBatch",
+    "ProductionAuthorizationDenied",
+    "ProductionBatchView",
+    "ProductionConflict",
+    "ProductionIdentity",
+    "ProductionInsufficientStock",
+    "ProductionNotFound",
+    "ProductionService",
+    "ProductionValidationError",
+]

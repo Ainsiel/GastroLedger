@@ -276,6 +276,30 @@ export interface SupplierReceiptResponse {
   lines: SupplierReceiptLineResponse[];
 }
 
+export interface ProductionBatchRequest {
+  batchNumber: string;
+  warehouseId: string;
+  recipeVersionId: string;
+  actualYield: string;
+  outputLotCode: string;
+  producedOn: string;
+  varianceReason: string;
+}
+
+export interface ProductionBatchResponse {
+  productionBatchId: string;
+  inventoryTransactionId: string;
+  outputLotId: string;
+  batchNumber: string;
+  status: "posted";
+  recipeVersionId: string;
+  expectedYield: string;
+  actualYield: string;
+  varianceQuantity: string;
+  varianceReason: string | null;
+  consumedQuantity: string;
+}
+
 export interface ApiProblem {
   type: string;
   title: string;
