@@ -1,10 +1,10 @@
 ---
 id: GL-015
 title: Import sales and resolve allocation exceptions
-status: draft
-readiness: blocked
+status: published
+readiness: ready
 primary_context: Store Operations
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-008, GL-009]
 requirements: [FR-021, FR-022, FR-030, FR-020]
 use_cases: [UC-021]

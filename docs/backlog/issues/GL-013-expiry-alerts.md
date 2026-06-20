@@ -1,10 +1,10 @@
 ---
 id: GL-013
 title: Create and acknowledge expiry alerts
-status: draft
-readiness: blocked
+status: published
+readiness: ready
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-008, GL-009]
 requirements: [FR-018, FR-029]
 use_cases: [UC-019]

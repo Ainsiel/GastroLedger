@@ -1,12 +1,14 @@
 ---
 id: GL-009
 title: Receive a supplier delivery into the inventory ledger
-status: in_pr
-readiness: ready
+status: done
+readiness: done
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical, status:in-pr]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-005]
 pull_request: https://github.com/Ainsiel/GastroLedger/pull/33
+merged_at: 2026-06-19T22:12:12Z
+merge_commit: f3ded99cd936bf39b6d37addb366f3713ce664aa
 requirements: [FR-013, FR-020, FR-027]
 use_cases: [UC-013]
 test_cases: [TC-013-S, TC-013-A, TC-013-F, IT-008, IT-009, IT-010]

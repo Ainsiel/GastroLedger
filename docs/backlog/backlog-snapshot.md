@@ -2,9 +2,9 @@
 
 ```text
 run_id = backlog-management-20260614-01
-generated_at = 2026-06-19
+generated_at = 2026-06-20
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published; GL-009 in PR #33
+status = published; GL-009 completed via PR #33
 github_issues_observed = 23
 ```
 
@@ -12,17 +12,17 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Done | 8 |
-| In PR | 1 |
-| Ready candidate | 3 |
-| Defined, blocked by dependencies | 11 |
+| Done | 9 |
+| In PR | 0 |
+| Ready candidate | 10 |
+| Defined, blocked by dependencies | 4 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
 
 The repository contains the bootstrap, architecture foundation, delivery
 infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
 SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001 through
-GL-008 are accepted in `develop`.
+GL-009 are accepted in `develop`.
 
 ## Items
 
@@ -36,16 +36,16 @@ GL-008 are accepted in `develop`.
 | [GL-006](https://github.com/Ainsiel/GastroLedger/issues/6) | Approve versioned sub-recipes | Menu Engineering | UC-008 | Done | GL-004 |
 | [GL-007](https://github.com/Ainsiel/GastroLedger/issues/7) | Approve menu items and branch margin | Menu Engineering | UC-009 | Done | GL-006 |
 | [GL-008](https://github.com/Ainsiel/GastroLedger/issues/8) | Recalculate recipe cost snapshots asynchronously | Menu Engineering | UC-010 | Done | GL-007 |
-| [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | In PR ([#33](https://github.com/Ainsiel/GastroLedger/pull/33)) | GL-005 |
-| [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Blocked | GL-006, GL-009 |
-| [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | Blocked | GL-009 |
-| [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | Blocked | GL-009 |
-| [GL-013](https://github.com/Ainsiel/GastroLedger/issues/13) | Create and acknowledge expiry alerts | Inventory & Production | UC-019 | Blocked | GL-008, GL-009 |
-| [GL-014](https://github.com/Ainsiel/GastroLedger/issues/14) | Perform a blind count and reconcile variance | Inventory & Production | UC-020 | Blocked | GL-002, GL-009 |
-| [GL-015](https://github.com/Ainsiel/GastroLedger/issues/15) | Import sales and resolve allocation exceptions | Store Operations | UC-021 | Blocked | GL-008, GL-009 |
+| [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Done ([#33](https://github.com/Ainsiel/GastroLedger/pull/33)) | GL-005 |
+| [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Ready | GL-006, GL-009 |
+| [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | Ready | GL-009 |
+| [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | Ready | GL-009 |
+| [GL-013](https://github.com/Ainsiel/GastroLedger/issues/13) | Create and acknowledge expiry alerts | Inventory & Production | UC-019 | Ready | GL-008, GL-009 |
+| [GL-014](https://github.com/Ainsiel/GastroLedger/issues/14) | Perform a blind count and reconcile variance | Inventory & Production | UC-020 | Ready | GL-002, GL-009 |
+| [GL-015](https://github.com/Ainsiel/GastroLedger/issues/15) | Import sales and resolve allocation exceptions | Store Operations | UC-021 | Ready | GL-008, GL-009 |
 | [GL-016](https://github.com/Ainsiel/GastroLedger/issues/16) | Apply manual ordering holds | Control & Insights | UC-024, flows A/F | Ready | GL-002, GL-003 |
 | [GL-017](https://github.com/Ainsiel/GastroLedger/issues/17) | Create approved purchase orders | Procurement | UC-012 | Blocked | GL-009, GL-016 |
-| [GL-018](https://github.com/Ainsiel/GastroLedger/issues/18) | Record supplier return and expected adjustment | Procurement | UC-014 | Blocked | GL-009 |
+| [GL-018](https://github.com/Ainsiel/GastroLedger/issues/18) | Record supplier return and expected adjustment | Procurement | UC-014 | Ready | GL-009 |
 | [GL-019](https://github.com/Ainsiel/GastroLedger/issues/19) | Reconcile an operational cash shift | Store Operations | UC-022 | Ready | GL-002, GL-003 |
 | [GL-020](https://github.com/Ainsiel/GastroLedger/issues/20) | Plan shifts and record attendance | Store Operations | UC-023 | Ready | GL-002, GL-003 |
 | [GL-021](https://github.com/Ainsiel/GastroLedger/issues/21) | Calculate non-financial royalty estimates | Control & Insights | UC-024, flow S | Blocked | GL-015 |
@@ -100,3 +100,5 @@ evidence.
   completed in GitHub. GL-013 and GL-015 remain blocked by GL-009.
 - On 2026-06-19, PR #33 opened for GL-009 and issue #9 is marked `status:in-pr`
   in GitHub.
+- On 2026-06-19, PR #33 merged GL-009 into `develop`; issue #9 is completed and
+  GL-010 through GL-015 plus GL-018 are dependency-unlocked ready candidates.

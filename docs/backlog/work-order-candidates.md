@@ -93,21 +93,28 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
+GL-010 Post a production batch and prepared lot
+GL-011 Complete a stock transfer lifecycle
+GL-012 Record operational waste with approval evidence
+GL-013 Create and acknowledge expiry alerts
+GL-014 Perform a blind count and reconcile variance
+GL-015 Import sales and resolve allocation exceptions
 GL-016 Apply manual ordering holds
+GL-018 Record supplier return and expected adjustment
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-009 Supplier Receipt Inventory Ledger
+## Completed: GL-009 Supplier Receipt Inventory Ledger
 
 ```text
 work_order_id = GL-009
 feature_branch = feature/GL-009-supplier-receipt-inventory-ledger
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/33
 ```
 
-Delivery evidence so far: PR #33 is open against `develop` and implements atomic,
+Delivery evidence: PR #33 merged into `develop` on 2026-06-19 and implements atomic,
 idempotent supplier receipts, traceable lots, immutable entries and non-negative
 balance projections. Visual QA is intentionally skipped per user instruction.
 

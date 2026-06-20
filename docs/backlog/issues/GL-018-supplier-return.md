@@ -1,10 +1,10 @@
 ---
 id: GL-018
 title: Record supplier return and expected adjustment
-status: draft
-readiness: blocked
+status: published
+readiness: ready
 primary_context: Procurement
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-009]
 requirements: [FR-014, FR-020, FR-027]
 use_cases: [UC-014]

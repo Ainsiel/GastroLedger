@@ -1,10 +1,10 @@
 ---
 id: GL-010
 title: Post a production batch and prepared lot
-status: draft
-readiness: blocked
+status: published
+readiness: ready
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-006, GL-009]
 requirements: [FR-015, FR-020, FR-031]
 use_cases: [UC-011]

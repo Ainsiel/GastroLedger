@@ -1,10 +1,10 @@
 ---
 id: GL-012
 title: Record operational waste with approval evidence
-status: draft
-readiness: blocked
+status: published
+readiness: ready
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical]
+labels: [gridwork, type:feature, slice:vertical, status:ready]
 dependencies: [GL-009]
 requirements: [FR-017, FR-020, FR-027]
 use_cases: [UC-018]
