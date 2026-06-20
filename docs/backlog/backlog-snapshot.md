@@ -4,7 +4,7 @@
 run_id = backlog-management-20260614-01
 generated_at = 2026-06-20
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published; GL-012 in PR #36
+status = published; GL-012 completed via PR #36
 github_issues_observed = 23
 ```
 
@@ -12,8 +12,8 @@ github_issues_observed = 23
 
 | Readiness | Count |
 |---|---:|
-| Done | 11 |
-| In PR | 1 |
+| Done | 12 |
+| In PR | 0 |
 | Ready candidate | 7 |
 | Defined, blocked by dependencies | 4 |
 | Needs requirement refinement | 0 |
@@ -22,7 +22,7 @@ github_issues_observed = 23
 The repository contains the bootstrap, architecture foundation, delivery
 infrastructure, approved shadcn/ui frontend foundation, local Swagger contract,
 SQLAlchemy technical adapters and an isolated PostgreSQL harness. GL-001 through
-GL-011 are accepted in `develop`.
+GL-012 are accepted in `develop`.
 
 ## Items
 
@@ -39,7 +39,7 @@ GL-011 are accepted in `develop`.
 | [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Done ([#33](https://github.com/Ainsiel/GastroLedger/pull/33)) | GL-005 |
 | [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Done ([#34](https://github.com/Ainsiel/GastroLedger/pull/34)) | GL-006, GL-009 |
 | [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | Done ([#35](https://github.com/Ainsiel/GastroLedger/pull/35)) | GL-009 |
-| [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | In PR ([#36](https://github.com/Ainsiel/GastroLedger/pull/36)) | GL-009 |
+| [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | Done ([#36](https://github.com/Ainsiel/GastroLedger/pull/36)) | GL-009 |
 | [GL-013](https://github.com/Ainsiel/GastroLedger/issues/13) | Create and acknowledge expiry alerts | Inventory & Production | UC-019 | Ready | GL-008, GL-009 |
 | [GL-014](https://github.com/Ainsiel/GastroLedger/issues/14) | Perform a blind count and reconcile variance | Inventory & Production | UC-020 | Ready | GL-002, GL-009 |
 | [GL-015](https://github.com/Ainsiel/GastroLedger/issues/15) | Import sales and resolve allocation exceptions | Store Operations | UC-021 | Ready | GL-008, GL-009 |
@@ -111,3 +111,5 @@ evidence.
   GL-012 remains the next recommended ready candidate.
 - On 2026-06-20, PR #36 opened for GL-012 and issue #12 is marked `status:in-pr`;
   GL-013 is the next recommended ready candidate.
+- On 2026-06-20, PR #36 merged GL-012 into `develop`; issue #12 is completed and
+  GL-013 remains the next recommended ready candidate.

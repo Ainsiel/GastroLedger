@@ -102,18 +102,18 @@ GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-012 Operational Waste
+## Completed: GL-012 Operational Waste
 
 ```text
 work_order_id = GL-012
 feature_branch = feature/GL-012-operational-waste
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/36
 ```
 
-Delivery evidence: PR #36 targets `develop` and implements approval-gated waste,
-append-only correction, audit evidence and visible inventory states. Visual QA was
-intentionally skipped per user instruction.
+Delivery evidence: PR #36 merged into `develop` on 2026-06-20 and implements
+approval-gated waste, append-only correction, audit evidence and visible inventory
+states. Visual QA was intentionally skipped per user instruction.
 
 ## Completed: GL-011 Stock Transfer Lifecycle
 
