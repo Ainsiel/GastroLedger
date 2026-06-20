@@ -442,7 +442,7 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
         SQLAlchemyError,
     )
 
-    @router.post("/waste/{commandId}", response_model=WasteResponse, status_code=201)
+    @router.post("/waste/commands/{commandId}", response_model=WasteResponse, status_code=201)
     def submit_waste_route(
         commandId: str,
         request: WasteSubmissionRequest,
