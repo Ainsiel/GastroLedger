@@ -4,7 +4,7 @@
 run_id = backlog-management-20260614-01
 generated_at = 2026-06-20
 sources = docs/sdd, docs/architecture, repository structure, GitHub read-only audit
-status = published; GL-010 completed via PR #34
+status = published; GL-011 in PR #35
 github_issues_observed = 23
 ```
 
@@ -13,8 +13,8 @@ github_issues_observed = 23
 | Readiness | Count |
 |---|---:|
 | Done | 10 |
-| In PR | 0 |
-| Ready candidate | 9 |
+| In PR | 1 |
+| Ready candidate | 8 |
 | Defined, blocked by dependencies | 4 |
 | Needs requirement refinement | 0 |
 | Published | 23 |
@@ -38,7 +38,7 @@ GL-010 are accepted in `develop`.
 | [GL-008](https://github.com/Ainsiel/GastroLedger/issues/8) | Recalculate recipe cost snapshots asynchronously | Menu Engineering | UC-010 | Done | GL-007 |
 | [GL-009](https://github.com/Ainsiel/GastroLedger/issues/9) | Receive a supplier delivery into the inventory ledger | Procurement | UC-013 | Done ([#33](https://github.com/Ainsiel/GastroLedger/pull/33)) | GL-005 |
 | [GL-010](https://github.com/Ainsiel/GastroLedger/issues/10) | Post a production batch and prepared lot | Inventory & Production | UC-011 | Done ([#34](https://github.com/Ainsiel/GastroLedger/pull/34)) | GL-006, GL-009 |
-| [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | Ready | GL-009 |
+| [GL-011](https://github.com/Ainsiel/GastroLedger/issues/11) | Complete a stock transfer lifecycle | Inventory & Production | UC-015 to UC-017 | In PR ([#35](https://github.com/Ainsiel/GastroLedger/pull/35)) | GL-009 |
 | [GL-012](https://github.com/Ainsiel/GastroLedger/issues/12) | Record operational waste with approval evidence | Inventory & Production | UC-018 | Ready | GL-009 |
 | [GL-013](https://github.com/Ainsiel/GastroLedger/issues/13) | Create and acknowledge expiry alerts | Inventory & Production | UC-019 | Ready | GL-008, GL-009 |
 | [GL-014](https://github.com/Ainsiel/GastroLedger/issues/14) | Perform a blind count and reconcile variance | Inventory & Production | UC-020 | Ready | GL-002, GL-009 |
@@ -106,3 +106,4 @@ evidence.
   in GitHub.
 - On 2026-06-20, PR #34 merged GL-010 into `develop`; issue #10 is completed and
   GL-011 remains the next recommended ready candidate.
+- On 2026-06-20, PR #35 opened for GL-011 and issue #11 is marked `status:in-pr`.

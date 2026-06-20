@@ -300,6 +300,19 @@ export interface ProductionBatchResponse {
   consumedQuantity: string;
 }
 
+export interface TransferRequest {
+  transferNumber: string; sourceWarehouseId: string; destinationWarehouseId: string;
+  itemType: "ingredient" | "prepared_recipe"; itemId: string; unitId: string;
+  requestedQuantity: string;
+}
+export interface TransferApprovalRequest { approvedQuantity: string; }
+export interface TransferDispatchRequest { dispatchQuantity: string; }
+export interface TransferReceiptRequest { receivedQuantity: string; lossQuantity: string; lossReason: string; }
+export interface TransferResponse extends TransferRequest {
+  transferId: string; status: "requested" | "approved" | "partially_dispatched" | "dispatched" | "partially_received" | "completed";
+  approvedQuantity: string; dispatchedQuantity: string; receivedQuantity: string; lossQuantity: string;
+}
+
 export interface ApiProblem {
   type: string;
   title: string;

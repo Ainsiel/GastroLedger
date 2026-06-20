@@ -12,9 +12,20 @@ from gastroledger_api.modules.inventory_production.application.production import
     ProductionNotFound,
     ProductionService,
 )
+from gastroledger_api.modules.inventory_production.application.transfers import (
+    RequestTransfer,
+    TransferAuthorizationDenied,
+    TransferConflict,
+    TransferIdentity,
+    TransferInsufficientStock,
+    TransferNotFound,
+    TransferService,
+    TransferView,
+)
 from gastroledger_api.modules.inventory_production.domain.production import (
     ProductionValidationError,
 )
+from gastroledger_api.modules.inventory_production.domain.transfers import TransferValidationError
 
 MODULE_ID = "inventory_production"
 
@@ -85,4 +96,13 @@ __all__ = [
     "ProductionNotFound",
     "ProductionService",
     "ProductionValidationError",
+    "RequestTransfer",
+    "TransferAuthorizationDenied",
+    "TransferConflict",
+    "TransferIdentity",
+    "TransferInsufficientStock",
+    "TransferNotFound",
+    "TransferService",
+    "TransferValidationError",
+    "TransferView",
 ]

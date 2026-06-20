@@ -1,4 +1,5 @@
 """Inventory and Production application boundary."""
+
 from .production import (
     PostProductionBatch,
     ProductionAuthorizationDenied,
@@ -8,6 +9,16 @@ from .production import (
     ProductionInsufficientStock,
     ProductionNotFound,
     ProductionService,
+)
+from .transfers import (
+    RequestTransfer,
+    TransferAuthorizationDenied,
+    TransferConflict,
+    TransferIdentity,
+    TransferInsufficientStock,
+    TransferNotFound,
+    TransferService,
+    TransferView,
 )
 
 __all__ = [
@@ -19,4 +30,12 @@ __all__ = [
     "ProductionInsufficientStock",
     "ProductionNotFound",
     "ProductionService",
+    "RequestTransfer",
+    "TransferAuthorizationDenied",
+    "TransferConflict",
+    "TransferIdentity",
+    "TransferInsufficientStock",
+    "TransferNotFound",
+    "TransferService",
+    "TransferView",
 ]

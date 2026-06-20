@@ -86,9 +86,7 @@ def validate_production_batch(
         details.append(yield_error)
     normalized_reason = variance_reason.strip()
     if parsed_yield is not None and parsed_yield < expected_yield and not normalized_reason:
-        details.append(
-            ProductionValidationDetail("varianceReason", "required_for_lower_yield")
-        )
+        details.append(ProductionValidationDetail("varianceReason", "required_for_lower_yield"))
     if details:
         raise ProductionValidationError(tuple(details))
     return ValidatedProductionBatch(

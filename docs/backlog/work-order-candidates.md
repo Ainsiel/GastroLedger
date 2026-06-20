@@ -93,7 +93,6 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-011 Complete a stock transfer lifecycle
 GL-012 Record operational waste with approval evidence
 GL-013 Create and acknowledge expiry alerts
 GL-014 Perform a blind count and reconcile variance
@@ -103,6 +102,19 @@ GL-018 Record supplier return and expected adjustment
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-011 Stock Transfer Lifecycle
+
+```text
+work_order_id = GL-011
+feature_branch = feature/GL-011-stock-transfer-lifecycle
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/35
+```
+
+Delivery evidence so far: PR #35 is open against `develop` and implements request,
+approval, FEFO/FIFO dispatch, idempotent receipt/loss reconciliation and destination
+lot lineage. Visual QA is intentionally skipped per user instruction.
 
 ## Completed: GL-010 Production Batch
 
