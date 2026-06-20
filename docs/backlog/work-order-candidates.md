@@ -93,7 +93,6 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-012 Record operational waste with approval evidence
 GL-013 Create and acknowledge expiry alerts
 GL-014 Perform a blind count and reconcile variance
 GL-015 Import sales and resolve allocation exceptions
@@ -102,6 +101,19 @@ GL-018 Record supplier return and expected adjustment
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-012 Operational Waste
+
+```text
+work_order_id = GL-012
+feature_branch = feature/GL-012-operational-waste
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/36
+```
+
+Delivery evidence: PR #36 targets `develop` and implements approval-gated waste,
+append-only correction, audit evidence and visible inventory states. Visual QA was
+intentionally skipped per user instruction.
 
 ## Completed: GL-011 Stock Transfer Lifecycle
 

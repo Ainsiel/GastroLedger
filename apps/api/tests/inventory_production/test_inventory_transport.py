@@ -18,3 +18,10 @@ def test_production_batch_is_a_session_scoped_public_api() -> None:
         assert schema["paths"][path]["post"]["responses"][
             "200" if path != "/api/v1/inventory/transfers" else "201"
         ]
+    for path in (
+        "/api/v1/inventory/waste/commands/{commandId}",
+        "/api/v1/inventory/waste/{wasteId}/approve/{commandId}",
+        "/api/v1/inventory/waste/{wasteId}/reject",
+        "/api/v1/inventory/waste/{wasteId}/correct/{commandId}",
+    ):
+        assert schema["paths"][path]["post"]

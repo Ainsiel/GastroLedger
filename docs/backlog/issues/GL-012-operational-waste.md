@@ -1,11 +1,12 @@
 ---
 id: GL-012
 title: Record operational waste with approval evidence
-status: published
-readiness: ready
+status: in_pr
+readiness: in_pr
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical, status:in-pr]
 dependencies: [GL-009]
+pull_request: https://github.com/Ainsiel/GastroLedger/pull/36
 requirements: [FR-017, FR-020, FR-027]
 use_cases: [UC-018]
 test_cases: [TC-018-S, TC-018-A, TC-018-F, IT-014]

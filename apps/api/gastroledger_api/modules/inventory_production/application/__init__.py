@@ -20,6 +20,16 @@ from .transfers import (
     TransferService,
     TransferView,
 )
+from .waste import (
+    SubmitWaste,
+    WasteAuthorizationDenied,
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteService,
+    WasteView,
+)
 
 __all__ = [
     "PostProductionBatch",
@@ -38,4 +48,12 @@ __all__ = [
     "TransferNotFound",
     "TransferService",
     "TransferView",
+    "SubmitWaste",
+    "WasteAuthorizationDenied",
+    "WasteConflict",
+    "WasteIdentity",
+    "WasteInsufficientStock",
+    "WasteNotFound",
+    "WasteService",
+    "WasteView",
 ]
