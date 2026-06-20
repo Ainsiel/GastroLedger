@@ -19,6 +19,7 @@ from gastroledger_api.modules.inventory_production.public import (
     ProductionService,
     ProductionValidationError,
     RequestTransfer,
+    SubmitWaste,
     TransferAuthorizationDenied,
     TransferConflict,
     TransferIdentity,
@@ -27,6 +28,14 @@ from gastroledger_api.modules.inventory_production.public import (
     TransferService,
     TransferValidationError,
     TransferView,
+    WasteAuthorizationDenied,
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteService,
+    WasteValidationError,
+    WasteView,
 )
 from gastroledger_api.modules.platform_organization.public import AuthenticationRequired
 from gastroledger_api.technical.postgres_inventory import PostgresInventoryStore
@@ -112,6 +121,30 @@ class TransferResponse(BaseModel):
     lossQuantity: str
 
 
+class WasteSubmissionRequest(BaseModel):
+    warehouseId: str
+    lotId: str
+    quantity: str
+    reason: str
+
+
+class WasteDecisionRequest(BaseModel):
+    reason: str = ""
+
+
+class WasteResponse(BaseModel):
+    wasteId: str
+    status: str
+    warehouseId: str
+    lotId: str
+    quantity: str
+    operationalValue: str
+    reason: str
+    requestedBy: str
+    decisionBy: str | None
+    inventoryTransactionId: str | None
+
+
 def production_response(batch: ProductionBatchView) -> ProductionBatchResponse:
     return ProductionBatchResponse(
         productionBatchId=batch.production_batch_id,
@@ -131,6 +164,7 @@ def production_response(batch: ProductionBatchView) -> ProductionBatchResponse:
 def transfer_response(value: TransferView) -> TransferResponse:
     def amount(number):
         return format(number.normalize(), "f")
+
     return TransferResponse(
         transferId=value.transfer_id,
         transferNumber=value.transfer_number,
@@ -148,12 +182,31 @@ def transfer_response(value: TransferView) -> TransferResponse:
     )
 
 
+def waste_response(value: WasteView) -> WasteResponse:
+    def amount(number):
+        return format(number.normalize(), "f")
+
+    return WasteResponse(
+        wasteId=value.waste_id,
+        status=value.status,
+        warehouseId=value.warehouse_id,
+        lotId=value.lot_id,
+        quantity=amount(value.quantity),
+        operationalValue=amount(value.operational_value),
+        reason=value.reason,
+        requestedBy=value.requested_by,
+        decisionBy=value.decision_by,
+        inventoryTransactionId=value.inventory_transaction_id,
+    )
+
+
 def create_inventory_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/inventory", tags=["inventory-production"])
     resolved_database_url = database_url or os.environ.get("DATABASE_URL", "")
     platform_store = PostgresPlatformStore(resolved_database_url)
     service = ProductionService(store=PostgresInventoryStore(resolved_database_url))
     transfers = TransferService(store=PostgresInventoryStore(resolved_database_url))
+    waste = WasteService(store=PostgresInventoryStore(resolved_database_url))
 
     def identity(gl_session: str | None) -> ProductionIdentity:
         if not gl_session:
@@ -164,6 +217,10 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
     def transfer_identity(gl_session: str | None) -> TransferIdentity:
         value = identity(gl_session)
         return TransferIdentity(value.tenant_id, value.actor_id, value.role)
+
+    def waste_identity(gl_session: str | None) -> WasteIdentity:
+        value = identity(gl_session)
+        return WasteIdentity(value.tenant_id, value.actor_id, value.role)
 
     def inventory_problem(error: Exception, correlation_id: str):
         if isinstance(error, AuthenticationRequired):
@@ -194,6 +251,24 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
             return problem_response(
                 422,
                 "inventory.transfer_invalid",
+                correlation_id,
+                [
+                    {"field": detail.field, "code": detail.code, "detail": "review field"}
+                    for detail in error.details
+                ],
+            )
+        if isinstance(error, WasteAuthorizationDenied):
+            return problem_response(403, "inventory.waste_authorization_denied", correlation_id, [])
+        if isinstance(error, WasteNotFound):
+            return problem_response(404, "inventory.waste_not_found", correlation_id, [])
+        if isinstance(error, WasteInsufficientStock):
+            return problem_response(409, "inventory.waste_insufficient_stock", correlation_id, [])
+        if isinstance(error, WasteConflict):
+            return problem_response(409, "inventory.waste_conflict", correlation_id, [])
+        if isinstance(error, WasteValidationError):
+            return problem_response(
+                422,
+                "inventory.waste_invalid",
                 correlation_id,
                 [
                     {"field": detail.field, "code": detail.code, "detail": "review field"}
@@ -353,6 +428,96 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
                 )
             )
         except transfer_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    waste_errors = (
+        AuthenticationRequired,
+        WasteAuthorizationDenied,
+        WasteNotFound,
+        WasteInsufficientStock,
+        WasteConflict,
+        WasteValidationError,
+        ValueError,
+        psycopg.Error,
+        SQLAlchemyError,
+    )
+
+    @router.post("/waste/{commandId}", response_model=WasteResponse, status_code=201)
+    def submit_waste_route(
+        commandId: str,
+        request: WasteSubmissionRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return waste_response(
+                waste.submit_waste(
+                    waste_identity(gl_session),
+                    SubmitWaste(
+                        commandId,
+                        request.warehouseId,
+                        request.lotId,
+                        request.quantity,
+                        request.reason,
+                    ),
+                    correlation_id=correlation_id,
+                )
+            )
+        except waste_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/waste/{wasteId}/approve/{commandId}", response_model=WasteResponse)
+    def approve_waste_route(
+        wasteId: str, commandId: str, gl_session: str | None = Security(session_cookie)
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return waste_response(
+                waste.approve_waste(
+                    waste_identity(gl_session), wasteId, commandId, correlation_id=correlation_id
+                )
+            )
+        except waste_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/waste/{wasteId}/reject", response_model=WasteResponse)
+    def reject_waste_route(
+        wasteId: str,
+        request: WasteDecisionRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return waste_response(
+                waste.reject_waste(
+                    waste_identity(gl_session),
+                    wasteId,
+                    request.reason,
+                    correlation_id=correlation_id,
+                )
+            )
+        except waste_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/waste/{wasteId}/correct/{commandId}", response_model=WasteResponse)
+    def correct_waste_route(
+        wasteId: str,
+        commandId: str,
+        request: WasteDecisionRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return waste_response(
+                waste.correct_waste(
+                    waste_identity(gl_session),
+                    wasteId,
+                    commandId,
+                    request.reason,
+                    correlation_id=correlation_id,
+                )
+            )
+        except waste_errors as error:
             return inventory_problem(error, correlation_id)
 
     return router

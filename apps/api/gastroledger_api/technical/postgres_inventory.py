@@ -23,6 +23,13 @@ from gastroledger_api.modules.inventory_production.application.transfers import 
     TransferNotFound,
     TransferView,
 )
+from gastroledger_api.modules.inventory_production.application.waste import (
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteView,
+)
 from gastroledger_api.modules.inventory_production.domain.production import (
     ProductionValidationError,
     StockLot,
@@ -37,6 +44,14 @@ from gastroledger_api.modules.inventory_production.domain.transfers import (
     dispatch_transfer,
     receive_transfer,
 )
+from gastroledger_api.modules.inventory_production.domain.waste import (
+    WasteState,
+    WasteValidationError,
+    classify_waste,
+)
+from gastroledger_api.modules.inventory_production.domain.waste import (
+    approve_waste as approve_waste_state,
+)
 from gastroledger_api.technical.cost_projection_models import ControlOutboxEvent
 from gastroledger_api.technical.inventory_models import (
     InventoryEntry,
@@ -46,6 +61,7 @@ from gastroledger_api.technical.inventory_models import (
     InventoryTransaction,
     InventoryTransfer,
     InventoryTransferLine,
+    InventoryWasteRecord,
 )
 from gastroledger_api.technical.menu_models import (
     MenuRecipe,
@@ -435,9 +451,7 @@ class PostgresInventoryStore:
             try:
                 allocations = allocate_stock(
                     tuple(
-                        StockLot(
-                            str(lot.id), balance.quantity, lot.expiry_date, lot.created_at
-                        )
+                        StockLot(str(lot.id), balance.quantity, lot.expiry_date, lot.created_at)
                         for lot, balance in rows
                     ),
                     quantity,
@@ -632,6 +646,269 @@ class PostgresInventoryStore:
                 session, identity, correlation_id, "inventory.transfer.received", record.id
             )
             return self._transfer_view(record, line)
+
+    def submit_waste(
+        self,
+        identity: WasteIdentity,
+        command_key: str,
+        warehouse_id: str,
+        waste,
+        correlation_id: str,
+    ) -> WasteView:
+        tenant_id, now = UUID(identity.tenant_id), datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            existing = session.execute(
+                select(InventoryWasteRecord).where(
+                    InventoryWasteRecord.tenant_id == tenant_id,
+                    InventoryWasteRecord.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing:
+                return self._waste_view(session, existing)
+            row = session.execute(
+                select(InventoryLot, InventoryStockBalance)
+                .join(InventoryStockBalance, InventoryStockBalance.lot_id == InventoryLot.id)
+                .where(
+                    InventoryLot.tenant_id == tenant_id,
+                    InventoryLot.id == UUID(waste.lot_id),
+                    InventoryLot.warehouse_id == UUID(warehouse_id),
+                )
+                .with_for_update(of=InventoryStockBalance)
+            ).one_or_none()
+            if row is None:
+                raise WasteNotFound
+            lot, balance = row
+            classification = classify_waste(waste.quantity, lot.unit_cost)
+            status = "posted" if classification == "post_immediately" else classification
+            record = InventoryWasteRecord(
+                id=uuid4(),
+                tenant_id=tenant_id,
+                command_key=command_key,
+                warehouse_id=lot.warehouse_id,
+                lot_id=lot.id,
+                quantity=waste.quantity,
+                unit_cost=lot.unit_cost,
+                reason=waste.reason,
+                status=status,
+                requested_by=UUID(identity.actor_id),
+                decision_by=None,
+                decision_reason=None,
+                correlation_id=correlation_id,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(record)
+            session.flush()
+            if classification == "post_immediately":
+                self._post_waste_movement(
+                    session,
+                    identity,
+                    record,
+                    balance,
+                    command_key,
+                    "waste",
+                    correlation_id,
+                    -record.quantity,
+                )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.submitted", record.id
+            )
+            return self._waste_view(session, record)
+
+    def approve_waste(
+        self, identity: WasteIdentity, waste_id: str, command_key: str, correlation_id: str
+    ) -> WasteView:
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            existing = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.tenant_id == UUID(identity.tenant_id),
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing:
+                return self._waste_view(session, record)
+            try:
+                approve_waste_state(
+                    WasteState(record.status, str(record.requested_by)), identity.actor_id
+                )
+            except WasteValidationError as error:
+                raise WasteConflict from error
+            balance = session.execute(
+                select(InventoryStockBalance)
+                .where(InventoryStockBalance.lot_id == record.lot_id)
+                .with_for_update()
+            ).scalar_one()
+            record.status, record.decision_by, record.updated_at = (
+                "posted",
+                UUID(identity.actor_id),
+                datetime.now(UTC),
+            )
+            self._post_waste_movement(
+                session,
+                identity,
+                record,
+                balance,
+                command_key,
+                "waste",
+                correlation_id,
+                -record.quantity,
+            )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.approved", record.id
+            )
+            return self._waste_view(session, record)
+
+    def reject_waste(
+        self, identity: WasteIdentity, waste_id: str, reason: str, correlation_id: str
+    ) -> WasteView:
+        if not reason:
+            raise WasteConflict
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            if record.status != "pending_approval":
+                raise WasteConflict
+            record.status, record.decision_by, record.decision_reason = (
+                "rejected",
+                UUID(identity.actor_id),
+                reason,
+            )
+            record.updated_at = datetime.now(UTC)
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.rejected", record.id
+            )
+            return self._waste_view(session, record)
+
+    def correct_waste(
+        self,
+        identity: WasteIdentity,
+        waste_id: str,
+        command_key: str,
+        reason: str,
+        correlation_id: str,
+    ) -> WasteView:
+        if not reason:
+            raise WasteConflict
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            existing_movement = session.execute(
+                select(InventoryTransaction).where(
+                    InventoryTransaction.tenant_id == record.tenant_id,
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing_movement is not None:
+                return self._waste_view(session, record)
+            if record.status != "posted":
+                raise WasteConflict
+            balance = session.execute(
+                select(InventoryStockBalance)
+                .where(InventoryStockBalance.lot_id == record.lot_id)
+                .with_for_update()
+            ).scalar_one()
+            record.status, record.decision_by, record.decision_reason = (
+                "corrected",
+                UUID(identity.actor_id),
+                reason,
+            )
+            record.updated_at = datetime.now(UTC)
+            self._post_waste_movement(
+                session,
+                identity,
+                record,
+                balance,
+                command_key,
+                "waste_correction",
+                correlation_id,
+                record.quantity,
+            )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.corrected", record.id
+            )
+            return self._waste_view(session, record)
+
+    def _post_waste_movement(
+        self,
+        session,
+        identity,
+        record,
+        balance,
+        command_key,
+        transaction_type,
+        correlation_id,
+        quantity,
+    ):
+        if balance.quantity + quantity < 0:
+            raise WasteInsufficientStock
+        now, tx_id = datetime.now(UTC), uuid4()
+        balance.quantity += quantity
+        balance.updated_at = now
+        session.add(
+            InventoryTransaction(
+                id=tx_id,
+                tenant_id=record.tenant_id,
+                warehouse_id=record.warehouse_id,
+                source_receipt_id=None,
+                source_production_batch_id=None,
+                source_transfer_id=None,
+                source_waste_id=record.id,
+                command_key=command_key,
+                transaction_type=transaction_type,
+                actor_id=UUID(identity.actor_id),
+                correlation_id=correlation_id,
+                occurred_at=now,
+            )
+        )
+        session.flush()
+        session.add(
+            InventoryEntry(
+                id=uuid4(),
+                tenant_id=record.tenant_id,
+                transaction_id=tx_id,
+                lot_id=record.lot_id,
+                quantity=quantity,
+                unit_cost=record.unit_cost,
+            )
+        )
+        session.flush()
+
+    def _locked_waste(self, session, identity, waste_id):
+        record = session.execute(
+            select(InventoryWasteRecord)
+            .where(
+                InventoryWasteRecord.tenant_id == UUID(identity.tenant_id),
+                InventoryWasteRecord.id == UUID(waste_id),
+            )
+            .with_for_update()
+        ).scalar_one_or_none()
+        if record is None:
+            raise WasteNotFound
+        return record
+
+    @staticmethod
+    def _waste_view(session, record):
+        tx = session.execute(
+            select(InventoryTransaction.id)
+            .where(InventoryTransaction.source_waste_id == record.id)
+            .order_by(InventoryTransaction.occurred_at.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+        return WasteView(
+            str(record.id),
+            record.status,
+            str(record.warehouse_id),
+            str(record.lot_id),
+            record.quantity,
+            record.quantity * record.unit_cost,
+            record.reason,
+            str(record.requested_by),
+            str(record.decision_by) if record.decision_by else None,
+            str(tx) if tx else None,
+        )
 
     def _locked_transfer(self, session: Session, identity: TransferIdentity, transfer_id: str):
         record = session.execute(

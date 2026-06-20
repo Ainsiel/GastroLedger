@@ -312,6 +312,13 @@ export interface TransferResponse extends TransferRequest {
   transferId: string; status: "requested" | "approved" | "partially_dispatched" | "dispatched" | "partially_received" | "completed";
   approvedQuantity: string; dispatchedQuantity: string; receivedQuantity: string; lossQuantity: string;
 }
+export interface WasteSubmissionRequest { warehouseId: string; lotId: string; quantity: string; reason: string; }
+export interface WasteDecisionRequest { reason: string; }
+export interface WasteResponse {
+  wasteId: string; status: "pending_approval" | "posted" | "rejected" | "corrected";
+  warehouseId: string; lotId: string; quantity: string; operationalValue: string;
+  reason: string; requestedBy: string; decisionBy: string | null; inventoryTransactionId: string | null;
+}
 
 export interface ApiProblem {
   type: string;

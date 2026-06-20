@@ -21,13 +21,17 @@ CREATE TABLE IF NOT EXISTS inventory_transfer_lines (
 ALTER TABLE inventory_transactions ADD COLUMN IF NOT EXISTS source_transfer_id uuid, ADD COLUMN IF NOT EXISTS command_key text;
 ALTER TABLE inventory_lots ADD COLUMN IF NOT EXISTS source_transfer_id uuid, ADD COLUMN IF NOT EXISTS source_lot_id uuid;
 DO $$ BEGIN
- IF EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_transactions_type_source_check') THEN ALTER TABLE inventory_transactions DROP CONSTRAINT inventory_transactions_type_source_check; END IF;
+ IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='inventory_transactions' AND column_name='source_waste_id') THEN
+  IF EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_transactions_type_source_check') THEN ALTER TABLE inventory_transactions DROP CONSTRAINT inventory_transactions_type_source_check; END IF;
+ END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_transactions_transfer_fk') THEN ALTER TABLE inventory_transactions ADD CONSTRAINT inventory_transactions_transfer_fk FOREIGN KEY(source_transfer_id,tenant_id) REFERENCES inventory_transfers(id,tenant_id); END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_transactions_command_uq') THEN ALTER TABLE inventory_transactions ADD CONSTRAINT inventory_transactions_command_uq UNIQUE(tenant_id,command_key); END IF;
- ALTER TABLE inventory_transactions ADD CONSTRAINT inventory_transactions_type_source_check CHECK(
-  (transaction_type='supplier_receipt' AND source_receipt_id IS NOT NULL AND source_production_batch_id IS NULL AND source_transfer_id IS NULL) OR
-  (transaction_type='production' AND source_receipt_id IS NULL AND source_production_batch_id IS NOT NULL AND source_transfer_id IS NULL) OR
-  (transaction_type IN ('transfer_dispatch','transfer_receipt') AND source_receipt_id IS NULL AND source_production_batch_id IS NULL AND source_transfer_id IS NOT NULL));
+ IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='inventory_transactions' AND column_name='source_waste_id') THEN
+  ALTER TABLE inventory_transactions ADD CONSTRAINT inventory_transactions_type_source_check CHECK(
+   (transaction_type='supplier_receipt' AND source_receipt_id IS NOT NULL AND source_production_batch_id IS NULL AND source_transfer_id IS NULL) OR
+   (transaction_type='production' AND source_receipt_id IS NULL AND source_production_batch_id IS NOT NULL AND source_transfer_id IS NULL) OR
+   (transaction_type IN ('transfer_dispatch','transfer_receipt') AND source_receipt_id IS NULL AND source_production_batch_id IS NULL AND source_transfer_id IS NOT NULL));
+ END IF;
  IF EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_lots_source_check') THEN ALTER TABLE inventory_lots DROP CONSTRAINT inventory_lots_source_check; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_lots_transfer_fk') THEN ALTER TABLE inventory_lots ADD CONSTRAINT inventory_lots_transfer_fk FOREIGN KEY(source_transfer_id,tenant_id) REFERENCES inventory_transfers(id,tenant_id); END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='inventory_lots_source_lot_fk') THEN ALTER TABLE inventory_lots ADD CONSTRAINT inventory_lots_source_lot_fk FOREIGN KEY(source_lot_id,tenant_id) REFERENCES inventory_lots(id,tenant_id); END IF;

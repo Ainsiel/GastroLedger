@@ -22,10 +22,21 @@ from gastroledger_api.modules.inventory_production.application.transfers import 
     TransferService,
     TransferView,
 )
+from gastroledger_api.modules.inventory_production.application.waste import (
+    SubmitWaste,
+    WasteAuthorizationDenied,
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteService,
+    WasteView,
+)
 from gastroledger_api.modules.inventory_production.domain.production import (
     ProductionValidationError,
 )
 from gastroledger_api.modules.inventory_production.domain.transfers import TransferValidationError
+from gastroledger_api.modules.inventory_production.domain.waste import WasteValidationError
 
 MODULE_ID = "inventory_production"
 
@@ -105,4 +116,13 @@ __all__ = [
     "TransferService",
     "TransferValidationError",
     "TransferView",
+    "SubmitWaste",
+    "WasteAuthorizationDenied",
+    "WasteConflict",
+    "WasteIdentity",
+    "WasteInsufficientStock",
+    "WasteNotFound",
+    "WasteService",
+    "WasteValidationError",
+    "WasteView",
 ]
