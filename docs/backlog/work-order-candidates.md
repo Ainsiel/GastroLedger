@@ -93,7 +93,6 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-010 Post a production batch and prepared lot
 GL-011 Complete a stock transfer lifecycle
 GL-012 Record operational waste with approval evidence
 GL-013 Create and acknowledge expiry alerts
@@ -104,6 +103,19 @@ GL-018 Record supplier return and expected adjustment
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-010 Production Batch
+
+```text
+work_order_id = GL-010
+feature_branch = feature/GL-010-production-batch
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/34
+```
+
+Delivery evidence so far: PR #34 is open against `develop` and implements atomic
+FEFO/FIFO input allocation, immutable production entries, prepared-lot lineage and
+visible yield/shortage states. Visual QA is intentionally skipped per user instruction.
 
 ## Completed: GL-009 Supplier Receipt Inventory Ledger
 

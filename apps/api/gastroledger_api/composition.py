@@ -15,6 +15,7 @@ from gastroledger_api.modules.store_operations.public import MODULE_ID as STORE_
 from gastroledger_api.runtime import configure_logging
 from gastroledger_api.technical.api_docs import configure_api_docs
 from gastroledger_api.technical.health import router as health_router
+from gastroledger_api.technical.inventory_routes import create_inventory_router
 from gastroledger_api.technical.menu_routes import create_menu_router
 from gastroledger_api.technical.platform_routes import create_platform_router
 from gastroledger_api.technical.problems import configure_problem_handlers
@@ -57,6 +58,10 @@ OPENAPI_TAGS = [
         "name": "procurement",
         "description": "Tenant suppliers and effective-dated ingredient offer operations.",
     },
+    {
+        "name": "inventory-production",
+        "description": "Tenant production batches and immutable inventory operations.",
+    },
 ]
 
 
@@ -90,6 +95,7 @@ def create_application(
     application.include_router(create_platform_router(database_url))
     application.include_router(create_menu_router(database_url))
     application.include_router(create_procurement_router(database_url))
+    application.include_router(create_inventory_router(database_url))
     application.state.module_boundaries = MODULE_BOUNDARIES
     return application
 
