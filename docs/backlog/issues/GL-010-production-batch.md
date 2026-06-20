@@ -1,11 +1,12 @@
 ---
 id: GL-010
 title: Post a production batch and prepared lot
-status: published
+status: in_pr
 readiness: ready
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical, status:in-pr]
 dependencies: [GL-006, GL-009]
+pull_request: https://github.com/Ainsiel/GastroLedger/pull/34
 requirements: [FR-015, FR-020, FR-031]
 use_cases: [UC-011]
 test_cases: [TC-011-S, TC-011-A, TC-011-F, IT-011]
