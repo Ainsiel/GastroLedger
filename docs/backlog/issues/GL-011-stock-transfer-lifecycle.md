@@ -1,12 +1,14 @@
 ---
 id: GL-011
 title: Complete a stock transfer lifecycle
-status: in_pr
-readiness: ready
+status: done
+readiness: done
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, status:in-pr]
+labels: [gridwork, type:feature, slice:vertical]
 dependencies: [GL-009]
 pull_request: https://github.com/Ainsiel/GastroLedger/pull/35
+merged_at: 2026-06-20T17:32:09Z
+merge_commit: 39417477d79aae3f32defcbd0e9bf859d8301ff7
 requirements: [FR-016, FR-020, FR-027]
 use_cases: [UC-015, UC-016, UC-017]
 test_cases: [TC-015-S, TC-015-A, TC-015-F, TC-016-S, TC-016-A, TC-016-F, TC-017-S, TC-017-A, TC-017-F, IT-012, IT-013]

@@ -103,16 +103,16 @@ GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
 
-## In PR: GL-011 Stock Transfer Lifecycle
+## Completed: GL-011 Stock Transfer Lifecycle
 
 ```text
 work_order_id = GL-011
 feature_branch = feature/GL-011-stock-transfer-lifecycle
-readiness = in_pr
+readiness = done
 pull_request = https://github.com/Ainsiel/GastroLedger/pull/35
 ```
 
-Delivery evidence so far: PR #35 is open against `develop` and implements request,
+Delivery evidence: PR #35 merged into `develop` on 2026-06-20 and implements request,
 approval, FEFO/FIFO dispatch, idempotent receipt/loss reconciliation and destination
 lot lineage. Visual QA is intentionally skipped per user instruction.
 
