@@ -7,14 +7,14 @@ export async function proxyInventoryRequest(
   upstreamPath: string,
 ): Promise<Response> {
   try {
-    const body = await request.text();
+    const body = request.method === "GET" ? undefined : await request.text();
     const upstream = await fetch(`${apiBaseUrl}${upstreamPath}`, {
       method: request.method,
       headers: {
         cookie: request.headers.get("cookie") ?? "",
         "content-type": "application/json",
       },
-      body,
+      ...(body === undefined ? {} : { body }),
       cache: "no-store",
     });
     const text = await upstream.text();

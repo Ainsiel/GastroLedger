@@ -1,5 +1,13 @@
 """Inventory and Production domain boundary."""
 
+from .expiry_alerts import (
+    EXPIRY_ALERT_RULE_KEY,
+    EXPIRY_ALERT_WINDOW_DAYS,
+    ExpiryAlertState,
+    ExpiryAlertValidationError,
+    acknowledge_alert,
+    requires_expiry_alert,
+)
 from .production import (
     ProductionValidationDetail,
     ProductionValidationError,
@@ -54,4 +62,10 @@ __all__ = [
     "approve_waste",
     "classify_waste",
     "validate_waste_submission",
+    "EXPIRY_ALERT_RULE_KEY",
+    "EXPIRY_ALERT_WINDOW_DAYS",
+    "ExpiryAlertState",
+    "ExpiryAlertValidationError",
+    "acknowledge_alert",
+    "requires_expiry_alert",
 ]

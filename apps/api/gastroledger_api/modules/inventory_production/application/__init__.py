@@ -1,5 +1,14 @@
 """Inventory and Production application boundary."""
 
+from .expiry_alerts import (
+    ExpiryAlertAuthorizationDenied,
+    ExpiryAlertConflict,
+    ExpiryAlertIdentity,
+    ExpiryAlertInvalid,
+    ExpiryAlertNotFound,
+    ExpiryAlertService,
+    ExpiryAlertView,
+)
 from .production import (
     PostProductionBatch,
     ProductionAuthorizationDenied,
@@ -32,6 +41,13 @@ from .waste import (
 )
 
 __all__ = [
+    "ExpiryAlertAuthorizationDenied",
+    "ExpiryAlertConflict",
+    "ExpiryAlertIdentity",
+    "ExpiryAlertInvalid",
+    "ExpiryAlertNotFound",
+    "ExpiryAlertService",
+    "ExpiryAlertView",
     "PostProductionBatch",
     "ProductionAuthorizationDenied",
     "ProductionBatchView",

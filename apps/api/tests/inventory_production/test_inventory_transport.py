@@ -25,3 +25,7 @@ def test_production_batch_is_a_session_scoped_public_api() -> None:
         "/api/v1/inventory/waste/{wasteId}/correct/{commandId}",
     ):
         assert schema["paths"][path]["post"]
+    assert schema["paths"]["/api/v1/inventory/expiry-alerts"]["get"]
+    assert schema["paths"][
+        "/api/v1/inventory/expiry-alerts/{alertId}/acknowledge"
+    ]["post"]

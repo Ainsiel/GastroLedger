@@ -88,3 +88,23 @@ class MenuCostProjectionSnapshot(Base):
     source_job_id: Mapped[UUID] = mapped_column(Uuid)
     total_cost: Mapped[Decimal] = mapped_column(Numeric(24, 10))
     calculated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ControlNotification(Base):
+    __tablename__ = "control_notifications"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["source_alert_id", "tenant_id"],
+            ["inventory_expiry_alerts.id", "inventory_expiry_alerts.tenant_id"],
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    source_alert_id: Mapped[UUID] = mapped_column(Uuid, unique=True)
+    recipient_role: Mapped[str] = mapped_column(Text)
+    title: Mapped[str] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

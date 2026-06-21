@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, datetime
 from uuid import uuid4
 
 import psycopg
@@ -9,6 +9,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import SQLAlchemyError
 
 from gastroledger_api.modules.inventory_production.public import (
+    ExpiryAlertAuthorizationDenied,
+    ExpiryAlertConflict,
+    ExpiryAlertIdentity,
+    ExpiryAlertInvalid,
+    ExpiryAlertNotFound,
+    ExpiryAlertService,
+    ExpiryAlertView,
     PostProductionBatch,
     ProductionAuthorizationDenied,
     ProductionBatchView,
@@ -38,6 +45,7 @@ from gastroledger_api.modules.inventory_production.public import (
     WasteView,
 )
 from gastroledger_api.modules.platform_organization.public import AuthenticationRequired
+from gastroledger_api.technical.postgres_expiry_alerts import PostgresExpiryAlertStore
 from gastroledger_api.technical.postgres_inventory import PostgresInventoryStore
 from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
 from gastroledger_api.technical.problems import ApiProblem, problem_response
@@ -145,6 +153,25 @@ class WasteResponse(BaseModel):
     inventoryTransactionId: str | None
 
 
+class ExpiryAlertAcknowledgeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    actionNote: str = Field(min_length=1, max_length=500)
+
+
+class ExpiryAlertResponse(BaseModel):
+    alertId: str
+    warehouseId: str
+    lotId: str
+    lotCode: str
+    expiryDate: date
+    status: str
+    ruleKey: str
+    createdAt: datetime
+    acknowledgedBy: str | None
+    acknowledgedAt: datetime | None
+    actionNote: str | None
+
+
 def production_response(batch: ProductionBatchView) -> ProductionBatchResponse:
     return ProductionBatchResponse(
         productionBatchId=batch.production_batch_id,
@@ -200,6 +227,22 @@ def waste_response(value: WasteView) -> WasteResponse:
     )
 
 
+def expiry_alert_response(value: ExpiryAlertView) -> ExpiryAlertResponse:
+    return ExpiryAlertResponse(
+        alertId=value.alert_id,
+        warehouseId=value.warehouse_id,
+        lotId=value.lot_id,
+        lotCode=value.lot_code,
+        expiryDate=value.expiry_date,
+        status=value.status,
+        ruleKey=value.rule_key,
+        createdAt=value.created_at,
+        acknowledgedBy=value.acknowledged_by,
+        acknowledgedAt=value.acknowledged_at,
+        actionNote=value.action_note,
+    )
+
+
 def create_inventory_router(database_url: str | None = None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/inventory", tags=["inventory-production"])
     resolved_database_url = database_url or os.environ.get("DATABASE_URL", "")
@@ -207,6 +250,7 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
     service = ProductionService(store=PostgresInventoryStore(resolved_database_url))
     transfers = TransferService(store=PostgresInventoryStore(resolved_database_url))
     waste = WasteService(store=PostgresInventoryStore(resolved_database_url))
+    expiry_alerts = ExpiryAlertService(store=PostgresExpiryAlertStore(resolved_database_url))
 
     def identity(gl_session: str | None) -> ProductionIdentity:
         if not gl_session:
@@ -221,6 +265,10 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
     def waste_identity(gl_session: str | None) -> WasteIdentity:
         value = identity(gl_session)
         return WasteIdentity(value.tenant_id, value.actor_id, value.role)
+
+    def expiry_identity(gl_session: str | None) -> ExpiryAlertIdentity:
+        value = identity(gl_session)
+        return ExpiryAlertIdentity(value.tenant_id, value.actor_id, value.role)
 
     def inventory_problem(error: Exception, correlation_id: str):
         if isinstance(error, AuthenticationRequired):
@@ -275,6 +323,16 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
                     for detail in error.details
                 ],
             )
+        if isinstance(error, ExpiryAlertAuthorizationDenied):
+            return problem_response(
+                403, "inventory.expiry_alert_authorization_denied", correlation_id, []
+            )
+        if isinstance(error, ExpiryAlertNotFound):
+            return problem_response(404, "inventory.expiry_alert_not_found", correlation_id, [])
+        if isinstance(error, ExpiryAlertConflict):
+            return problem_response(409, "inventory.expiry_alert_conflict", correlation_id, [])
+        if isinstance(error, ExpiryAlertInvalid):
+            return problem_response(422, "inventory.expiry_alert_invalid", correlation_id, [])
         if isinstance(error, ProductionValidationError):
             return problem_response(
                 422,
@@ -518,6 +576,50 @@ def create_inventory_router(database_url: str | None = None) -> APIRouter:
                 )
             )
         except waste_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    expiry_errors = (
+        AuthenticationRequired,
+        ExpiryAlertAuthorizationDenied,
+        ExpiryAlertNotFound,
+        ExpiryAlertConflict,
+        ExpiryAlertInvalid,
+        ValueError,
+        psycopg.Error,
+        SQLAlchemyError,
+    )
+
+    @router.get("/expiry-alerts", response_model=list[ExpiryAlertResponse])
+    def list_expiry_alerts_route(
+        status: str = "active",
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return [
+                expiry_alert_response(value)
+                for value in expiry_alerts.list_alerts(expiry_identity(gl_session), status)
+            ]
+        except expiry_errors as error:
+            return inventory_problem(error, correlation_id)
+
+    @router.post("/expiry-alerts/{alertId}/acknowledge", response_model=ExpiryAlertResponse)
+    def acknowledge_expiry_alert_route(
+        alertId: str,
+        request: ExpiryAlertAcknowledgeRequest,
+        gl_session: str | None = Security(session_cookie),
+    ):
+        correlation_id = str(uuid4())
+        try:
+            return expiry_alert_response(
+                expiry_alerts.acknowledge(
+                    expiry_identity(gl_session),
+                    alertId,
+                    request.actionNote,
+                    correlation_id,
+                )
+            )
+        except expiry_errors as error:
             return inventory_problem(error, correlation_id)
 
     return router
