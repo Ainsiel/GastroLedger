@@ -319,6 +319,13 @@ export interface WasteResponse {
   warehouseId: string; lotId: string; quantity: string; operationalValue: string;
   reason: string; requestedBy: string; decisionBy: string | null; inventoryTransactionId: string | null;
 }
+export interface ExpiryAlertAcknowledgeRequest { actionNote: string; }
+export interface ExpiryAlertResponse {
+  alertId: string; warehouseId: string; lotId: string; lotCode: string;
+  expiryDate: string; status: "active" | "acknowledged"; ruleKey: string;
+  createdAt: string; acknowledgedBy: string | null; acknowledgedAt: string | null;
+  actionNote: string | null;
+}
 
 export interface ApiProblem {
   type: string;

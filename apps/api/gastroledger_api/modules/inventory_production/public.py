@@ -2,6 +2,15 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from gastroledger_api.application.identifiers import EventId, TenantId, WarehouseId
+from gastroledger_api.modules.inventory_production.application.expiry_alerts import (
+    ExpiryAlertAuthorizationDenied,
+    ExpiryAlertConflict,
+    ExpiryAlertIdentity,
+    ExpiryAlertInvalid,
+    ExpiryAlertNotFound,
+    ExpiryAlertService,
+    ExpiryAlertView,
+)
 from gastroledger_api.modules.inventory_production.application.production import (
     PostProductionBatch,
     ProductionAuthorizationDenied,
@@ -90,6 +99,13 @@ class InventoryCountFact:
 
 
 __all__ = [
+    "ExpiryAlertAuthorizationDenied",
+    "ExpiryAlertConflict",
+    "ExpiryAlertIdentity",
+    "ExpiryAlertInvalid",
+    "ExpiryAlertNotFound",
+    "ExpiryAlertService",
+    "ExpiryAlertView",
     "AllocationOutcome",
     "AllocationRequest",
     "IngredientCostChanged",

@@ -2,9 +2,9 @@
 
 ## Delivery Sequence
 
-Current state: GL-001 through GL-012 are complete in `develop`. GL-013 is the next
-recommended ready candidate; GL-014 through GL-016 and GL-018 through GL-020 are
-also ready.
+Current state: GL-001 through GL-012 are complete in `develop`. GL-013 is in PR
+[#37](https://github.com/Ainsiel/GastroLedger/pull/37). GL-014 is the next
+recommended ready candidate; GL-015, GL-016 and GL-018 through GL-020 are also ready.
 
 | Order | Issue | Why At This Point |
 |---:|---|---|

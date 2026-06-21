@@ -16,8 +16,8 @@ describe("production batch experience", () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        Response.json({
+      vi.fn().mockImplementation((input: RequestInfo | URL) => Promise.resolve(
+        String(input).includes("/expiry-alerts") ? Response.json([]) : Response.json({
           productionBatchId: "production-1",
           inventoryTransactionId: "transaction-1",
           outputLotId: "lot-1",
@@ -29,7 +29,7 @@ describe("production batch experience", () => {
           varianceQuantity: "-2",
           varianceReason: "trim loss",
           consumedQuantity: "12",
-        }),
+        })),
       ),
     );
     render(<ProductionPage />);
@@ -52,8 +52,8 @@ describe("production batch experience", () => {
     const user = userEvent.setup();
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        Response.json(
+      vi.fn().mockImplementation((input: RequestInfo | URL) => Promise.resolve(
+        String(input).includes("/expiry-alerts") ? Response.json([]) : Response.json(
           {
             type: "inventory.insufficient_stock",
             title: "The request could not be completed",
@@ -62,7 +62,7 @@ describe("production batch experience", () => {
             errors: [],
           },
           { status: 409 },
-        ),
+        )),
       ),
     );
     render(<ProductionPage />);

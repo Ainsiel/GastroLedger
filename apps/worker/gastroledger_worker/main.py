@@ -2,6 +2,7 @@ import logging
 import os
 import signal
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -9,7 +10,9 @@ from gastroledger_api.runtime import configure_logging
 from gastroledger_api.technical.postgres_cost_projection import (
     PostgresCostRecalculationStore,
 )
+from gastroledger_api.technical.postgres_expiry_alerts import PostgresExpiryAlertStore
 from gastroledger_worker.cost_recalculation import CostRecalculationWorker
+from gastroledger_worker.expiry_alerts import ExpiryAlertWorker
 
 LOGGER = logging.getLogger(__name__)
 HEARTBEAT_PATH = Path(os.getenv("WORKER_HEARTBEAT_PATH", "/tmp/gastroledger-worker.heartbeat"))
@@ -36,6 +39,14 @@ def run() -> None:
         if DATABASE_URL
         else None
     )
+    expiry_worker = (
+        ExpiryAlertWorker(
+            store=PostgresExpiryAlertStore(DATABASE_URL),
+            worker_id=f"expiry-worker-{uuid4()}",
+        )
+        if DATABASE_URL
+        else None
+    )
 
     while _running:
         HEARTBEAT_PATH.write_text(str(time.time()), encoding="ascii")
@@ -44,6 +55,11 @@ def run() -> None:
                 cost_worker.run_once()
             except Exception:
                 LOGGER.exception("Cost recalculation polling cycle failed")
+        if expiry_worker is not None:
+            try:
+                expiry_worker.run_once(datetime.now(UTC).date())
+            except Exception:
+                LOGGER.exception("Expiry alert polling cycle failed")
         time.sleep(HEARTBEAT_INTERVAL_SECONDS)
 
     LOGGER.info("GastroLedger worker technical entry point stopped")

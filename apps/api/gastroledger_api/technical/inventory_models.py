@@ -317,3 +317,31 @@ class InventoryWasteRecord(Base):
     correlation_id: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class InventoryExpiryAlert(Base):
+    __tablename__ = "inventory_expiry_alerts"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["warehouse_id", "tenant_id"],
+            ["platform_warehouses.id", "platform_warehouses.tenant_id"],
+        ),
+        ForeignKeyConstraint(
+            ["lot_id", "tenant_id"], ["inventory_lots.id", "inventory_lots.tenant_id"]
+        ),
+        CheckConstraint("status IN ('active','acknowledged')"),
+        UniqueConstraint("tenant_id", "lot_id", "rule_key"),
+        UniqueConstraint("id", "tenant_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("platform_tenants.id"))
+    warehouse_id: Mapped[UUID] = mapped_column(Uuid)
+    lot_id: Mapped[UUID] = mapped_column(Uuid)
+    expiry_date: Mapped[date] = mapped_column(Date)
+    rule_key: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    acknowledged_by: Mapped[UUID | None] = mapped_column(Uuid, ForeignKey("platform_users.id"))
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    action_note: Mapped[str | None] = mapped_column(Text)

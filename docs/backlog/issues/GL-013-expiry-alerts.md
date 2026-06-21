@@ -1,11 +1,12 @@
 ---
 id: GL-013
 title: Create and acknowledge expiry alerts
-status: published
-readiness: ready
+status: in_pr
+readiness: in_pr
 primary_context: Inventory & Production
-labels: [gridwork, type:feature, slice:vertical, status:ready]
+labels: [gridwork, type:feature, slice:vertical, status:in-pr]
 dependencies: [GL-008, GL-009]
+pull_request: https://github.com/Ainsiel/GastroLedger/pull/37
 requirements: [FR-018, FR-029]
 use_cases: [UC-019]
 test_cases: [TC-019-S, TC-019-A, TC-019-F]

@@ -93,7 +93,6 @@ Delivery evidence: PR #27 merged into `develop`.
 ## Current Ready Candidates
 
 ```text
-GL-013 Create and acknowledge expiry alerts
 GL-014 Perform a blind count and reconcile variance
 GL-015 Import sales and resolve allocation exceptions
 GL-016 Apply manual ordering holds
@@ -101,6 +100,19 @@ GL-018 Record supplier return and expected adjustment
 GL-019 Reconcile an operational cash shift
 GL-020 Plan shifts and record attendance
 ```
+
+## In PR: GL-013 Expiry Alerts
+
+```text
+work_order_id = GL-013
+feature_branch = feature/GL-013-expiry-alerts
+readiness = in_pr
+pull_request = https://github.com/Ainsiel/GastroLedger/pull/37
+```
+
+Delivery evidence: PR #37 targets `develop` and implements leased expiry scanning,
+deduplicated in-app alerts, tenant isolation, acknowledgement evidence and active or
+acknowledged inventory views. Visual QA is intentionally skipped per user instruction.
 
 ## Completed: GL-012 Operational Waste
 
