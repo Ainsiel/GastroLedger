@@ -37,7 +37,7 @@ Instala dependencias base:
 ```bash
 cat /etc/os-release
 sudo dnf update -y
-sudo dnf install -y curl git docker nginx python3
+sudo dnf install -y git docker nginx python3
 sudo systemctl enable --now docker
 sudo systemctl enable --now nginx
 sudo usermod -aG docker ec2-user
@@ -48,9 +48,18 @@ case "$ARCH" in
   *) echo "Unsupported architecture for Docker Compose: $ARCH" >&2; exit 1 ;;
 esac
 sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo curl -SL \
-  "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$ARCH" \
-  -o /usr/local/lib/docker/cli-plugins/docker-compose
+COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$ARCH"
+if command -v curl >/dev/null 2>&1; then
+  sudo curl -SL "$COMPOSE_URL" -o /usr/local/lib/docker/cli-plugins/docker-compose
+else
+  python3 - "$COMPOSE_URL" <<'PY'
+import sys
+import urllib.request
+
+urllib.request.urlretrieve(sys.argv[1], "/tmp/docker-compose")
+PY
+  sudo mv /tmp/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
+fi
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 ```
 
