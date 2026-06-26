@@ -1,0 +1,1665 @@
+{
+  "lockfileVersion": "1.0.0",
+  "factory": {
+    "sourceType": "github-release",
+    "source": "Ainsiel/Gridwork",
+    "version": "0.2.0",
+    "factoryProfile": "full-v1",
+    "schemaVersion": "1.0.0",
+    "tag": "factory-v0.2.0",
+    "assetName": "gridwork-factory-v0.2.0.zip",
+    "releaseChannel": "stable",
+    "prerelease": false,
+    "sha256": "sha256:419b5bb1bc8125de4e821b16a41e8721233339c17b96dc5ad4a0e14e1fc58a09",
+    "sourceCommit": "c12da1665ffa461333a01bc6e35537c3bb011cd4",
+    "bundleManifestHash": "sha256:3bd8b1fe743cde4ea5456fb5a1926a896def9d0dd302761241e6b74ea34e4583"
+  },
+  "installer": {
+    "package": "gridwork",
+    "version": "0.1.0"
+  },
+  "compatibility": {
+    "requiredCliVersion": ">=0.1.0",
+    "status": "compatible"
+  },
+  "resolution": {
+    "authMode": "none"
+  },
+  "files": [
+    {
+      "path": ".gridwork/agents/architecture-foundation-agent/agent.json",
+      "sha256": "sha256:454d5b13bd32196aeca1b865792960c63645ca6bec2d7e5f3b4169ce407bb52c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/architecture-foundation-agent/AGENT.md",
+      "sha256": "sha256:c6917907c6f590ba8c68494f7110f472c5b6189bf5703bdbc78d096bbee96204",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/backlog-manager-agent/agent.json",
+      "sha256": "sha256:f775c532d25dfb334043c9cdc882bbc5e4c8fb318b2c0eded4f4bf1245f9c72d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/backlog-manager-agent/AGENT.md",
+      "sha256": "sha256:0dfa711513471b870097dcfae25b059b4bd4a77622a21c3e83749a3baa2685c2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/implementer-agent/agent.json",
+      "sha256": "sha256:1316f5b3f014fe6bc3bcbc5abfcb814c8043ec2d856ec4f44341e165f84a9854",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/implementer-agent/AGENT.md",
+      "sha256": "sha256:3e288c166c7ddb630358db78a5410bb8274f40fdd661a593890b16e4022a1599",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/intake-agent/agent.json",
+      "sha256": "sha256:ee3d9de99b3d1a5f7d26e0f4bafd3fef4e73730b9364f75b3073f4fa42ea1c01",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/intake-agent/AGENT.md",
+      "sha256": "sha256:d198439bd36fe3a6f85e74a367f2cac0795c603e30bf7c1e735145ab118d515f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/orchestrator/agent.json",
+      "sha256": "sha256:bdac6fc6e9e2c0fd49ac7d84940c7d7d6cdc0ce0057226a99f1b2d9d72f30b78",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/orchestrator/AGENT.md",
+      "sha256": "sha256:9c0ec58ac41c0e3aff3710b33a37e6c3a5d96be1a7feae8871d03fc69486c534",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/orchestrator/PROMPT.md",
+      "sha256": "sha256:e27706cf3f9dd5380047b9ee4680d6994c6052d5959a7360e87264da192cf6d6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/planner-agent/agent.json",
+      "sha256": "sha256:28d4327780e9bb07c5ce231dc49107cb47d7ad9623a6f4e317cb6833cec60cc2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/planner-agent/AGENT.md",
+      "sha256": "sha256:d6fc74ff5c4ca0525036eac52f3855e0ed911697eaab7e4fc9e94e676269da56",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/platform-engineer-agent/agent.json",
+      "sha256": "sha256:636cc81e0f272d159e39ba012eb5754d556b7d90880ff88c56d62eb930f3b9e9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/platform-engineer-agent/AGENT.md",
+      "sha256": "sha256:1db94b1ccf85adb23d3e9fc4e3ef0fc4188a1a16a8be8c8862a802d5b16d5462",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/release-manager-agent/agent.json",
+      "sha256": "sha256:74242f36129cd0c3165ddfaf50da6470c695a1efc3bcbbfe1d9b104e34c2c213",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/release-manager-agent/AGENT.md",
+      "sha256": "sha256:2da1bb9e56f9414e669e41367adf86e27ec1faaf9a0b34e1aae5d6fbef04dbce",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/software-architect/agent.json",
+      "sha256": "sha256:abc05ae87c44d379dcaa7ff9c64a0e9739a7dc07d1d7cf96e52ca19dfdafac71",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/software-architect/AGENT.md",
+      "sha256": "sha256:364a4d9a20b4e2aa3200ae049b524cc2f7abdde50b0bd37160b776f93ebf7251",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/verifier-agent/agent.json",
+      "sha256": "sha256:d163fdcc806d8998529246ad42767e16cc682fc8c5589c4cc8bb6458fd0a9baf",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/agents/verifier-agent/AGENT.md",
+      "sha256": "sha256:7468b76e2a15e82e48dce80604ea6e724cac8591f111312590da52d9ce1d4a1e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/docs/AGENTS.md",
+      "sha256": "sha256:6edf0e8ae1374c324c103d3ec3af9dca3d2ecfc7d7a4086ace376a9ce3ba3115",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/docs/FACTORY_PROFILE.md",
+      "sha256": "sha256:91d11b7e767bc98e2c0dda48bf1422ce1a1258beafb6d28c514b5786ac119e71",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/docs/SKILL_CATALOG.md",
+      "sha256": "sha256:ef0423d0f85186d8e0f4f1c38352f94e4d6d5d2cdf3f9712710ca4e379d8d0b5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/docs/WORKFLOW_CATALOG.md",
+      "sha256": "sha256:c976314e7af74b4b7534dd4037af09c8e1e5507d3e0c71551fcc4922e970a781",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/docs/WORKFLOW_GUIDE.md",
+      "sha256": "sha256:1c038eb6b7123938695abc88bd072517e0fd863ddd0257766a12e5aecf2c51a6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/factory.json",
+      "sha256": "sha256:6adaa7ba9383307bd75ce77fa2be548fa5d51d3cea4dc806a38ee8fa0de12fef",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/agent-permissions.md",
+      "sha256": "sha256:4362f1c146308df8c4b76593c561561c5f389377be913a85994cb6c7e0c755d0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/architecture-design-policy.md",
+      "sha256": "sha256:90f01de6a730797beaf140158e78b8894f50e1849eb5667f8fcff1ebfe0a25c0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/architecture-foundation-policy.md",
+      "sha256": "sha256:5ac59788d870f6b0b733ce66b098e238fda13834cebe4bef3347aeecd6bd0763",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/delivery-infrastructure-policy.md",
+      "sha256": "sha256:42666b089cd993ed1c52d20b9e6099a54a705167f5412ee4f1fda4004271ab3f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/delivery-lifecycle-policy.md",
+      "sha256": "sha256:2db3291398dd5b4e92abb550526b4093a61fd7d38275896a9c1ad05f37ffab9d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/diagram-html-policy.md",
+      "sha256": "sha256:71f853e935b50412296e34068f7161ca73f13117ca32798b6d0248eca57e7331",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/git-policy.md",
+      "sha256": "sha256:2d7796635371c0062eff2b3c9fbec2c276439385e11b0548b6418c01842aec54",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/github-cli-policy.md",
+      "sha256": "sha256:8349d72caf211fe0a4c536620664d5270388d4f4b2b441bd57fab9da03f9165b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/github-labels.json",
+      "sha256": "sha256:eb85f739b9a1acdab8b245af9e7ca3863bc9a5da93696d461c8c9e87431bf159",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/human-gates.md",
+      "sha256": "sha256:e92be3c90699b83e9f2625d069f78b93e00dfac20aea0b099b174f31b1e7f3d6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/logging-policy.md",
+      "sha256": "sha256:a64f2c63a2286bbb81a43ff4c52b79e9401929efdbef0ac9f5e0d0d209588d84",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/path-scopes.md",
+      "sha256": "sha256:d140a237b9be90e12871a922b3d2ef9895f435b23acfa9e2b0e06419e9ac0dbb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/policy-precedence.md",
+      "sha256": "sha256:a21ecf8420190911bfd13fb7672f6539a62d6e8998b7a2d680404876e92bc157",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/security-policy.md",
+      "sha256": "sha256:e137496bd8b51460e19a18e094d4ea76194c97682176b60d22978b8516e1e731",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/security-secrets-redaction.md",
+      "sha256": "sha256:78c9d8e34ba3cc026ce4ada2571f9a34a7cde7e2f637d78828686a49463935d6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/stack-skill-policy.md",
+      "sha256": "sha256:b6fc66fbbf16fd8e8ab118ca9e9df2b16573c231e12d672b9eecb469459788fd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/tdd-evidence-policy.md",
+      "sha256": "sha256:c2d639775e53fc9e5e32054ac7c58e2e043cc868dfe8e74299cba2453aa68a1e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/tool-allowlist.md",
+      "sha256": "sha256:a65830cfb37518fdd6d8a6faa880b4882b84313e9f91e970a16f5219e7bd3ec2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/work-order-policy.md",
+      "sha256": "sha256:674b2fbb4657d4d614d37aba02cf59e1d081f45688a7728ab2ad1bbcc4f81d18",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/policies/workspace-domains.md",
+      "sha256": "sha256:4f97c6496c4ad45c685aec350f20d4684cb3c012244f23ed6535cecba77774ce",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/QUICKSTART.md",
+      "sha256": "sha256:bf2aee9b78a6d00e09563d6db1e967f3b5c40c5eacc4834114896ee2131d545f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/README.md",
+      "sha256": "sha256:1a2b844438a2824d21c3e15328571254fd3597a17a6c60c1d2edb46295367f19",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/schemas/agent.schema.json",
+      "sha256": "sha256:51734e845a533979c28a163f9164fc4158f84b781bab7087060df7c94cac71ef",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/schemas/factory.schema.json",
+      "sha256": "sha256:04f6f65292c54680251e27b25eee597e640d8221fb1f1e95d47e96a7aa87417a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/schemas/lockfile.schema.json",
+      "sha256": "sha256:fa6d6831057ddff2f187deba7775f2e903faadca34a177aeb322b9ed742459ad",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/schemas/skill.schema.json",
+      "sha256": "sha256:1ce5d8e3af1b86ed4c23972775ad744eb90a96f9d5426421b3bdfbf9cc00beb4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/schemas/workflow.schema.json",
+      "sha256": "sha256:568879155be5a732c58b81780fa0e263a848d3ca383885cd9e6378dc93c8396f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/api-contract-design/skill.json",
+      "sha256": "sha256:f3aef4eb4a28bb3fb4112e1aa3901717678f8f29cf4c47fdc48204c61b0d7f60",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/api-contract-design/SKILL.md",
+      "sha256": "sha256:237781ecc937879d3882fc7c4c00a8f9d9145e5f8eee844ff62030bf58788914",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-conformance-verification/skill.json",
+      "sha256": "sha256:36ff79d716e9d1d7d2a66116b06646267f0d91ab8ed51bc0edf8abd233676c5c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-conformance-verification/SKILL.md",
+      "sha256": "sha256:da65bba53f7423c503bc8deae580d59e6553832610c5b250dfaead943ec311bd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-decision-records/skill.json",
+      "sha256": "sha256:c897cc068010962a64321353da28ed4c428b94754e024b6472a2c17d9970dd4a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-decision-records/SKILL.md",
+      "sha256": "sha256:5e0d5bb3a0528c223f1ae9e6016ef144f5e27cb0729c4c8903811a8bafc5df64",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-foundation-planning/skill.json",
+      "sha256": "sha256:b510921475a5f63a51bb135a683169de05364067fb1bba12e3aa944206fbf526",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-foundation-planning/SKILL.md",
+      "sha256": "sha256:d1f23e0de9dc9e04895003726c872a6743c116f1f635bc3361e59b840aad8812",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-grill-me/skill.json",
+      "sha256": "sha256:b822a51281303ad77aafa0726f8a3d2148900b0aaf038794b6fde3963929818d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-grill-me/SKILL.md",
+      "sha256": "sha256:d48a012a4b32fa993dbcb154fdee1eacdea2fa03c545526d8cffd9853c41232b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-pattern-selection/skill.json",
+      "sha256": "sha256:cd322cae448265dfe7f7d4d7162c48f13d8c15922e6113455d4cd5ac31bb7fdb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/architecture-pattern-selection/SKILL.md",
+      "sha256": "sha256:c62e52cdfec54f12572eb3b66c98afcbecfd455aca0e3f0b2aa1cdab45d42042",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/backlog-management/skill.json",
+      "sha256": "sha256:a156d0b3898d1a6efe9f222a0c54feb4991a17adb8f67d685bc2c91d0f62f4ea",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/backlog-management/SKILL.md",
+      "sha256": "sha256:8bd0b9a0edbe9a85a99de5720ea5d446867a27137f19e3fe5154b04d6536735c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/backlog-planning/skill.json",
+      "sha256": "sha256:95511c530baaa22301833780fa39a52522d4476c3f81d1d123d4bc749fb947d9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/backlog-planning/SKILL.md",
+      "sha256": "sha256:997b52361f03c367d3c64a38c1288782094ef3199ae9f0dedfb8acec9152e392",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/c4-html-diagrams/skill.json",
+      "sha256": "sha256:c728d1605e9cc97a269aaf9d4dd8caa4e14da1bb7654ecab9dbeeeaa723f6ba2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/c4-html-diagrams/SKILL.md",
+      "sha256": "sha256:f8900cd581acc8668dbad17529e24faf44f279fc255198ed80051f4015e32928",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/changed-scope-detection/skill.json",
+      "sha256": "sha256:9f8789a206ea6dde0e447f7b7901c6e11a7806113bc3e45bd0bb8b9e68fadd29",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/changed-scope-detection/SKILL.md",
+      "sha256": "sha256:e316dd9c9b9d1ab15309ceb392e0ab5871e5c9c3b185719134f9dd2f8fb1d3e1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ci-failure-diagnosis/skill.json",
+      "sha256": "sha256:c5a3e235a2444b4574254e27b713358b9f9a1d73605a84ab326ce75feadd0830",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ci-failure-diagnosis/SKILL.md",
+      "sha256": "sha256:3cf80cd87f39936ba1b5db2717a10872fd70ba7089b5b09d1fc440d565e4cc90",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ci-status-evaluation/skill.json",
+      "sha256": "sha256:1facc9e01ada13cc3bb95f24cc859eada93f26a434230643b9f04f2a8bd4da9a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ci-status-evaluation/SKILL.md",
+      "sha256": "sha256:3e0554bce7c1a69d5033151842ac3d7bd1f80dbf72bd28bcf2c4aea4bdf642ba",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/clean-architecture/skill.json",
+      "sha256": "sha256:28c299c61bc28b377c639ed1e54795be8a88321f00beb168e89a97c683a7cee4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/clean-architecture/SKILL.md",
+      "sha256": "sha256:1a4eb8f2c52c3365297c0163e3608ecceb91cf2eff8b6e7842a1341c9d84fd39",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/composition-root-wiring/skill.json",
+      "sha256": "sha256:159c8e606efd2b0531c0b23e81a315961bffec8bdc69495a02dc2f1d9c5e7642",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/composition-root-wiring/SKILL.md",
+      "sha256": "sha256:d535dc0257592c3b1d8f6fbc02a4685eb89431ffb1888507e7c87f1f2e71b1d1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/container-build-and-verification/skill.json",
+      "sha256": "sha256:f9e1706a1c42082fbda72eefc6b564506ffeb2a84266beb0a2585a241e6353b3",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/container-build-and-verification/SKILL.md",
+      "sha256": "sha256:2db03d38d40340c7148c65f30a1d44c380c0457523fb23b443a2eef290c63a4c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/contract-first-boundaries/skill.json",
+      "sha256": "sha256:a6a33ff38c019162e1bcde7af29878cecbe1760576f469c6677811f8dc006386",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/contract-first-boundaries/SKILL.md",
+      "sha256": "sha256:203c9d7a8be0f96cb9b2d5344768aef3d2e276203f34b0a82eef62ba205e5c73",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/deployment-verification/skill.json",
+      "sha256": "sha256:6a370efd30d04a278b2352a0ab6612893f0f2f13c16df0999cab728860ba6fad",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/deployment-verification/SKILL.md",
+      "sha256": "sha256:7e3e741e94fb4d525716b4c9a26f523344e2dac79697638849a9bf85f0c0a1c6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/design-pattern-selection/skill.json",
+      "sha256": "sha256:434bc35ecc04c1eaeafc8b2c5169ba75903c65e665bc40dfbc65d034f09b5b25",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/design-pattern-selection/SKILL.md",
+      "sha256": "sha256:688bb6dd3dfcc8886c141b5af13f4913c64841f76bf728027359338a1c5478bd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/diagnose-bug/skill.json",
+      "sha256": "sha256:7260f24206d71a8e9fcd140fd07d4314e76ab038962d9ccd7301c4689265b629",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/diagnose-bug/SKILL.md",
+      "sha256": "sha256:f107071d1667e0c6acb94354a93f3b0b84a88e78cf77cf7e43f9d6fa2d90a948",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/docker-compose-environment-strategy/skill.json",
+      "sha256": "sha256:d3c8cce20ca2904d833413105f18ee9756da61b3a48f6351dec0bf4a70a4d0f8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/docker-compose-environment-strategy/SKILL.md",
+      "sha256": "sha256:8fe8aaaea164652a8aff981809b8f5dd3c20b88d487633580272e479911a0df2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/domain-driven-design/skill.json",
+      "sha256": "sha256:488a20c90d7843d8f7a6ef3eee59637788b856927d10e5ea966ec211498b8cc0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/domain-driven-design/SKILL.md",
+      "sha256": "sha256:2ac4b82c9505fba98fd32c72d3b1ccfdb692cd6d864c7d7af0f51813959fd6c7",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/erd-html-diagrams/skill.json",
+      "sha256": "sha256:5cf18f13d4eaa6c7517f9e6e9b2af53da6818d52853a6900432061563c12001a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/erd-html-diagrams/SKILL.md",
+      "sha256": "sha256:c27c836bc6b8ab382ff51ca98b01fd1ddc6771dd69d47ac7ae840ec8a92d0874",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-api-contract-consumption/skill.json",
+      "sha256": "sha256:944730a7ed85c35651a8428b4d21ad25a0f03e677a5fe2aee86991f3ea904cd0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-api-contract-consumption/SKILL.md",
+      "sha256": "sha256:be168a79d3eddb0eced90c00a4b8af7443a788bc085fb0ab6e31bae4746801f6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-architecture-design/skill.json",
+      "sha256": "sha256:ef1075f13d5ca55a78a8ffd3d3f2ddd49b5a40af8e15b3fd95e0c970bc4bae54",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-architecture-design/SKILL.md",
+      "sha256": "sha256:f404de0280f1aa755728ba44d3a46ef02c077297534c5d96db05f88908adefab",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-state-strategy/skill.json",
+      "sha256": "sha256:0f0203b5e827e1c6de4b26c58d6942a94241a01812b9c0befc96a7be07984c8e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-state-strategy/SKILL.md",
+      "sha256": "sha256:6197bcaac9242e8845d239d45f72aa00b0274c8c4cc554c75fcffc043c606ff5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-testing-strategy/skill.json",
+      "sha256": "sha256:b9d47def8977c22a877d8cad46d5ed5d35ee42bc789967ea7118d0bcf396da88",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/frontend-testing-strategy/SKILL.md",
+      "sha256": "sha256:03f6cb381ac2c0031c07485c11f90c2428f645aadaeeb58849532b0cbba87103",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/git-branch-management/skill.json",
+      "sha256": "sha256:b525724922fccc8a947f0cf509ad0a3daa23273177d35536d2dc232f47c0fb3b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/git-branch-management/SKILL.md",
+      "sha256": "sha256:c9d51e3bab0c634da20dc1b1430e3d0ced9367277677c6f16d74af77be203d6e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-cicd/skill.json",
+      "sha256": "sha256:9237f18aeebf56620dda260245faef26821303f2b0bd8ae926efe2de778078a8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-cicd/SKILL.md",
+      "sha256": "sha256:a6315fd9c2748982676152692edb0d4a34c749bdcb8f246deb8ffe5dc547377d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-monorepo-ci/skill.json",
+      "sha256": "sha256:69bb95ef590ec249c155987c05ee10ffe8565f12d697cd280e1a59e3fc6b298a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-monorepo-ci/SKILL.md",
+      "sha256": "sha256:540bc572dcd037960d0176f7903ba31166070d5a4e68701cca9de755341c5238",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-reusable-workflows/skill.json",
+      "sha256": "sha256:0511e3c25866c43e0c6270e7528a9c85ccb0b99073b2479136bc77bcf3334c7f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-actions-reusable-workflows/SKILL.md",
+      "sha256": "sha256:393c6390a3289e6db07f82f29954b0bda6e7a1f5c4c1a3f82873517109214568",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-cli/skill.json",
+      "sha256": "sha256:2c6a463ff84af8338fc6f0284c197f535bb0de3297260027fb24d32b54c6c3e0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-cli/SKILL.md",
+      "sha256": "sha256:0ea9a4fb3d683f22d0954f1a5fedb4d51d38a3d824dd9671fa83694a1c21da0c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-environments-management/skill.json",
+      "sha256": "sha256:56851ebc8171cb7df56376d841da88c76325baa73c5c711eaddc9d9eaaeec5ab",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-environments-management/SKILL.md",
+      "sha256": "sha256:00577085e307bdea5c940992821c7409ee664c9a49ddb5e94cd8869b724023d7",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-issue-discovery/skill.json",
+      "sha256": "sha256:98d889f8b7e9041b25b6e43fa62f77b5c4e919fed75ffc51092949720a1640ba",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-issue-discovery/SKILL.md",
+      "sha256": "sha256:f0422b25851eebe61043e1697a435e5ca3987870bfa7d1d01772c7eb24ba3523",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-issue-publisher/skill.json",
+      "sha256": "sha256:d9741ddcc4f9f93e6834fb46ff0fce762a80dae81e7ea5ac976dc7035ac18bbd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-issue-publisher/SKILL.md",
+      "sha256": "sha256:8b1904eceb0b194611be8b623bd78fb1be8c7166c3b354d4f2441e048950ed84",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-label-manager/skill.json",
+      "sha256": "sha256:e1f03032ecae1b1aa772de4c1f0224d38f34728a710961b184c73d16b78b03d6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-label-manager/SKILL.md",
+      "sha256": "sha256:251e1e5d84932f60fb22093aa8c2dfd1e41817d6fbc3aab0e406c4221acf981c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-rulesets-management/skill.json",
+      "sha256": "sha256:86268f5c945987d1f50739af4d8fbb1ae87aa5e024f0636d105b4460929c3171",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/github-rulesets-management/SKILL.md",
+      "sha256": "sha256:5e7b8031bb9d1c4a11eac248ce0b04b5306f2d6c5e80b65138a5ead535c749cb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/gridwork-release-publisher/skill.json",
+      "sha256": "sha256:814da21a645e12e7f15462f2e2e69b4e1fb8664c25da01856a1a68bfe8866988",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/gridwork-release-publisher/SKILL.md",
+      "sha256": "sha256:10f0738a546217b79907166aeb788b8acd581d2a3632bac1c1cde49c4434f19e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/handoff/skill.json",
+      "sha256": "sha256:aca2aa0426ab5d915b87b9939574f2e1702e2029d051a0bc3f6324e54b86cdda",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/handoff/SKILL.md",
+      "sha256": "sha256:2079b72c8cf87c7f1329025bcded504c5834a069811d9c967795bcd9a5bd8c60",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/html-architecture-diagrams/skill.json",
+      "sha256": "sha256:c2ffa85fa42bb89d16a72dbf5cee69d2235947257e7d7065393af20971cd475f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/html-architecture-diagrams/SKILL.md",
+      "sha256": "sha256:50ca2e1a42817eed98f157dfce5519b5ec617eaeb736f0db058782812fd1e9bc",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/integration-test-design/skill.json",
+      "sha256": "sha256:ae772827eb2e656638146eb8de0bde5d246df3cac13ae5ea7ea827b111fa161f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/integration-test-design/SKILL.md",
+      "sha256": "sha256:68a19eac3b43bfa6527fc11f7173e180f7972da108de9efd928c1debab8ccd42",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/integration-testing/skill.json",
+      "sha256": "sha256:4ef6d311c161120d6741a4c14229abc417187e28612d0bb0d97f9ccba40bc29b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/integration-testing/SKILL.md",
+      "sha256": "sha256:7fd33cbb1d4dc6ab6f64c53a158cb379d6a5abeaf3179c646fae5a5d0aa56229",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/module-boundary-enforcement/skill.json",
+      "sha256": "sha256:31b34c4fe6edb2cb49b9372e15460a3d7bb9edb39068043f0d7a7b150656dbdb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/module-boundary-enforcement/SKILL.md",
+      "sha256": "sha256:1369932abd81e045e8a9a94a62788c422e8c342b5d5e74af290e03c3f4de0192",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/monorepo-layout-design/skill.json",
+      "sha256": "sha256:5c5b5e20a183d48f74b2da461370f00be9089a063da8cab8e48d586c2070c7e1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/monorepo-layout-design/SKILL.md",
+      "sha256": "sha256:eba397abedb6267c875e98ce53dc9a7bd1dac4dff000bb85d0b5b08e21eb02d8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/project-scaffolding/skill.json",
+      "sha256": "sha256:8b6be2d8312fdf288649238ca217bc273629669144c80596ef5ea25096b2ef6e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/project-scaffolding/SKILL.md",
+      "sha256": "sha256:534004e9e5f4a7d1075277f9dbbe298cc663e217f2597248b55b4360399e76b6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/pull-request-lifecycle/skill.json",
+      "sha256": "sha256:87cdf3dc8205268cd8bf722917d7d120d29000aea448ab59928d35732ee3d7a4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/pull-request-lifecycle/SKILL.md",
+      "sha256": "sha256:7e6f81ffcbb8c58300afda1eed67bfcdcfb04b012de6c3f389ce8f92cc62a3e8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/quality-command-contract/skill.json",
+      "sha256": "sha256:a5ce015464444564a35b26062ea177ede4b3a4fb33be83d161935e6f9d276ba5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/quality-command-contract/SKILL.md",
+      "sha256": "sha256:05d053b57e9cfee632e064f4022932acc903b4852fcd642fca413a7d79160e08",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/relational-data-modeling/skill.json",
+      "sha256": "sha256:7e2748c696b70eb09a03ce4669fdd1e5a835f52aa8b14f59f68e883ac4251e3b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/relational-data-modeling/SKILL.md",
+      "sha256": "sha256:1949e1ecb7a0100e75450290d3c2cf5d5d1e56148a7cbcfc91c1bade987c29c3",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/release-promotion/skill.json",
+      "sha256": "sha256:89743114cccfc5c1a11fb19b94cabcd141ba4fc309ef1f4562ac7420f813df81",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/release-promotion/SKILL.md",
+      "sha256": "sha256:1729360e262fadf4835425cb53317ee3bb288c86d7b7cb624a7aae2cd6611067",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/repository-bootstrap/skill.json",
+      "sha256": "sha256:9d599c902d898842e5a6f2e3fb3ce9148112d9b80a389ec2e220437c51e8bbbe",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/repository-bootstrap/SKILL.md",
+      "sha256": "sha256:05890048978101ff5897dcb4677a13a0d358b097174bc082b132745608d540ce",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/rollback-planning/skill.json",
+      "sha256": "sha256:d76aa2dfc791d64f2d5127238e871b7ec3c2d0b2b4bb5553ba010d7edfcb85ce",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/rollback-planning/SKILL.md",
+      "sha256": "sha256:a0cc83ae5262ccab2f063e8ff36e0e858a2039a9d8fa2209fe865cb6a2b9acae",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/sdd-requirements/skill.json",
+      "sha256": "sha256:63393b7f23b61d30414e4914d5e29ada6e284a2b27737b0b034d216a170ae0cc",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/sdd-requirements/SKILL.md",
+      "sha256": "sha256:7ebc033eb1d63e0098adcc4008d6075acec38810a57a3cd826626ecbc2388e53",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/tdd/skill.json",
+      "sha256": "sha256:6c4ea8a6e94aabcc163ed732a3ceb96dbbe6c83f63ee26bb150030f0134f5b58",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/tdd/SKILL.md",
+      "sha256": "sha256:8be1cd6b98d3ed12fb2872ff1c660fd3181740e0ca0474fb61635e48c804cbc6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ubiquitous-language/skill.json",
+      "sha256": "sha256:40137b1fa410462e3f10c0dc1f6bb8aaa7ba21652dbec01e3fda522915d264d2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/ubiquitous-language/SKILL.md",
+      "sha256": "sha256:f71399e04d9ba32ffe2a2889bc43778870e40c3d1cd93574388bc80e335e9330",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/uml-html-diagrams/skill.json",
+      "sha256": "sha256:b881d88bc22516a9b4855c21a9aea9fa3bd2395a8da0d9bb0375cc7d7d55effe",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/uml-html-diagrams/SKILL.md",
+      "sha256": "sha256:105558fae5b214e8a9f677edb9976896bc8120e0b7545cc5c2dd14fd34547ce0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/work-order-branch-lifecycle/skill.json",
+      "sha256": "sha256:eb003d805004cda5a30d7e0afc0b68ef70a996d8fc6a361fb1e677abef550401",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/skills/work-order-branch-lifecycle/SKILL.md",
+      "sha256": "sha256:508363a28bf3523247ad1d0cc3fb838e3a4c7d1de22c676ce3435eadcfac930a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/ddd-stack-guidance.md",
+      "sha256": "sha256:3785bc29156516194ec70c66539ebba546d4d23f31728c853d587539d602deef",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/docker-compose-guidance.md",
+      "sha256": "sha256:43970732bed85f25986d4d8125f08cb0a3fd5446069d602e0b00227abaa33bea",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/path-hints.md",
+      "sha256": "sha256:6b571f18896350b785613e940437fb47c0e2b4bef7586dc033c0ca1b76056e2e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/quality-commands.json",
+      "sha256": "sha256:601fc533fd45f28682955ef056faf1036b09507f2dd12da6205ba7a2fc0d5493",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/test-commands.json",
+      "sha256": "sha256:ea6e40eb884af2a1a440ef543c06b1ba4ccfa9e52bd05ccde9363383ed6db383",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/policies/vertical-slice-policy.md",
+      "sha256": "sha256:b80983e7d1c904899d3489dbea39c7ed23572d18b185a20235762aa139b1b0cb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/README.md",
+      "sha256": "sha256:81400763a8e65691446c660ebb2fae62469519666b8b1872bab7da1f0baccfad",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/database-migration-verification/skill.json",
+      "sha256": "sha256:47e5f9ccedb87ebaee86d44c6e08105592ea3d6bdc2397e6d7185001dfec3c09",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/database-migration-verification/SKILL.md",
+      "sha256": "sha256:14844ef3c1a067ff4896e66d77ed27f21a7e94b76e33e90e2292d9857f9c4268",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/docker-compose-local-guidance/skill.json",
+      "sha256": "sha256:039c993c56e67d511c1703f79b4e330a44d392ee78e686fc67e3a962c1a495d9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/docker-compose-local-guidance/SKILL.md",
+      "sha256": "sha256:5f90c8df8b498e83dc4ffbdc3fc82cfda81e07306e37760ef0091af37ca0d694",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/docker-compose-optimization/skill.json",
+      "sha256": "sha256:b4db890f445b426bb66db9ae9159d7a3a443027b5eb4c145f786c3c5e61e4f84",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/docker-compose-optimization/SKILL.md",
+      "sha256": "sha256:dee9ff867063d08dff8399af4d4a85451587661f3d63026d4f87e5ea631bd430",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/dockerfile-authoring/skill.json",
+      "sha256": "sha256:2e1c1241c72cf03ee4906666ad50c1383b175366465922b8180acc2a15d03ff0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/dockerfile-authoring/SKILL.md",
+      "sha256": "sha256:6fbdfd2840a7314528f33b6696c006a6f70511544c85c49c40c172de59439b97",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-backend-guidance/skill.json",
+      "sha256": "sha256:de19dd0958bb683db0573aa2be6714adc994fb3af22ccfd65c2786e19d1e590f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-backend-guidance/SKILL.md",
+      "sha256": "sha256:6971bb0c53128148df5ccbc339ac80a082a4ba0781cff1ed98e9d16bec947f86",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-ci-quality-gates/skill.json",
+      "sha256": "sha256:d8cf02d124b89b8b11ce39f12db6d95f58484a696dbe95c9d82b4f18e74aa8b5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-ci-quality-gates/SKILL.md",
+      "sha256": "sha256:48e92212df331b596dca7ad246092afa52cdcc373a157d68d11c083945cf0e56",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-container-build/skill.json",
+      "sha256": "sha256:0b753ac0eb044a75dfbb411f96bff91ead8674b29ba29089d938998bd8d0728c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-container-build/SKILL.md",
+      "sha256": "sha256:868920e74600f5c68f490e8c606d99b7e4fb2d84a1fe106dd58e248599c43325",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-integration-testing/skill.json",
+      "sha256": "sha256:75f872b11e148eeefa91962590244e6fb9f4258f6ddf27665b2736361d979409",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-integration-testing/SKILL.md",
+      "sha256": "sha256:78b492d2933d11b97c41cff8bc6e869bc01c150e7b3685744baeac455026643b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-migration-testing/skill.json",
+      "sha256": "sha256:3d0f0634fa3979279ceb80cfb1fb80ee79a6738443755ca9cf9581b0935e3658",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-migration-testing/SKILL.md",
+      "sha256": "sha256:d8614a33823d9521ac89606309e63e511429560fcbc381974fded36e440be160",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-performance/skill.json",
+      "sha256": "sha256:21c5076698eafcd0c4a7fd0c627ccacdd1718583df8ef35bc339699ba1b8f1c3",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-performance/SKILL.md",
+      "sha256": "sha256:21e1d55977cdc4e7db3b172cc0aa64d6c4a9032419b3e28fc85e5229197af45c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-project-bootstrap/skill.json",
+      "sha256": "sha256:62113afe925e40bf8d067b1099102fd4d137f89bdb0444814621a79821e19ade",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/fastapi-project-bootstrap/SKILL.md",
+      "sha256": "sha256:b31e8f437aaee4255939cf388d9de74e5919281589bd39d8d0d0aa9d6dc30860",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-app-router-architecture/skill.json",
+      "sha256": "sha256:26821b82951ab496afa3e762a4647a82b9e629b72789f831057c04debc8d7b26",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-app-router-architecture/SKILL.md",
+      "sha256": "sha256:3142bf7397a9448a663c17a265c34d37aa6bafe8fdd85dd3bc0d41a75f694829",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-auth-session-guidance/skill.json",
+      "sha256": "sha256:0736eaf82b483e1a3250e22c6493bd7c2f758c9612447554edc4303fe36d080c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-auth-session-guidance/SKILL.md",
+      "sha256": "sha256:5c27f98dedd89880c96bb7702cf9d93dfcc0ef18ce58b305f0017876402faf54",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-ci-quality-gates/skill.json",
+      "sha256": "sha256:bb9462ac24c966dd38490483ffecd68a0de38815dbce4c7dc7edd3524aa57d09",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-ci-quality-gates/SKILL.md",
+      "sha256": "sha256:7ac9440a5e8dca54f875711bc53373e982edc058a4bf180ff3551922b7eb0f87",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-container-build/skill.json",
+      "sha256": "sha256:0089410a87a05ede555eef232edd40ffd1dc9e0525f205826cbf9b2623dff9d2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-container-build/SKILL.md",
+      "sha256": "sha256:9415ac7d7dd83d823ebc2a3f7d949fe2735261fce01bb62d33d54cae8bc97d05",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-data-fetching-and-cache/skill.json",
+      "sha256": "sha256:63d5d7ba2806ab665eefd962eb47e60a1beacdce7a138adec2731add90f57a69",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-data-fetching-and-cache/SKILL.md",
+      "sha256": "sha256:5b758f1c87f383d8f8f40375f5dede7705fe708ce682d8dff6eaabdbbd57ecb7",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-e2e-testing/skill.json",
+      "sha256": "sha256:73e3270b3ae8a3cff914f0b50947504f82b59d5bc6f0cd408d1c2874fc520234",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-e2e-testing/SKILL.md",
+      "sha256": "sha256:ed4e38e5c596ee2f9f633ef05880aaf3b77871af244061297a60e0dd895ce2cb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-frontend-guidance/skill.json",
+      "sha256": "sha256:5797b92640601f8de14852c01a60c56ad3e3447b29c370fb1db64063e783e89c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-frontend-guidance/SKILL.md",
+      "sha256": "sha256:bac6820b37614b9e066a6446ad02cb2f0a8233fbdc418166a42f187a2b438a07",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-performance/skill.json",
+      "sha256": "sha256:be7a927d1754fde144f82e48201119f718ce6684cab627b15f1a52a0ff04ccb9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-performance/SKILL.md",
+      "sha256": "sha256:7e10c742e774a0d07d99ce3eaa39cfad8c33847686548e3bfed6f2e64cc91542",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-project-bootstrap/skill.json",
+      "sha256": "sha256:6792afd4611cde6455f936a2af3efafe2b89d033c3dd7e03f35576ac55d78dec",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-project-bootstrap/SKILL.md",
+      "sha256": "sha256:a10774a5c50ec069b69495e7c2d69af7c942efec943e93fd7c2038f34df50aaf",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-ui-design/skill.json",
+      "sha256": "sha256:1d7966202bb607728fe1758e2accf0c73f0752d9ef2fce5711d08f93e208dbe0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/nextjs-ui-design/SKILL.md",
+      "sha256": "sha256:9c01b133259aa7c8a6d5d7b347a0256d3348f194ae42499be1df26bbff301c79",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgres-test-environment/skill.json",
+      "sha256": "sha256:d126ba87c0a51220a241415c13e62381991e85305b5ccb520b9f39ecbf3e3f1d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgres-test-environment/SKILL.md",
+      "sha256": "sha256:9c62834795467d72b96f538269b88b1957e2fe6c95ac688ce3240862d9f06c5f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgresql-performance/skill.json",
+      "sha256": "sha256:582689b65c448024882ca1d84335c9b69a2b085fad0ae9de6a9a4cb81dcb73f9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgresql-performance/SKILL.md",
+      "sha256": "sha256:57d7cc3cea0184b3ac28277aeccc64de0eec98e209aabf640bee89bdd70c978e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgresql-persistence-guidance/skill.json",
+      "sha256": "sha256:b5a9a214f61b61ed14fa566762c63580f2f5e5f831316eea79baa53eea1aaf80",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/postgresql-persistence-guidance/SKILL.md",
+      "sha256": "sha256:9b4a0d698c15075af2ad710a90b5513799f1bcb1780a9ca4c0a8edcc2dbce279",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-backend-guidance/skill.json",
+      "sha256": "sha256:7a50e691278882958c3eccc714da0e54372b6e63c0f777f251d06eab3b046dcb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-backend-guidance/SKILL.md",
+      "sha256": "sha256:212c6b525afc4e25956fdc7afc65a9b8c187faac5959bb91f500f332b9860081",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-ci-quality-gates/skill.json",
+      "sha256": "sha256:7c8ec148993f4e00e8cc5bc27da1551364ad176ce5607f42063452d340f660a1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-ci-quality-gates/SKILL.md",
+      "sha256": "sha256:e89b20f527139984f69aa334a78b4059aecf4e2880217176eb78512d5c3c48f0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-container-build/skill.json",
+      "sha256": "sha256:2896090b6b2af5cb884a4386b2bee7e1ad9abbb5ee802e079ca92ddd1bb21869",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-container-build/SKILL.md",
+      "sha256": "sha256:35c94f2529be4493a3f6b98f8ec5f33f02663422699a87ca66e20d3571a368b0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-integration-testing/skill.json",
+      "sha256": "sha256:cbf6a7b095f2aa209af0cf3d4fd19359ccaa7ad51031dd0d380b2ebc918ba9b1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-integration-testing/SKILL.md",
+      "sha256": "sha256:70b226df1eec3f3d3fd59d81e070902e421fc6ac11e6636c6b6f927cc6aab31b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-migration-testing/skill.json",
+      "sha256": "sha256:a92bed24e1a9e73217a3bf3e1c0ffe05c5277f60abffd298e34e0c4df8f16baf",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-migration-testing/SKILL.md",
+      "sha256": "sha256:1d3e1087027dcd202daca8bd78558de014172f7f014a5bfd95bb3e828b1c115c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-performance/skill.json",
+      "sha256": "sha256:4fbe4549b41c6426333d3d4acaddfb8fbc6e27e9bfb3ca679a6af920c56d3f0e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-performance/SKILL.md",
+      "sha256": "sha256:83e6c681a0310d53268b14367512cb0487d62794ec2c79d5e239767c03490cf0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-project-bootstrap/skill.json",
+      "sha256": "sha256:997c19ea7682225e9745bf85dc709b2b127342d64b48d0376c29f6eb58f029aa",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/skills/springboot-project-bootstrap/SKILL.md",
+      "sha256": "sha256:74b03f5ecbd7a342506edd66498b8c0c040a49565c36e2f78fbb17bb33c7fef4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/stack-pack.json",
+      "sha256": "sha256:04de041bce949bf72032a02dfa94b498414625a33b57e572dfea53a3f24d77ec",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/STACK.md",
+      "sha256": "sha256:cb814c1c94797a9fb4692e906f7dc81899e3d2f22dbf3b3fdc29e23c87bf90a0",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/api-contract.md",
+      "sha256": "sha256:39b6e9e9518bd6aaf1369037499cc7d031b053d27a556cea444ed6265bfe1b62",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/compose-optimization-plan.md",
+      "sha256": "sha256:548606eefee0358303c6f9744432eb69219d2bd05c87c827f5374f77e6677dcd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/database-migration-plan.md",
+      "sha256": "sha256:cd6daaf82dff0ec6f9d81ab995dc99e86c14ea340ffd67402c29e40aa947e84a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/dockerfile-plan.md",
+      "sha256": "sha256:f1b157ef9917ed4bc75a717f5122feb0de5d85397b45c367802bd872b97ecf3a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/github-issue-fullstack-slice.md",
+      "sha256": "sha256:dd5b9f7ac069bf677dc1dc2c5099b93c94e9d96b110fa1b314a83cacf45e5cf6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/performance-analysis.md",
+      "sha256": "sha256:4786af62389eb80ac043103aec2c8dc9112f332c396283d92a3d3ac058eeb7f1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/test-plan-fullstack-slice.md",
+      "sha256": "sha256:72f8f6848919ac774856767c0f339614758369630aec4e530ed66cd4425fe611",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/ui-design-spec.md",
+      "sha256": "sha256:3919e1b13fce2a4993c958db38e0240606935c1926d1ffca79976484f6c69eca",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/stack-packs/nextjs-springboot-postgresql/templates/work-order-fullstack-slice.md",
+      "sha256": "sha256:86bad1048560327497ebe50f5969839f9e346ab4745561c15e3cb202c349f076",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/adr.md",
+      "sha256": "sha256:ad177e5ac142680e41223a89266e5b36884581f4f997925afd7cd93bdb3a0652",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/api-design.md",
+      "sha256": "sha256:c044f2ff87aa216a1e499aa2ae915e7609bc101c140770b24efb410eaf774441",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/apply-plan.md",
+      "sha256": "sha256:bbb397eca4544012228c537ca3a16b2b78ad7b928183a969a36c88daf547dd30",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/architecture-conformance-report.md",
+      "sha256": "sha256:2dafe42dce26905b42e86b97732fca24a7d3578fcb0a204470117899d0980910",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/architecture-diagram.html",
+      "sha256": "sha256:8cadbf78bc66a2eb026f54c9a9dec20697654ffe0ddeadb2f8333a8b09e463e9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/architecture-foundation-plan.md",
+      "sha256": "sha256:f95db11c2f98a041204c6470ade902f3be923680e9168cdb04dc52d0a9542b0c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/architecture-overview.md",
+      "sha256": "sha256:41a5ad433327e601a3c7f5a4bf862ab42658dcf676c5e0c90a9009094559e2b3",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/architecture-questionnaire.md",
+      "sha256": "sha256:641fe2103421153c9e981ded0d808e44e7305f99a81280a70ba1052e10a0b4af",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/backlog-snapshot.md",
+      "sha256": "sha256:dee019804c50c72cc4a82c3922684f5c2d26b50235024ec16eccefeb425e4dd9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/bounded-context-canvas.md",
+      "sha256": "sha256:856039e41c5ebb56d56f17bf99fa6c2b7d9b7c4685cb62e6ce690781fe699fbe",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/ci-failure-handoff.md",
+      "sha256": "sha256:b562e4d93a291a4dfa89cfacdad65254eb7ef04a0b9865ede039a8eed201a842",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/cli-npm-pack-report.md",
+      "sha256": "sha256:6bf61770d985cd64a0299ce58257074cd969292b340332801a6a1e96a02f629e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/cli-publish-commands.md",
+      "sha256": "sha256:3f4b9bda565adf4402ec3a8affbfe119897f3937ac813279fdf4a3f1a25ef181",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/cli-release-notes.md",
+      "sha256": "sha256:dd062d9fb5d3d227922addf1b0a6a6f300e5296b4120f7f1fd0bc36c4a68320c",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/cli-release-plan.md",
+      "sha256": "sha256:bfe121a1cedd4045556a9b696c187f4f24c8acb6ef75daed9cfa8591dd090cdd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/compatibility-report.md",
+      "sha256": "sha256:a3b3fdc4aa124d5b44f1f812fbcb6b2a2166d644a732e9527dee7db9e5cb1b5f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/compose-environment-plan.md",
+      "sha256": "sha256:cf534593acbc539f5a52f2743abdd4673320b5d305d1c6103adc57bf3d1817d6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/conflicts.md",
+      "sha256": "sha256:5dab0e319b27cd17de929c475c19e3f92617b7496b7453134ac3a3be5c961e1e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/data-model-design.md",
+      "sha256": "sha256:1e729262b4ff5a60a2e5209cbf64ff4141a3ab735b57ec6d524400309fc321e5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/diagram-notes.md",
+      "sha256": "sha256:44150a87e82b8b338e18b68a04081b62447a2e648b55dfdd1abf4b18c4a3a852",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/event.jsonl",
+      "sha256": "sha256:73aa321aa0229ae14097a796c392c9d00a5f3295092a99929fcfc588bdd2ddc1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/factory-release-notes.md",
+      "sha256": "sha256:f552abd4aa3342932a21b7e3a6948866ce32ae7851384e69b22a2d214b2cf47a",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/factory-release-plan.md",
+      "sha256": "sha256:0996c24027fd2bfd9a27a654c9c804272a4bf70e57392979aaa246779580e6a6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/factory-release-validation.md",
+      "sha256": "sha256:4590492182c8e32750a98b51c4c19a25a03ff997af46897b86cdef5dd94edf56",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/git-action-plan.md",
+      "sha256": "sha256:e48c5837d5b393ea5da5bed4834595791ec72dd5172eae5873481eb718354daf",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-deploy-production.yml",
+      "sha256": "sha256:0e344304d81e6567953432992539ed9d4bcc54ca6278f4f70ceda614ef36de2f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-develop-ci.yml",
+      "sha256": "sha256:4b493f5bbda9b9fbdbe350f234b412415bb628b9c23a54c0461b3c84ec3c9a66",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-feature-pr-ci.yml",
+      "sha256": "sha256:cc2b909af7f36769cd536b18eb1f8e3b0ff66e026cbdbb6a8bf72112170e7953",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-release-pr-ci.yml",
+      "sha256": "sha256:be9c8588a6e3c9737954001154452108b6d8356979ba387ec5b3d5850591833e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-reusable-backend-ci.yml",
+      "sha256": "sha256:716d33c79a0085b68d077eabbad781d7a6a19e181af43feec6eca6546cffc9c1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-reusable-frontend-ci.yml",
+      "sha256": "sha256:7d60d9853b444e9dd155f71b0a32624c71450cba2dfb0490b671d3cbe8e336a8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-actions-reusable-integration-ci.yml",
+      "sha256": "sha256:b3c4c6a431483d5d790d41b62133487451258d385dc90bb6639a4d947c2896c7",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-issue-draft.md",
+      "sha256": "sha256:5d810a3f6b9188480b0e8c59e73409eecf7a4c1064fc1ac3e692b91590f43adb",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-issue-publish-plan.md",
+      "sha256": "sha256:d7cc0b014567ab7500c929e2d6149a3fddf05dccacf096da23642d78f43ae0db",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-label-plan.md",
+      "sha256": "sha256:28b05c9ed2c6150a542f3c05d904c8f963e408d80b3325df5631072170bf27ca",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-pr-comment.md",
+      "sha256": "sha256:2955504797b5f1056b175d2a401e7c720c36410786b5b381d8fe9ba1c9c6b701",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/github-rulesets-plan.md",
+      "sha256": "sha256:e804ace3bdf00a468138c5ef942a2fcc0e060e127745ea4aa6e1e5865adc1c1f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/handoff.md",
+      "sha256": "sha256:c4c3c3f003466302017dcba3ae81b9e5fb87b37e020ca5523a0a85ec5d4810ac",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/implementation-summary.md",
+      "sha256": "sha256:a38e9be0b795fe0672ea83f5cf4a9312fb0a27c637b833f81a76b3edc396e6f1",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/init-report.md",
+      "sha256": "sha256:b061138c018022275e8d30680aaab44801ea77fdd7453835f8d9634acdf59064",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/integration-test-evidence.md",
+      "sha256": "sha256:95b3bebe003669633ac3bd744c51d57dfaf317505037eb30d2e935f713c59b58",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/integration-test-strategy.md",
+      "sha256": "sha256:60afb81206fed5f5d71377d3ee54a4823fd274c9758783564895355d8017a0c5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/lockfile-report.md",
+      "sha256": "sha256:71268e30d8f4a1cecfed16ff94600f8aacde66c5020a705de871760e7c38db90",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/metrics.json",
+      "sha256": "sha256:a093f55097335cfbd7a597b8024551ec0cfc8c31efb0734e2e8b7e40233e0055",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/pattern-decision.md",
+      "sha256": "sha256:f120b81efc65689c747453e4559f96f94cb0e6c8cd52a0282efd073df06a7622",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/publish-commands.md",
+      "sha256": "sha256:dbbaae871b6af5d1f36e591cd2c5517792bd9a5ebb8b8ed72bfe264b70b146e5",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/quality-command-contract.md",
+      "sha256": "sha256:04bf3fbaa39d36c7f12301beb7a77f75a056597481869df6f2d0b1adf30582d2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/release-promotion-report.md",
+      "sha256": "sha256:0837bdd805be033dc02773d08e5897c2ae68936876c973e78475a46db2f335c9",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/run-state.json",
+      "sha256": "sha256:2280d2d9e1ee5a531164618fd1f10451a6e3aa1783d28b01620f4fd2969efbc4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/run-summary.md",
+      "sha256": "sha256:aa585be77b52403c29e670ce05caae7908184f0bca0a5d7f866b3e236eb49943",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/source-resolution-report.md",
+      "sha256": "sha256:0333d005412989f099b3a832e687392b130f7a9b4381cb4c3c504f4503aeb61b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/task-selection.md",
+      "sha256": "sha256:41070492d47ff4733e02c585ca205a948a407b4c554cefa78b115085d61adc49",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/tdd-evidence.md",
+      "sha256": "sha256:ef552a88fe0fe0c0cf36b92c1354b7cfd1f8adfb3b19fe27a2eacfaa3bdf9c68",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/tdd-plan.md",
+      "sha256": "sha256:0c2eb44574f5a70cd80c2e8cce474581a1c07cc757b3ba63566b791fcaeaf8e8",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/validation-report.md",
+      "sha256": "sha256:f90c9d0db60fd855c727a2d4101339993e0449a5a418ef737019ea4cacb647dd",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/verifier-report.md",
+      "sha256": "sha256:9eb9baa258ca3b40591c209e36a391fbb9048e427c21932abdb5531c5c1c34d2",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/templates/work-order-afk.md",
+      "sha256": "sha256:6f9743c8f1880c8937c8bcc06c28210d2713b580d0e6697f5c6a32ece98f51b4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/architecture-ddd/workflow.json",
+      "sha256": "sha256:e04775ed887e2b58c2ee959137842e7d2a35a26422798dc015b13e07fee4e6fa",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/architecture-ddd/WORKFLOW.md",
+      "sha256": "sha256:27ae0e2ec0ed11d6e7ae8b1518c2aabaf7861979c2cf55b594217bbb9dc7caf6",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/architecture-foundation/workflow.json",
+      "sha256": "sha256:4af16fd3c67405380c45a7e3f286b7b6a6ba2f11563e81d27e1579fc660ca559",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/architecture-foundation/WORKFLOW.md",
+      "sha256": "sha256:404064fbff877b288d87d7d455c2b08db2c792e16e286a35e038a0a3dda0a966",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/backlog-management/workflow.json",
+      "sha256": "sha256:3b3c61ebc73b36c7a0a1f7303cf44d18a8556afe5a0512281bae285283e4ad38",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/backlog-management/WORKFLOW.md",
+      "sha256": "sha256:2d5a6ebce39effc558b43a2a3a98d0cf18613bdcf522243e4c7fd9a02565eb2e",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/backlog-task-delivery/workflow.json",
+      "sha256": "sha256:c67480c3ef488fcdf97fd6ba3deb1d0441d33eb24bec2c5c8aa29f0a040e4cca",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/backlog-task-delivery/WORKFLOW.md",
+      "sha256": "sha256:39c5dc360b5ad459fa6f0df7fe393aad426f367599163e4d7258183f1fff906f",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/ci-failure-repair/workflow.json",
+      "sha256": "sha256:7d7b4cf7e06c989959624380608bcd79d98c896cfa9bc196f5694bc1af5f6c6d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/ci-failure-repair/WORKFLOW.md",
+      "sha256": "sha256:0f6f6ec51864cbe09fcb53e17d9ec9bddde724f593017e803f66aba17c706021",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/delivery-infrastructure/workflow.json",
+      "sha256": "sha256:e0546ccc2a1bc297533b3285289ae455dd184cef18dd9e8de1c54fcb023eccab",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/delivery-infrastructure/WORKFLOW.md",
+      "sha256": "sha256:e6861918a0beec4439f959b39c6e2ee7f38eacef3c6749ab62a76c7b9017c746",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/feature-pr-delivery/workflow.json",
+      "sha256": "sha256:58e08095a349ac8e1b4d310ff22c09925bab15a144a5165e63b13a7c6cad5abe",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/feature-pr-delivery/WORKFLOW.md",
+      "sha256": "sha256:c839e54ba18c00375f34c02d50a7e37c3df9a383670cc01c84adefaf5078f334",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/ideation-from-zero/workflow.json",
+      "sha256": "sha256:8fa4590a4d39cf39f9b33cb7d212f1bc3e74008d71dc6ce16f0ebb053d2f7965",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/ideation-from-zero/WORKFLOW.md",
+      "sha256": "sha256:0fc64091fb75274c3048bb42a957bd36c939d4fc080d37c159f3e69bc3611c37",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/intake-existing-code/workflow.json",
+      "sha256": "sha256:7d9cf91bce85f035d178209f07c8e104e2c66b54cafbf5d8b31bdc8718ba1b90",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/intake-existing-code/WORKFLOW.md",
+      "sha256": "sha256:61d2ab8c3e8c7935bdad9edeb6c043ce54f9f496b34470141e983983836fb079",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/release-promotion/workflow.json",
+      "sha256": "sha256:a1764f3be27f9544da8a06cc1e1d7d59ddb99b3d6e22bca33c1efc06b424af06",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/release-promotion/WORKFLOW.md",
+      "sha256": "sha256:5b90b20388cd7a33359fc67bf3b0bc65d1698fc7809c756088234dcb9aab6802",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/repository-bootstrap/workflow.json",
+      "sha256": "sha256:4f59dd0dc546005df9d6a9b1edad519e97320ca72cb7fddc2c06ff9eade22d67",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/repository-bootstrap/WORKFLOW.md",
+      "sha256": "sha256:4b003147ef8b0aa3a1e95fdc9a0388843281b261ccb00a5db5e7afa9602549c3",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/tdd-implementation/workflow.json",
+      "sha256": "sha256:62f667a82636fc774fa0046f61d6c8994f43f642e7f346b27b60c678e3552ff4",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/tdd-implementation/WORKFLOW.md",
+      "sha256": "sha256:588bb4b79106de6d07da4e3b3005c0f6f2a805b6a445b66c50b27fd7bc0fc78d",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/verification-pr/workflow.json",
+      "sha256": "sha256:7fbeb5612560b5095b8639a47dd1156a72bf088f5a39f611224fcf6a88847b2b",
+      "source": "github-release"
+    },
+    {
+      "path": ".gridwork/workflows/verification-pr/WORKFLOW.md",
+      "sha256": "sha256:4892702fe05470acbc19e12e323351bf0e33f0a4897eb22565105258a3d48b73",
+      "source": "github-release"
+    }
+  ]
+}

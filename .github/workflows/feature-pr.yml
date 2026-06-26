@@ -1,0 +1,73 @@
+name: feature
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+
+concurrency:
+  group: feature-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  branch-policy:
+    name: branch-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require feature branch source
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ "$HEAD_REF" != feature/* ]]; then
+            echo "Feature PRs targeting develop must originate from feature/*." >&2
+            exit 1
+          fi
+
+  frontend:
+    needs: branch-policy
+    uses: ./.github/workflows/reusable-frontend.yml
+
+  backend:
+    needs: branch-policy
+    uses: ./.github/workflows/reusable-backend.yml
+
+  integration:
+    needs: branch-policy
+    uses: ./.github/workflows/reusable-integration.yml
+    with:
+      build_containers: true
+      run_e2e: true
+      run_migrations: true
+
+  regression-gate:
+    name: regression-gate
+    if: ${{ always() }}
+    needs:
+      - branch-policy
+      - frontend
+      - backend
+      - integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every feature check
+        env:
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          BRANCH_RESULT: ${{ needs.branch-policy.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          INTEGRATION_RESULT: ${{ needs.integration.result }}
+        run: |
+          test "$BRANCH_RESULT" = "success"
+          test "$FRONTEND_RESULT" = "success"
+          test "$BACKEND_RESULT" = "success"
+          test "$INTEGRATION_RESULT" = "success"
+

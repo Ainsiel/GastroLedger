@@ -1,0 +1,41 @@
+{
+  "kind": "gridwork.skill",
+  "id": "backlog-management",
+  "name": "Backlog Management",
+  "version": "0.1.0",
+  "description": "Builds a unified backlog view, answers status questions, identifies gaps and prepares selected tasks for implementation.",
+  "category": "planning",
+  "allowedAgents": [
+    "backlog-manager-agent"
+  ],
+  "allowedWorkflows": [
+    "backlog-management",
+    "backlog-task-delivery"
+  ],
+  "requiredInputs": [
+    "backlog_sources",
+    "user_question_or_task_request"
+  ],
+  "producedOutputs": [
+    "backlog_snapshot",
+    "readiness_report",
+    "gap_analysis",
+    "task_selection",
+    "work_order_candidate"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/backlog-management/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md",
+    "../../policies/github-labels.json",
+    "../../policies/work-order-policy.md"
+  ],
+  "humanGates": [
+    "github_write",
+    "backlog_priority_change",
+    "work_order_approval",
+    "afk_delegation"
+  ],
+  "permissionsInheritedOnly": true
+}

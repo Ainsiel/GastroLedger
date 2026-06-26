@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-actions-reusable-workflows",
+  "name": "GitHub Actions Reusable Workflows",
+  "version": "0.2.0",
+  "description": "Extracts component CI and build behavior into reusable workflow_call contracts.",
+  "category": "cicd",
+  "allowedAgents": ["platform-engineer-agent"],
+  "allowedWorkflows": ["delivery-infrastructure"],
+  "requiredInputs": ["component_ownership_map", "root_quality_command_contract"],
+  "producedOutputs": ["reusable_workflow_contracts"],
+  "artifactPaths": [".github/workflows/"],
+  "humanGates": ["github_workflow_file_write"],
+  "permissionsInheritedOnly": true
+}

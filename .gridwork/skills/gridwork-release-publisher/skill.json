@@ -1,0 +1,44 @@
+{
+  "kind": "gridwork.skill",
+  "id": "gridwork-release-publisher",
+  "name": "Gridwork Release Publisher",
+  "version": "0.1.0",
+  "description": "Prepares Gridwork factory and CLI release artifacts in dry-run mode.",
+  "category": "release",
+  "allowedAgents": [
+    "orchestrator",
+    "planner-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "release_mode",
+    "version",
+    "source",
+    "source_commit"
+  ],
+  "producedOutputs": [
+    "release_plan",
+    "release_notes",
+    "validation_report",
+    "publish_command_plan"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/release/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md"
+  ],
+  "humanGates": [
+    "git_tag",
+    "git_push_tag",
+    "gh_release_create",
+    "npm_publish_workflow"
+  ],
+  "permissionsInheritedOnly": true,
+  "remoteActions": "approval-required",
+  "canPublishNpm": false
+}
+

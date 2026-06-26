@@ -1,0 +1,41 @@
+{
+  "kind": "gridwork.skill",
+  "id": "docker-compose-local-guidance",
+  "name": "Docker Compose Local Guidance",
+  "version": "0.1.0",
+  "description": "Guidance for reviewing existing Docker Compose local development setup.",
+  "category": "stack-guidance",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent",
+    "platform-engineer-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr",
+    "repository-bootstrap"
+  ],
+  "requiredInputs": [
+    "confirmed_compose_path",
+    "work_order_or_architecture_question"
+  ],
+  "producedOutputs": [
+    "docker_compose_guidance"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/stack-guidance/"
+  ],
+  "toolPolicyRefs": [
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "path_confirmation",
+    "infra_file_write"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

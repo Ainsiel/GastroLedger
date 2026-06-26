@@ -1,0 +1,144 @@
+from dataclasses import dataclass
+from decimal import Decimal
+
+from gastroledger_api.application.identifiers import EventId, TenantId, WarehouseId
+from gastroledger_api.modules.inventory_production.application.expiry_alerts import (
+    ExpiryAlertAuthorizationDenied,
+    ExpiryAlertConflict,
+    ExpiryAlertIdentity,
+    ExpiryAlertInvalid,
+    ExpiryAlertNotFound,
+    ExpiryAlertService,
+    ExpiryAlertView,
+)
+from gastroledger_api.modules.inventory_production.application.production import (
+    PostProductionBatch,
+    ProductionAuthorizationDenied,
+    ProductionBatchView,
+    ProductionConflict,
+    ProductionIdentity,
+    ProductionInsufficientStock,
+    ProductionNotFound,
+    ProductionService,
+)
+from gastroledger_api.modules.inventory_production.application.transfers import (
+    RequestTransfer,
+    TransferAuthorizationDenied,
+    TransferConflict,
+    TransferIdentity,
+    TransferInsufficientStock,
+    TransferNotFound,
+    TransferService,
+    TransferView,
+)
+from gastroledger_api.modules.inventory_production.application.waste import (
+    SubmitWaste,
+    WasteAuthorizationDenied,
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteService,
+    WasteView,
+)
+from gastroledger_api.modules.inventory_production.domain.production import (
+    ProductionValidationError,
+)
+from gastroledger_api.modules.inventory_production.domain.transfers import TransferValidationError
+from gastroledger_api.modules.inventory_production.domain.waste import WasteValidationError
+
+MODULE_ID = "inventory_production"
+
+
+@dataclass(frozen=True)
+class InventoryPosting:
+    tenant_id: TenantId
+    source_reference: str
+    posting_type: str
+
+
+@dataclass(frozen=True)
+class InventoryTransactionReference:
+    tenant_id: TenantId
+    transaction_id: str
+
+
+@dataclass(frozen=True)
+class AllocationRequest:
+    tenant_id: TenantId
+    warehouse_id: WarehouseId
+    stock_item_id: str
+    quantity: Decimal
+
+
+@dataclass(frozen=True)
+class AllocationOutcome:
+    request: AllocationRequest
+    allocation_reference: str
+
+
+@dataclass(frozen=True)
+class IngredientCostChanged:
+    event_id: EventId
+    tenant_id: TenantId
+    ingredient_id: str
+
+
+@dataclass(frozen=True)
+class InventoryMovementFact:
+    event_id: EventId
+    tenant_id: TenantId
+    transaction_id: str
+
+
+@dataclass(frozen=True)
+class InventoryCountFact:
+    event_id: EventId
+    tenant_id: TenantId
+    count_id: str
+
+
+__all__ = [
+    "ExpiryAlertAuthorizationDenied",
+    "ExpiryAlertConflict",
+    "ExpiryAlertIdentity",
+    "ExpiryAlertInvalid",
+    "ExpiryAlertNotFound",
+    "ExpiryAlertService",
+    "ExpiryAlertView",
+    "AllocationOutcome",
+    "AllocationRequest",
+    "IngredientCostChanged",
+    "InventoryCountFact",
+    "InventoryMovementFact",
+    "InventoryPosting",
+    "InventoryTransactionReference",
+    "MODULE_ID",
+    "PostProductionBatch",
+    "ProductionAuthorizationDenied",
+    "ProductionBatchView",
+    "ProductionConflict",
+    "ProductionIdentity",
+    "ProductionInsufficientStock",
+    "ProductionNotFound",
+    "ProductionService",
+    "ProductionValidationError",
+    "RequestTransfer",
+    "TransferAuthorizationDenied",
+    "TransferConflict",
+    "TransferIdentity",
+    "TransferInsufficientStock",
+    "TransferNotFound",
+    "TransferService",
+    "TransferValidationError",
+    "TransferView",
+    "SubmitWaste",
+    "WasteAuthorizationDenied",
+    "WasteConflict",
+    "WasteIdentity",
+    "WasteInsufficientStock",
+    "WasteNotFound",
+    "WasteService",
+    "WasteValidationError",
+    "WasteView",
+]

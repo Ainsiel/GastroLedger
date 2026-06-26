@@ -1,0 +1,47 @@
+{
+  "kind": "gridwork.skill",
+  "id": "github-cli",
+  "name": "GitHub CLI",
+  "version": "0.1.0",
+  "description": "Uses GitHub CLI through the Gridwork allowlist and approval gates.",
+  "category": "tooling",
+  "allowedAgents": [
+    "orchestrator",
+    "planner-agent",
+    "backlog-manager-agent",
+    "verifier-agent",
+    "release-manager-agent",
+    "platform-engineer-agent"
+  ],
+  "allowedWorkflows": [
+    "intake-existing-code",
+    "backlog-management",
+    "backlog-task-delivery",
+    "architecture-ddd",
+    "verification-pr",
+    "feature-pr-delivery",
+    "release-promotion",
+    "delivery-infrastructure",
+    "ci-failure-repair"
+  ],
+  "requiredInputs": [
+    "command_intent",
+    "repo",
+    "approval_when_write"
+  ],
+  "producedOutputs": [
+    "command_summary",
+    "remote_result_summary"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/github/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-cli-policy.md"
+  ],
+  "humanGates": [
+    "github_write",
+    "strong_remote_action"
+  ],
+  "permissionsInheritedOnly": true
+}

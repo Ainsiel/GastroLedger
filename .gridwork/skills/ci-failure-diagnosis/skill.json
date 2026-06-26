@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "ci-failure-diagnosis",
+  "name": "CI Failure Diagnosis",
+  "version": "0.2.0",
+  "description": "Classifies failed CI checks and creates a reproducible scoped handoff.",
+  "category": "diagnosis",
+  "allowedAgents": ["platform-engineer-agent"],
+  "allowedWorkflows": ["ci-failure-repair"],
+  "requiredInputs": ["failed_checks", "current_head_sha"],
+  "producedOutputs": ["ci_failure_classification", "ci_failure_handoff"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/ci/"],
+  "toolPolicyRefs": ["../../policies/github-cli-policy.md"],
+  "humanGates": ["secret_value_needed", "scope_change"],
+  "permissionsInheritedOnly": true
+}

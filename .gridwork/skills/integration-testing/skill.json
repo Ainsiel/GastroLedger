@@ -1,0 +1,44 @@
+{
+  "kind": "gridwork.skill",
+  "id": "integration-testing",
+  "name": "Integration Testing",
+  "version": "0.1.0",
+  "description": "Designs, implements and assesses integration tests across real component boundaries without assuming a specific technology.",
+  "category": "testing",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "behavior_or_contract",
+    "integration_boundaries",
+    "confirmed_test_commands"
+  ],
+  "producedOutputs": [
+    "integration_test_strategy",
+    "integration_test_cases",
+    "integration_test_evidence"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/testing/integration/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/tool-allowlist.md",
+    "../../policies/tdd-evidence-policy.md"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "unknown_command",
+    "shared_environment_access",
+    "secret_value_needed"
+  ],
+  "permissionsInheritedOnly": true
+}

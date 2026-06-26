@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "springboot-performance",
+  "name": "Spring Boot Performance",
+  "version": "0.1.0",
+  "description": "Measures and improves Spring Boot latency, throughput and resource efficiency using evidence-first optimization.",
+  "category": "stack-performance",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_backend_path", "performance_scenario", "measurement_method"],
+  "producedOutputs": ["performance_baseline", "bottleneck_analysis", "optimization_evidence"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/backend-performance/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "dependency_change", "runtime_tuning_change"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "frontend-state-strategy",
+  "name": "Frontend State Strategy",
+  "version": "0.1.0",
+  "description": "Classifies frontend state ownership and prevents unjustified global client state.",
+  "category": "frontend-architecture",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["frontend_workflows", "state_inventory", "sharing_and_persistence_needs"],
+  "producedOutputs": ["frontend_state_strategy", "state_ownership_map"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/frontend/state/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["global_state_decision", "browser_persistence_decision"],
+  "permissionsInheritedOnly": true
+}

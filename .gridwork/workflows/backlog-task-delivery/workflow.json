@@ -1,0 +1,60 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "backlog-task-delivery",
+  "name": "Backlog Task Delivery",
+  "version": "0.1.0",
+  "description": "Selects a ready backlog task, obtains approval, delegates TDD implementation and verifies the result.",
+  "mode": "hybrid",
+  "primaryAgent": "orchestrator",
+  "participatingAgents": [
+    "orchestrator",
+    "backlog-manager-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedSkills": [
+    "backlog-management",
+    "github-issue-discovery",
+    "github-cli",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "backlog_sources",
+    "task_selection_criteria",
+    "delivery_request"
+  ],
+  "producedOutputs": [
+    "backlog_snapshot",
+    "selected_task",
+    "approved_work_order",
+    "implementation_summary",
+    "tdd_evidence",
+    "verifier_report",
+    "verification_decision",
+    "merge_to_develop_record",
+    "delivery_summary"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/backlog-management/",
+    ".factory/runs/<run-id>/artifacts/tdd/",
+    ".factory/runs/<run-id>/artifacts/verification/",
+    ".factory/runs/<run-id>/handoffs/"
+  ],
+  "humanGates": [
+    "work_order_approval",
+    "afk_delegation",
+    "dependency_change",
+    "scope_change",
+    "unknown_command",
+    "github_write",
+    "create_local_branch",
+    "create_commit",
+    "push_branch",
+    "create_pr",
+    "merge",
+    "deploy",
+    "secret_value_needed",
+    "destructive_action"
+  ],
+  "requiresWorkOrder": false
+}

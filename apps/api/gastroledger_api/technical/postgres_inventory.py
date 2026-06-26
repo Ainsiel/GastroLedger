@@ -1,0 +1,1034 @@
+from datetime import UTC, datetime
+from decimal import Decimal
+from uuid import UUID, uuid4
+
+from sqlalchemy import create_engine, select, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
+
+from gastroledger_api.modules.inventory_production.application.production import (
+    PostProductionBatch,
+    ProductionAuthorizationDenied,
+    ProductionBatchView,
+    ProductionConflict,
+    ProductionIdentity,
+    ProductionInsufficientStock,
+    ProductionNotFound,
+)
+from gastroledger_api.modules.inventory_production.application.transfers import (
+    TransferConflict,
+    TransferIdentity,
+    TransferInsufficientStock,
+    TransferNotFound,
+    TransferView,
+)
+from gastroledger_api.modules.inventory_production.application.waste import (
+    WasteConflict,
+    WasteIdentity,
+    WasteInsufficientStock,
+    WasteNotFound,
+    WasteView,
+)
+from gastroledger_api.modules.inventory_production.domain.production import (
+    ProductionValidationError,
+    StockLot,
+    allocate_stock,
+    validate_production_batch,
+)
+from gastroledger_api.modules.inventory_production.domain.transfers import (
+    TransferState,
+    TransferValidationError,
+    ValidatedTransferRequest,
+    approve_transfer,
+    dispatch_transfer,
+    receive_transfer,
+)
+from gastroledger_api.modules.inventory_production.domain.waste import (
+    WasteState,
+    WasteValidationError,
+    classify_waste,
+)
+from gastroledger_api.modules.inventory_production.domain.waste import (
+    approve_waste as approve_waste_state,
+)
+from gastroledger_api.technical.cost_projection_models import ControlOutboxEvent
+from gastroledger_api.technical.inventory_models import (
+    InventoryEntry,
+    InventoryLot,
+    InventoryProductionBatch,
+    InventoryStockBalance,
+    InventoryTransaction,
+    InventoryTransfer,
+    InventoryTransferLine,
+    InventoryWasteRecord,
+)
+from gastroledger_api.technical.menu_models import (
+    MenuRecipe,
+    MenuRecipeComponent,
+    MenuRecipeVersion,
+)
+from gastroledger_api.technical.platform_models import (
+    ControlAuditEvent,
+    PlatformMembership,
+    PlatformWarehouse,
+)
+from gastroledger_api.technical.postgres_platform import sqlalchemy_database_url
+
+
+class PostgresInventoryStore:
+    def __init__(self, database_url: str) -> None:
+        self._database_url = database_url
+        self._engine: Engine | None = None
+
+    def _open_session(self) -> Session:
+        if self._engine is None:
+            self._engine = create_engine(
+                sqlalchemy_database_url(self._database_url), poolclass=NullPool
+            )
+        return Session(self._engine)
+
+    def post_batch(
+        self,
+        identity: ProductionIdentity,
+        command: PostProductionBatch,
+        correlation_id: str,
+    ) -> ProductionBatchView:
+        tenant_id = UUID(identity.tenant_id)
+        now = datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            existing = session.execute(
+                select(InventoryProductionBatch).where(
+                    InventoryProductionBatch.tenant_id == tenant_id,
+                    InventoryProductionBatch.idempotency_key == command.idempotency_key.strip(),
+                )
+            ).scalar_one_or_none()
+            if existing is not None:
+                return self._batch_view(session, existing)
+
+            warehouse = session.execute(
+                select(PlatformWarehouse).where(
+                    PlatformWarehouse.tenant_id == tenant_id,
+                    PlatformWarehouse.id == UUID(command.warehouse_id),
+                    PlatformWarehouse.status == "active",
+                )
+            ).scalar_one_or_none()
+            recipe_row = session.execute(
+                select(MenuRecipeVersion, MenuRecipe)
+                .join(MenuRecipe, MenuRecipe.id == MenuRecipeVersion.recipe_id)
+                .where(
+                    MenuRecipeVersion.tenant_id == tenant_id,
+                    MenuRecipeVersion.id == UUID(command.recipe_version_id),
+                    MenuRecipeVersion.status == "approved",
+                    MenuRecipeVersion.effective_from <= command.produced_on,
+                    MenuRecipe.recipe_type == "sub_recipe",
+                )
+            ).one_or_none()
+            if warehouse is None or recipe_row is None:
+                raise ProductionNotFound
+            recipe_version, _recipe = recipe_row
+            validated = validate_production_batch(
+                idempotency_key=command.idempotency_key,
+                batch_number=command.batch_number,
+                warehouse_id=command.warehouse_id,
+                recipe_version_id=command.recipe_version_id,
+                actual_yield=command.actual_yield,
+                output_lot_code=command.output_lot_code,
+                produced_on=command.produced_on,
+                variance_reason=command.variance_reason,
+                expected_yield=recipe_version.yield_quantity,
+            )
+            duplicate = session.execute(
+                select(InventoryProductionBatch.id).where(
+                    InventoryProductionBatch.tenant_id == tenant_id,
+                    InventoryProductionBatch.batch_number == validated.batch_number,
+                )
+            ).scalar_one_or_none()
+            duplicate_lot = session.execute(
+                select(InventoryLot.id).where(
+                    InventoryLot.tenant_id == tenant_id,
+                    InventoryLot.warehouse_id == warehouse.id,
+                    InventoryLot.lot_code == validated.output_lot_code,
+                )
+            ).scalar_one_or_none()
+            if duplicate is not None or duplicate_lot is not None:
+                raise ProductionConflict
+
+            components = tuple(
+                session.execute(
+                    select(MenuRecipeComponent).where(
+                        MenuRecipeComponent.tenant_id == tenant_id,
+                        MenuRecipeComponent.recipe_version_id == recipe_version.id,
+                    )
+                ).scalars()
+            )
+            if not components or any(
+                component.component_type != "ingredient" for component in components
+            ):
+                raise ProductionNotFound
+
+            planned: list[tuple[InventoryLot, InventoryStockBalance, Decimal]] = []
+            try:
+                for component in components:
+                    rows = tuple(
+                        session.execute(
+                            select(InventoryLot, InventoryStockBalance)
+                            .join(
+                                InventoryStockBalance,
+                                InventoryStockBalance.lot_id == InventoryLot.id,
+                            )
+                            .where(
+                                InventoryLot.tenant_id == tenant_id,
+                                InventoryLot.warehouse_id == warehouse.id,
+                                InventoryLot.ingredient_id == component.ingredient_id,
+                                InventoryLot.unit_id == component.unit_id,
+                                InventoryStockBalance.quantity > 0,
+                            )
+                            .with_for_update(of=InventoryStockBalance)
+                        ).all()
+                    )
+                    allocations = allocate_stock(
+                        tuple(
+                            StockLot(str(lot.id), balance.quantity, lot.expiry_date, lot.created_at)
+                            for lot, balance in rows
+                        ),
+                        component.quantity,
+                    )
+                    row_by_id = {str(lot.id): (lot, balance) for lot, balance in rows}
+                    for allocation in allocations:
+                        lot, balance = row_by_id[allocation.lot_id]
+                        planned.append((lot, balance, allocation.quantity))
+            except ProductionValidationError as error:
+                if any(detail.code == "insufficient_stock" for detail in error.details):
+                    raise ProductionInsufficientStock from error
+                raise
+
+            batch_id = uuid4()
+            transaction_id = uuid4()
+            output_lot_id = uuid4()
+            batch = InventoryProductionBatch(
+                id=batch_id,
+                tenant_id=tenant_id,
+                idempotency_key=validated.idempotency_key,
+                batch_number=validated.batch_number,
+                warehouse_id=warehouse.id,
+                recipe_version_id=recipe_version.id,
+                expected_yield=validated.expected_yield,
+                actual_yield=validated.actual_yield,
+                variance_quantity=validated.variance_quantity,
+                variance_reason=validated.variance_reason,
+                output_lot_code=validated.output_lot_code,
+                produced_on=validated.produced_on,
+                status="posted",
+                actor_id=UUID(identity.actor_id),
+                correlation_id=correlation_id,
+                posted_at=now,
+            )
+            session.add(batch)
+            session.flush()
+            session.add(
+                InventoryTransaction(
+                    id=transaction_id,
+                    tenant_id=tenant_id,
+                    warehouse_id=warehouse.id,
+                    source_receipt_id=None,
+                    source_production_batch_id=batch_id,
+                    transaction_type="production",
+                    actor_id=UUID(identity.actor_id),
+                    correlation_id=correlation_id,
+                    occurred_at=now,
+                )
+            )
+            session.flush()
+            total_cost = Decimal("0")
+            for lot, balance, quantity in planned:
+                balance.quantity -= quantity
+                balance.updated_at = now
+                total_cost += quantity * lot.unit_cost
+                session.add(
+                    InventoryEntry(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        transaction_id=transaction_id,
+                        lot_id=lot.id,
+                        quantity=-quantity,
+                        unit_cost=lot.unit_cost,
+                    )
+                )
+            output_unit_cost = total_cost / validated.actual_yield
+            session.add(
+                InventoryLot(
+                    id=output_lot_id,
+                    tenant_id=tenant_id,
+                    warehouse_id=warehouse.id,
+                    ingredient_id=None,
+                    prepared_recipe_version_id=recipe_version.id,
+                    unit_id=recipe_version.yield_unit_id,
+                    lot_code=validated.output_lot_code,
+                    expiry_date=None,
+                    unit_cost=output_unit_cost,
+                    source_receipt_line_id=None,
+                    source_production_batch_id=batch_id,
+                    created_at=now,
+                )
+            )
+            session.flush()
+            session.add_all(
+                [
+                    InventoryEntry(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        transaction_id=transaction_id,
+                        lot_id=output_lot_id,
+                        quantity=validated.actual_yield,
+                        unit_cost=output_unit_cost,
+                    ),
+                    InventoryStockBalance(
+                        lot_id=output_lot_id,
+                        tenant_id=tenant_id,
+                        warehouse_id=warehouse.id,
+                        quantity=validated.actual_yield,
+                        updated_at=now,
+                    ),
+                    ControlOutboxEvent(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        event_type="inventory.production_batch.posted",
+                        aggregate_id=batch_id,
+                        payload={
+                            "productionBatchId": str(batch_id),
+                            "inventoryTransactionId": str(transaction_id),
+                            "outputLotId": str(output_lot_id),
+                        },
+                        correlation_id=correlation_id,
+                        status="pending",
+                        attempts=0,
+                        available_at=now,
+                        created_at=now,
+                        processed_at=None,
+                        last_error=None,
+                    ),
+                    ControlAuditEvent(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        actor_id=UUID(identity.actor_id),
+                        correlation_id=correlation_id,
+                        action="inventory.production_batch.posted",
+                        object_reference=str(batch_id),
+                        occurred_at=now,
+                    ),
+                ]
+            )
+            session.flush()
+            return self._batch_view(session, batch, transaction_id, output_lot_id)
+
+    def request_transfer(
+        self, identity: TransferIdentity, transfer: ValidatedTransferRequest, correlation_id: str
+    ) -> TransferView:
+        tenant_id, now = UUID(identity.tenant_id), datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            warehouses = set(
+                session.execute(
+                    select(PlatformWarehouse.id).where(
+                        PlatformWarehouse.tenant_id == tenant_id,
+                        PlatformWarehouse.id.in_(
+                            (
+                                UUID(transfer.source_warehouse_id),
+                                UUID(transfer.destination_warehouse_id),
+                            )
+                        ),
+                        PlatformWarehouse.status == "active",
+                    )
+                ).scalars()
+            )
+            if len(warehouses) != 2:
+                raise TransferNotFound
+            if session.execute(
+                select(InventoryTransfer.id).where(
+                    InventoryTransfer.tenant_id == tenant_id,
+                    InventoryTransfer.transfer_number == transfer.transfer_number,
+                )
+            ).scalar_one_or_none():
+                raise TransferConflict
+            transfer_id = uuid4()
+            record = InventoryTransfer(
+                id=transfer_id,
+                tenant_id=tenant_id,
+                transfer_number=transfer.transfer_number,
+                source_warehouse_id=UUID(transfer.source_warehouse_id),
+                destination_warehouse_id=UUID(transfer.destination_warehouse_id),
+                status="requested",
+                requested_by=UUID(identity.actor_id),
+                approved_by=None,
+                correlation_id=correlation_id,
+                created_at=now,
+                updated_at=now,
+            )
+            line = InventoryTransferLine(
+                id=uuid4(),
+                tenant_id=tenant_id,
+                transfer_id=transfer_id,
+                item_type=transfer.item_type,
+                item_id=UUID(transfer.item_id),
+                unit_id=UUID(transfer.unit_id),
+                requested_quantity=transfer.requested_quantity,
+                approved_quantity=Decimal("0"),
+                dispatched_quantity=Decimal("0"),
+                received_quantity=Decimal("0"),
+                loss_quantity=Decimal("0"),
+                loss_reason=None,
+            )
+            session.add_all((record, line))
+            session.flush()
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.transfer.requested", transfer_id
+            )
+            return self._transfer_view(record, line)
+
+    def approve_transfer(
+        self, identity: TransferIdentity, transfer_id: str, quantity: Decimal, correlation_id: str
+    ) -> TransferView:
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record, line = self._locked_transfer(session, identity, transfer_id)
+            state = approve_transfer(self._state(record, line), quantity)
+            record.status, record.approved_by, record.updated_at = (
+                state.status,
+                UUID(identity.actor_id),
+                datetime.now(UTC),
+            )
+            line.approved_quantity = state.approved_quantity
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.transfer.approved", record.id
+            )
+            return self._transfer_view(record, line)
+
+    def dispatch_transfer(
+        self,
+        identity: TransferIdentity,
+        transfer_id: str,
+        command_key: str,
+        quantity: Decimal,
+        correlation_id: str,
+    ) -> TransferView:
+        tenant_id, now = UUID(identity.tenant_id), datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            existing = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.tenant_id == tenant_id,
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            record, line = self._locked_transfer(session, identity, transfer_id)
+            if existing:
+                return self._transfer_view(record, line)
+            try:
+                state = dispatch_transfer(self._state(record, line), quantity)
+            except TransferValidationError as error:
+                raise TransferConflict from error
+            item_filter = (
+                InventoryLot.ingredient_id == line.item_id
+                if line.item_type == "ingredient"
+                else InventoryLot.prepared_recipe_version_id == line.item_id
+            )
+            rows = tuple(
+                session.execute(
+                    select(InventoryLot, InventoryStockBalance)
+                    .join(InventoryStockBalance, InventoryStockBalance.lot_id == InventoryLot.id)
+                    .where(
+                        InventoryLot.tenant_id == tenant_id,
+                        InventoryLot.warehouse_id == record.source_warehouse_id,
+                        InventoryLot.unit_id == line.unit_id,
+                        item_filter,
+                        InventoryStockBalance.quantity > 0,
+                    )
+                    .with_for_update(of=InventoryStockBalance)
+                ).all()
+            )
+            try:
+                allocations = allocate_stock(
+                    tuple(
+                        StockLot(str(lot.id), balance.quantity, lot.expiry_date, lot.created_at)
+                        for lot, balance in rows
+                    ),
+                    quantity,
+                )
+            except ProductionValidationError as error:
+                raise TransferInsufficientStock from error
+            tx_id = uuid4()
+            session.add(
+                InventoryTransaction(
+                    id=tx_id,
+                    tenant_id=tenant_id,
+                    warehouse_id=record.source_warehouse_id,
+                    source_receipt_id=None,
+                    source_production_batch_id=None,
+                    source_transfer_id=record.id,
+                    command_key=command_key,
+                    transaction_type="transfer_dispatch",
+                    actor_id=UUID(identity.actor_id),
+                    correlation_id=correlation_id,
+                    occurred_at=now,
+                )
+            )
+            session.flush()
+            by_id = {str(lot.id): (lot, balance) for lot, balance in rows}
+            for allocation in allocations:
+                lot, balance = by_id[allocation.lot_id]
+                balance.quantity -= allocation.quantity
+                balance.updated_at = now
+                session.add(
+                    InventoryEntry(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        transaction_id=tx_id,
+                        lot_id=lot.id,
+                        quantity=-allocation.quantity,
+                        unit_cost=lot.unit_cost,
+                    )
+                )
+            line.dispatched_quantity, record.status, record.updated_at = (
+                state.dispatched_quantity,
+                state.status,
+                now,
+            )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.transfer.dispatched", record.id
+            )
+            return self._transfer_view(record, line)
+
+    def receive_transfer(
+        self,
+        identity: TransferIdentity,
+        transfer_id: str,
+        command_key: str,
+        received: Decimal,
+        loss: Decimal,
+        reason: str,
+        correlation_id: str,
+    ) -> TransferView:
+        tenant_id, now = UUID(identity.tenant_id), datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            existing = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.tenant_id == tenant_id,
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            record, line = self._locked_transfer(session, identity, transfer_id)
+            if existing:
+                return self._transfer_view(record, line)
+            try:
+                state = receive_transfer(self._state(record, line), received, loss, reason)
+            except TransferValidationError as error:
+                raise TransferConflict from error
+            tx_id = uuid4()
+            session.add(
+                InventoryTransaction(
+                    id=tx_id,
+                    tenant_id=tenant_id,
+                    warehouse_id=record.destination_warehouse_id,
+                    source_receipt_id=None,
+                    source_production_batch_id=None,
+                    source_transfer_id=record.id,
+                    command_key=command_key,
+                    transaction_type="transfer_receipt",
+                    actor_id=UUID(identity.actor_id),
+                    correlation_id=correlation_id,
+                    occurred_at=now,
+                )
+            )
+            session.flush()
+            remaining = received
+            dispatch_entries = tuple(
+                session.execute(
+                    select(InventoryEntry, InventoryLot)
+                    .join(
+                        InventoryTransaction,
+                        InventoryTransaction.id == InventoryEntry.transaction_id,
+                    )
+                    .join(InventoryLot, InventoryLot.id == InventoryEntry.lot_id)
+                    .where(
+                        InventoryTransaction.source_transfer_id == record.id,
+                        InventoryTransaction.transaction_type == "transfer_dispatch",
+                    )
+                    .order_by(InventoryTransaction.occurred_at, InventoryEntry.id)
+                ).all()
+            )
+            for entry, source_lot in dispatch_entries:
+                if remaining <= 0:
+                    break
+                destination_lot = session.execute(
+                    select(InventoryLot).where(
+                        InventoryLot.tenant_id == tenant_id,
+                        InventoryLot.warehouse_id == record.destination_warehouse_id,
+                        InventoryLot.source_transfer_id == record.id,
+                        InventoryLot.source_lot_id == source_lot.id,
+                    )
+                ).scalar_one_or_none()
+                already = (
+                    Decimal("0")
+                    if destination_lot is None
+                    else session.execute(
+                        select(InventoryEntry.quantity).where(
+                            InventoryEntry.lot_id == destination_lot.id, InventoryEntry.quantity > 0
+                        )
+                    )
+                    .scalars()
+                    .all()
+                )
+                already_total = (
+                    sum(already, Decimal("0")) if not isinstance(already, Decimal) else already
+                )
+                available = -entry.quantity - already_total
+                quantity = min(available, remaining)
+                if quantity <= 0:
+                    continue
+                if destination_lot is None:
+                    destination_lot = InventoryLot(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        warehouse_id=record.destination_warehouse_id,
+                        ingredient_id=source_lot.ingredient_id,
+                        prepared_recipe_version_id=source_lot.prepared_recipe_version_id,
+                        unit_id=source_lot.unit_id,
+                        lot_code=f"{record.transfer_number}-{source_lot.lot_code}",
+                        expiry_date=source_lot.expiry_date,
+                        unit_cost=source_lot.unit_cost,
+                        source_receipt_line_id=None,
+                        source_production_batch_id=None,
+                        source_transfer_id=record.id,
+                        source_lot_id=source_lot.id,
+                        created_at=now,
+                    )
+                    session.add(destination_lot)
+                    session.flush()
+                    balance = InventoryStockBalance(
+                        lot_id=destination_lot.id,
+                        tenant_id=tenant_id,
+                        warehouse_id=record.destination_warehouse_id,
+                        quantity=Decimal("0"),
+                        updated_at=now,
+                    )
+                    session.add(balance)
+                else:
+                    balance = session.execute(
+                        select(InventoryStockBalance)
+                        .where(InventoryStockBalance.lot_id == destination_lot.id)
+                        .with_for_update()
+                    ).scalar_one()
+                balance.quantity += quantity
+                balance.updated_at = now
+                session.add(
+                    InventoryEntry(
+                        id=uuid4(),
+                        tenant_id=tenant_id,
+                        transaction_id=tx_id,
+                        lot_id=destination_lot.id,
+                        quantity=quantity,
+                        unit_cost=source_lot.unit_cost,
+                    )
+                )
+                remaining -= quantity
+            if remaining > 0:
+                raise TransferConflict
+            line.received_quantity, line.loss_quantity, line.loss_reason = (
+                state.received_quantity,
+                state.loss_quantity,
+                reason.strip() or line.loss_reason,
+            )
+            record.status, record.updated_at = state.status, now
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.transfer.received", record.id
+            )
+            return self._transfer_view(record, line)
+
+    def submit_waste(
+        self,
+        identity: WasteIdentity,
+        command_key: str,
+        warehouse_id: str,
+        waste,
+        correlation_id: str,
+    ) -> WasteView:
+        tenant_id, now = UUID(identity.tenant_id), datetime.now(UTC)
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            existing = session.execute(
+                select(InventoryWasteRecord).where(
+                    InventoryWasteRecord.tenant_id == tenant_id,
+                    InventoryWasteRecord.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing:
+                return self._waste_view(session, existing)
+            row = session.execute(
+                select(InventoryLot, InventoryStockBalance)
+                .join(InventoryStockBalance, InventoryStockBalance.lot_id == InventoryLot.id)
+                .where(
+                    InventoryLot.tenant_id == tenant_id,
+                    InventoryLot.id == UUID(waste.lot_id),
+                    InventoryLot.warehouse_id == UUID(warehouse_id),
+                )
+                .with_for_update(of=InventoryStockBalance)
+            ).one_or_none()
+            if row is None:
+                raise WasteNotFound
+            lot, balance = row
+            classification = classify_waste(waste.quantity, lot.unit_cost)
+            status = "posted" if classification == "post_immediately" else classification
+            record = InventoryWasteRecord(
+                id=uuid4(),
+                tenant_id=tenant_id,
+                command_key=command_key,
+                warehouse_id=lot.warehouse_id,
+                lot_id=lot.id,
+                quantity=waste.quantity,
+                unit_cost=lot.unit_cost,
+                reason=waste.reason,
+                status=status,
+                requested_by=UUID(identity.actor_id),
+                decision_by=None,
+                decision_reason=None,
+                correlation_id=correlation_id,
+                created_at=now,
+                updated_at=now,
+            )
+            session.add(record)
+            session.flush()
+            if classification == "post_immediately":
+                self._post_waste_movement(
+                    session,
+                    identity,
+                    record,
+                    balance,
+                    command_key,
+                    "waste",
+                    correlation_id,
+                    -record.quantity,
+                )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.submitted", record.id
+            )
+            return self._waste_view(session, record)
+
+    def approve_waste(
+        self, identity: WasteIdentity, waste_id: str, command_key: str, correlation_id: str
+    ) -> WasteView:
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            existing = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.tenant_id == UUID(identity.tenant_id),
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing:
+                return self._waste_view(session, record)
+            try:
+                approve_waste_state(
+                    WasteState(record.status, str(record.requested_by)), identity.actor_id
+                )
+            except WasteValidationError as error:
+                raise WasteConflict from error
+            balance = session.execute(
+                select(InventoryStockBalance)
+                .where(InventoryStockBalance.lot_id == record.lot_id)
+                .with_for_update()
+            ).scalar_one()
+            record.status, record.decision_by, record.updated_at = (
+                "posted",
+                UUID(identity.actor_id),
+                datetime.now(UTC),
+            )
+            self._post_waste_movement(
+                session,
+                identity,
+                record,
+                balance,
+                command_key,
+                "waste",
+                correlation_id,
+                -record.quantity,
+            )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.approved", record.id
+            )
+            return self._waste_view(session, record)
+
+    def reject_waste(
+        self, identity: WasteIdentity, waste_id: str, reason: str, correlation_id: str
+    ) -> WasteView:
+        if not reason:
+            raise WasteConflict
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            if record.status != "pending_approval":
+                raise WasteConflict
+            record.status, record.decision_by, record.decision_reason = (
+                "rejected",
+                UUID(identity.actor_id),
+                reason,
+            )
+            record.updated_at = datetime.now(UTC)
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.rejected", record.id
+            )
+            return self._waste_view(session, record)
+
+    def correct_waste(
+        self,
+        identity: WasteIdentity,
+        waste_id: str,
+        command_key: str,
+        reason: str,
+        correlation_id: str,
+    ) -> WasteView:
+        if not reason:
+            raise WasteConflict
+        with self._open_session() as session, session.begin():
+            self._authorize(session, identity)
+            record = self._locked_waste(session, identity, waste_id)
+            existing_movement = session.execute(
+                select(InventoryTransaction).where(
+                    InventoryTransaction.tenant_id == record.tenant_id,
+                    InventoryTransaction.command_key == command_key,
+                )
+            ).scalar_one_or_none()
+            if existing_movement is not None:
+                return self._waste_view(session, record)
+            if record.status != "posted":
+                raise WasteConflict
+            balance = session.execute(
+                select(InventoryStockBalance)
+                .where(InventoryStockBalance.lot_id == record.lot_id)
+                .with_for_update()
+            ).scalar_one()
+            record.status, record.decision_by, record.decision_reason = (
+                "corrected",
+                UUID(identity.actor_id),
+                reason,
+            )
+            record.updated_at = datetime.now(UTC)
+            self._post_waste_movement(
+                session,
+                identity,
+                record,
+                balance,
+                command_key,
+                "waste_correction",
+                correlation_id,
+                record.quantity,
+            )
+            self._transfer_audit(
+                session, identity, correlation_id, "inventory.waste.corrected", record.id
+            )
+            return self._waste_view(session, record)
+
+    def _post_waste_movement(
+        self,
+        session,
+        identity,
+        record,
+        balance,
+        command_key,
+        transaction_type,
+        correlation_id,
+        quantity,
+    ):
+        if balance.quantity + quantity < 0:
+            raise WasteInsufficientStock
+        now, tx_id = datetime.now(UTC), uuid4()
+        balance.quantity += quantity
+        balance.updated_at = now
+        session.add(
+            InventoryTransaction(
+                id=tx_id,
+                tenant_id=record.tenant_id,
+                warehouse_id=record.warehouse_id,
+                source_receipt_id=None,
+                source_production_batch_id=None,
+                source_transfer_id=None,
+                source_waste_id=record.id,
+                command_key=command_key,
+                transaction_type=transaction_type,
+                actor_id=UUID(identity.actor_id),
+                correlation_id=correlation_id,
+                occurred_at=now,
+            )
+        )
+        session.flush()
+        session.add(
+            InventoryEntry(
+                id=uuid4(),
+                tenant_id=record.tenant_id,
+                transaction_id=tx_id,
+                lot_id=record.lot_id,
+                quantity=quantity,
+                unit_cost=record.unit_cost,
+            )
+        )
+        session.flush()
+
+    def _locked_waste(self, session, identity, waste_id):
+        record = session.execute(
+            select(InventoryWasteRecord)
+            .where(
+                InventoryWasteRecord.tenant_id == UUID(identity.tenant_id),
+                InventoryWasteRecord.id == UUID(waste_id),
+            )
+            .with_for_update()
+        ).scalar_one_or_none()
+        if record is None:
+            raise WasteNotFound
+        return record
+
+    @staticmethod
+    def _waste_view(session, record):
+        tx = session.execute(
+            select(InventoryTransaction.id)
+            .where(InventoryTransaction.source_waste_id == record.id)
+            .order_by(InventoryTransaction.occurred_at.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+        return WasteView(
+            str(record.id),
+            record.status,
+            str(record.warehouse_id),
+            str(record.lot_id),
+            record.quantity,
+            record.quantity * record.unit_cost,
+            record.reason,
+            str(record.requested_by),
+            str(record.decision_by) if record.decision_by else None,
+            str(tx) if tx else None,
+        )
+
+    def _locked_transfer(self, session: Session, identity: TransferIdentity, transfer_id: str):
+        record = session.execute(
+            select(InventoryTransfer)
+            .where(
+                InventoryTransfer.tenant_id == UUID(identity.tenant_id),
+                InventoryTransfer.id == UUID(transfer_id),
+            )
+            .with_for_update()
+        ).scalar_one_or_none()
+        if record is None:
+            raise TransferNotFound
+        line = session.execute(
+            select(InventoryTransferLine)
+            .where(InventoryTransferLine.transfer_id == record.id)
+            .with_for_update()
+        ).scalar_one()
+        return record, line
+
+    @staticmethod
+    def _state(record, line):
+        return TransferState(
+            record.status,
+            line.requested_quantity,
+            line.approved_quantity,
+            line.dispatched_quantity,
+            line.received_quantity,
+            line.loss_quantity,
+        )
+
+    @staticmethod
+    def _transfer_view(record, line):
+        return TransferView(
+            str(record.id),
+            record.transfer_number,
+            record.status,
+            str(record.source_warehouse_id),
+            str(record.destination_warehouse_id),
+            line.item_type,
+            str(line.item_id),
+            str(line.unit_id),
+            line.requested_quantity,
+            line.approved_quantity,
+            line.dispatched_quantity,
+            line.received_quantity,
+            line.loss_quantity,
+        )
+
+    @staticmethod
+    def _transfer_audit(session, identity, correlation_id, action, transfer_id):
+        session.add(
+            ControlAuditEvent(
+                id=uuid4(),
+                tenant_id=UUID(identity.tenant_id),
+                actor_id=UUID(identity.actor_id),
+                correlation_id=correlation_id,
+                action=action,
+                object_reference=str(transfer_id),
+                occurred_at=datetime.now(UTC),
+            )
+        )
+
+    @staticmethod
+    def _authorize(session: Session, identity: ProductionIdentity) -> None:
+        session.execute(text("set local role gastroledger_app"))
+        session.execute(
+            text("select set_config('app.current_tenant_id', :tenant_id, true)"),
+            {"tenant_id": identity.tenant_id},
+        )
+        role = session.execute(
+            select(PlatformMembership.role).where(
+                PlatformMembership.tenant_id == UUID(identity.tenant_id),
+                PlatformMembership.user_id == UUID(identity.actor_id),
+            )
+        ).scalar_one_or_none()
+        if role not in {"tenant_admin", "branch_manager", "branch_operator"}:
+            raise ProductionAuthorizationDenied
+
+    @staticmethod
+    def _batch_view(
+        session: Session,
+        batch: InventoryProductionBatch,
+        transaction_id: UUID | None = None,
+        output_lot_id: UUID | None = None,
+    ) -> ProductionBatchView:
+        if transaction_id is None:
+            transaction_id = session.execute(
+                select(InventoryTransaction.id).where(
+                    InventoryTransaction.source_production_batch_id == batch.id
+                )
+            ).scalar_one()
+        if output_lot_id is None:
+            output_lot_id = session.execute(
+                select(InventoryLot.id).where(
+                    InventoryLot.source_production_batch_id == batch.id,
+                    InventoryLot.prepared_recipe_version_id.is_not(None),
+                )
+            ).scalar_one()
+        consumed = sum(
+            (
+                -quantity
+                for quantity in session.execute(
+                    select(InventoryEntry.quantity).where(
+                        InventoryEntry.transaction_id == transaction_id,
+                        InventoryEntry.quantity < 0,
+                    )
+                ).scalars()
+            ),
+            Decimal("0"),
+        )
+        return ProductionBatchView(
+            production_batch_id=str(batch.id),
+            inventory_transaction_id=str(transaction_id),
+            output_lot_id=str(output_lot_id),
+            batch_number=batch.batch_number,
+            status=batch.status,
+            recipe_version_id=str(batch.recipe_version_id),
+            expected_yield=batch.expected_yield,
+            actual_yield=batch.actual_yield,
+            variance_quantity=batch.variance_quantity,
+            variance_reason=batch.variance_reason,
+            consumed_quantity=consumed,
+        )

@@ -1,0 +1,40 @@
+{
+  "kind": "gridwork.skill",
+  "id": "diagnose-bug",
+  "name": "Diagnose Bug",
+  "version": "0.1.0",
+  "description": "Helps reproduce, minimize and explain bugs without modifying code by itself.",
+  "category": "diagnosis",
+  "allowedAgents": [
+    "intake-agent",
+    "implementer-agent",
+    "verifier-agent",
+    "platform-engineer-agent"
+  ],
+  "allowedWorkflows": [
+    "intake-existing-code",
+    "tdd-implementation",
+    "verification-pr",
+    "ci-failure-repair"
+  ],
+  "requiredInputs": [
+    "bug_report",
+    "observed_behavior",
+    "expected_behavior"
+  ],
+  "producedOutputs": [
+    "diagnosis_report",
+    "reproduction_steps",
+    "hypothesis_log",
+    "regression_test_idea"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/diagnosis/"
+  ],
+  "toolPolicyRefs": [],
+  "humanGates": [
+    "code_write",
+    "unknown_command"
+  ],
+  "permissionsInheritedOnly": true
+}

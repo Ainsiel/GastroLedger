@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridwork.local/schemas/agent.schema.json",
+  "title": "Gridwork Agent Manifest",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "mode",
+    "contract",
+    "allowedWorkflows",
+    "allowedSkills",
+    "permissionProfile",
+    "pathScopes",
+    "policyRefs",
+    "handoffPolicy"
+  ],
+  "properties": {
+    "kind": {
+      "const": "gridwork.agent"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "interactive",
+        "afk",
+        "hybrid"
+      ]
+    },
+    "contract": {
+      "type": "string"
+    },
+    "prompt": {
+      "type": "string"
+    },
+    "allowedWorkflows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedSkills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissionProfile": {
+      "type": "string"
+    },
+    "pathScopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policyRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "handoffPolicy": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

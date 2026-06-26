@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "architecture-conformance-verification",
+  "name": "Architecture Conformance Verification",
+  "version": "0.1.0",
+  "description": "Verifies structure and implementation against approved architecture, dependency rules and anti-speculation constraints.",
+  "category": "architecture-testing",
+  "allowedAgents": ["architecture-foundation-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-foundation", "verification-pr"],
+  "requiredInputs": ["approved_architecture", "changed_files", "architecture_test_evidence"],
+  "producedOutputs": ["conformance_report", "conformance_decision"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/verification/architecture/"],
+  "toolPolicyRefs": ["../../policies/architecture-foundation-policy.md", "../../policies/architecture-design-policy.md"],
+  "humanGates": ["architecture_decision", "needs_more_evidence"],
+  "permissionsInheritedOnly": true
+}

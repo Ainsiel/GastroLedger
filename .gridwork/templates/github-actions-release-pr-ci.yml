@@ -1,0 +1,15 @@
+name: release-pr-ci
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  release-gate:
+    name: release / full-regression-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        run: test "${{ github.head_ref }}" = "develop"
+      - name: Configure full confirmed validation commands
+        run: echo "Replace through an approved github-actions-cicd plan"

@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "docker-compose-environment-strategy",
+  "name": "Docker Compose Environment Strategy",
+  "version": "0.2.0",
+  "description": "Designs base Compose definitions, environment overlays, optional profiles and health-check contracts.",
+  "category": "platform",
+  "allowedAgents": ["software-architect", "platform-engineer-agent"],
+  "allowedWorkflows": ["architecture-ddd", "repository-bootstrap"],
+  "requiredInputs": ["approved_repository_layout", "environment_requirements"],
+  "producedOutputs": ["compose_environment_contract"],
+  "artifactPaths": ["infra/compose/", ".factory/runs/<run-id>/artifacts/platform/"],
+  "humanGates": ["secret_value_needed", "deploy_enabled"],
+  "permissionsInheritedOnly": true
+}

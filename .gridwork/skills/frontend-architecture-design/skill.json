@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "frontend-architecture-design",
+  "name": "Frontend Architecture Design",
+  "version": "0.1.0",
+  "description": "Designs technology-agnostic frontend feature boundaries, route ownership, public surfaces and dependency rules.",
+  "category": "frontend-architecture",
+  "allowedAgents": ["software-architect", "architecture-foundation-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "architecture-foundation", "verification-pr"],
+  "requiredInputs": ["user_workflows", "frontend_drivers", "backend_contracts", "confirmed_frontend_scope"],
+  "producedOutputs": ["frontend_architecture", "route_ownership_map", "frontend_dependency_rules", "frontend_public_surfaces"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/frontend/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md", "../../policies/architecture-foundation-policy.md"],
+  "humanGates": ["frontend_boundary_decision", "public_contract_decision"],
+  "permissionsInheritedOnly": true
+}

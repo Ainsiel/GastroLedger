@@ -1,0 +1,414 @@
+import json
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+from uuid import uuid4
+
+import psycopg
+import pytest
+
+from gastroledger_api.modules.platform_organization.application.registration import (
+    RegisterTenant,
+    RegistrationCommand,
+    RegistrationConflict,
+)
+from gastroledger_api.modules.platform_organization.application.security import (
+    ScryptPasswordHasher,
+    SessionTokenIssuer,
+)
+from gastroledger_api.modules.platform_organization.domain.registration import (
+    RegistrationValidationError,
+)
+from gastroledger_api.technical.postgres_platform import PostgresPlatformStore
+
+
+def command(slug: str, *, with_branch: bool = False) -> RegistrationCommand:
+    return RegistrationCommand(
+        tenant_name=f"Tenant {slug}",
+        tenant_slug=slug,
+        admin_email=f"admin-{slug}@example.com",
+        password="StrongPassword123",
+        branch_name="Downtown" if with_branch else None,
+        branch_code="MAIN" if with_branch else None,
+    )
+
+
+def register(database_url: str, registration: RegistrationCommand):
+    return RegisterTenant(
+        store=PostgresPlatformStore(database_url),
+        password_hasher=ScryptPasswordHasher(),
+        session_tokens=SessionTokenIssuer(),
+    ).execute(registration)
+
+
+def http_json(
+    method: str,
+    url: str,
+    *,
+    payload: dict[str, object] | None = None,
+    cookie: str | None = None,
+) -> tuple[int, dict[str, Any], Any]:
+    headers = {"content-type": "application/json"}
+    if cookie:
+        headers["cookie"] = cookie
+    request = Request(
+        url,
+        method=method,
+        headers=headers,
+        data=json.dumps(payload).encode() if payload is not None else None,
+    )
+    try:
+        with urlopen(request, timeout=5) as response:
+            body = response.read()
+            return response.status, json.loads(body) if body else {}, response.headers
+    except HTTPError as error:
+        body = error.read()
+        return error.code, json.loads(body) if body else {}, error.headers
+
+
+def registration_payload(slug: str) -> dict[str, object]:
+    return {
+        "tenantName": f"Tenant {slug}",
+        "tenantSlug": slug,
+        "adminEmail": f"admin-{slug}@example.com",
+        "password": "StrongPassword123",
+    }
+
+
+def test_registration_atomically_creates_tenant_admin_session_and_optional_branch(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    database_url: str,
+) -> None:
+    slug = f"tenant-{uuid4().hex}"
+
+    result = register(database_url, command(slug, with_branch=True))
+
+    with postgres_connection.transaction():
+        tenant = postgres_connection.execute(
+            "select slug from platform_tenants where id = %s", (result.tenant_id,)
+        ).fetchone()
+        membership = postgres_connection.execute(
+            """
+            select role
+            from platform_memberships
+            where tenant_id = %s and user_id = %s
+            """,
+            (result.tenant_id, result.actor_id),
+        ).fetchone()
+        branch = postgres_connection.execute(
+            "select code from platform_branches where id = %s", (result.branch_id,)
+        ).fetchone()
+        session = postgres_connection.execute(
+            "select token_hash from platform_sessions where tenant_id = %s",
+            (result.tenant_id,),
+        ).fetchone()
+
+    assert tenant == (slug,)
+    assert membership == ("tenant_admin",)
+    assert branch == ("MAIN",)
+    assert session is not None
+    assert result.session_token not in session[0]
+
+
+def test_concurrent_duplicate_slug_commits_exactly_one_registration(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    database_url: str,
+) -> None:
+    slug = f"same-{uuid4().hex}"
+
+    def attempt() -> str:
+        try:
+            register(database_url, command(slug))
+            return "created"
+        except RegistrationConflict:
+            return "conflict"
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(lambda _: attempt(), range(2)))
+
+    with postgres_connection.transaction():
+        count = postgres_connection.execute(
+            "select count(*) from platform_tenants where slug = %s", (slug,)
+        ).fetchone()
+
+    assert sorted(outcomes) == ["conflict", "created"]
+    assert count == (1,)
+
+
+def test_invalid_credentials_leave_no_partial_tenant(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    database_url: str,
+) -> None:
+    slug = f"invalid-{uuid4().hex}"
+    invalid = command(slug)
+    invalid = RegistrationCommand(
+        tenant_name=invalid.tenant_name,
+        tenant_slug=invalid.tenant_slug,
+        admin_email=invalid.admin_email,
+        password="weak",
+    )
+
+    try:
+        register(database_url, invalid)
+    except RegistrationValidationError:
+        pass
+    else:
+        raise AssertionError("invalid credentials must reject registration")
+
+    with postgres_connection.transaction():
+        count = postgres_connection.execute(
+            "select count(*) from platform_tenants where slug = %s", (slug,)
+        ).fetchone()
+
+    assert count == (0,)
+
+
+def test_http_session_scope_hides_another_tenant_and_records_denial_audit(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    first_slug = f"first-{uuid4().hex}"
+    second_slug = f"second-{uuid4().hex}"
+    first_status, first, first_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(first_slug),
+    )
+    second_status, second, _second_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(second_slug),
+    )
+    cookie = first_headers["set-cookie"].split(";", 1)[0]
+
+    hidden_status, hidden, _hidden_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant?tenantId={second['tenantId']}",
+        cookie=cookie,
+    )
+
+    with postgres_connection.transaction():
+        audit = postgres_connection.execute(
+            """
+            select action, object_reference, correlation_id
+            from control_audit_events
+            where tenant_id = %s
+            order by occurred_at desc
+            limit 1
+            """,
+            (first["tenantId"],),
+        ).fetchone()
+
+    assert first_status == 201
+    assert second_status == 201
+    assert hidden_status == 404
+    assert hidden["type"] == "platform.tenant_not_found"
+    assert audit == (
+        "tenant.cross_scope_probe_denied",
+        second["tenantId"],
+        hidden["correlationId"],
+    )
+
+
+def test_invalid_or_membershipless_session_returns_authentication_required(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    slug = f"membership-{uuid4().hex}"
+    created_status, created, headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(slug),
+    )
+    cookie = headers["set-cookie"].split(";", 1)[0]
+
+    invalid_status, invalid, _invalid_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie="gl_session=invalid",
+    )
+    with postgres_connection.transaction():
+        postgres_connection.execute(
+            "delete from platform_memberships where tenant_id = %s and user_id = %s",
+            (created["tenantId"], created["actorId"]),
+        )
+        session_count = postgres_connection.execute(
+            "select count(*) from platform_sessions where tenant_id = %s",
+            (created["tenantId"],),
+        ).fetchone()
+    removed_status, removed, _removed_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie=cookie,
+    )
+
+    assert created_status == 201
+    assert invalid_status == 401
+    assert invalid["type"] == "platform.authentication_required"
+    assert session_count == (0,)
+    assert removed_status == 401
+    assert removed["type"] == "platform.authentication_required"
+
+
+def test_http_login_issues_fresh_tenant_scoped_cookie_and_logout_revokes_it(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    slug = f"login-{uuid4().hex}"
+    created_status, created, registration_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(slug),
+    )
+    registration_cookie = registration_headers["set-cookie"].split(";", 1)[0]
+
+    login_status, logged_in, login_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={
+            "email": f"admin-{slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+    login_cookie = login_headers["set-cookie"].split(";", 1)[0]
+    resolved_status, resolved, _resolved_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie=login_cookie,
+    )
+    logout_status, logout_body, logout_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/logout",
+        cookie=login_cookie,
+    )
+    revoked_status, revoked, _revoked_headers = http_json(
+        "GET",
+        f"{api_base_url}/api/v1/session/tenant",
+        cookie=login_cookie,
+    )
+
+    token = login_cookie.split("=", 1)[1]
+    token_hash = SessionTokenIssuer().hash(token)
+    with postgres_connection.transaction():
+        revoked_at = postgres_connection.execute(
+            "select revoked_at from platform_sessions where token_hash = %s",
+            (token_hash,),
+        ).fetchone()
+
+    assert created_status == 201
+    assert login_status == 200
+    assert logged_in == {
+        "tenantId": created["tenantId"],
+        "actorId": created["actorId"],
+        "tenantName": created["tenantName"],
+        "tenantSlug": created["tenantSlug"],
+    }
+    assert login_cookie.startswith("gl_session=")
+    assert login_cookie != registration_cookie
+    assert resolved_status == 200
+    assert resolved == logged_in
+    assert logout_status == 204
+    assert logout_body == {}
+    assert "gl_session=" in logout_headers["set-cookie"]
+    assert revoked_status == 401
+    assert revoked["type"] == "platform.authentication_required"
+    assert revoked_at is not None
+    assert revoked_at[0] is not None
+
+
+def test_http_login_rejects_invalid_credentials_without_cookie(
+    api_base_url: str,
+) -> None:
+    status, body, headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={"email": "missing@example.com", "password": "wrong"},
+    )
+
+    assert status == 401
+    assert body["type"] == "platform.invalid_credentials"
+    assert "set-cookie" not in headers
+
+
+def test_http_login_returns_typed_problem_when_email_has_multiple_tenants(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    api_base_url: str,
+) -> None:
+    first_slug = f"ambiguous-a-{uuid4().hex}"
+    second_slug = f"ambiguous-b-{uuid4().hex}"
+    first_status, first, _first_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(first_slug),
+    )
+    second_status, second, _second_headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/tenants/register",
+        payload=registration_payload(second_slug),
+    )
+    with postgres_connection.transaction():
+        postgres_connection.execute(
+            """
+            insert into platform_memberships (tenant_id, user_id, role)
+            values (%s, %s, 'tenant_admin')
+            """,
+            (second["tenantId"], first["actorId"]),
+        )
+
+    login_status, login, headers = http_json(
+        "POST",
+        f"{api_base_url}/api/v1/session/login",
+        payload={
+            "email": f"admin-{first_slug}@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+
+    assert first_status == 201
+    assert second_status == 201
+    assert login_status == 409
+    assert login["type"] == "platform.login_tenant_ambiguous"
+    assert login["errors"] == [
+        {"field": "email", "code": "tenant_ambiguous", "detail": "select tenant"}
+    ]
+    assert "set-cookie" not in headers
+
+
+def test_runtime_database_identity_is_not_privileged(
+    postgres_connection: psycopg.Connection[tuple[object, ...]],
+    database_url: str,
+) -> None:
+    with psycopg.connect(database_url) as runtime_connection:
+        runtime_user = runtime_connection.execute("select current_user").fetchone()
+        assert runtime_user is not None
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            runtime_connection.execute("select count(*) from platform_tenants")
+
+    with postgres_connection.transaction():
+        attributes = postgres_connection.execute(
+            """
+            select rolsuper, rolbypassrls, rolinherit
+            from pg_roles
+            where rolname = %s
+            """,
+            (runtime_user[0],),
+        ).fetchone()
+
+    assert attributes == (False, False, False)
+
+
+def test_rls_denies_tenant_tables_without_transaction_tenant_context(
+    database_url: str,
+) -> None:
+    created = register(database_url, command(f"rls-{uuid4().hex}"))
+
+    with psycopg.connect(database_url) as runtime_connection:
+        with runtime_connection.transaction():
+            runtime_connection.execute("set local role gastroledger_app")
+            invisible = runtime_connection.execute(
+                "select tenant_id from platform_tenant_settings where tenant_id = %s",
+                (created.tenant_id,),
+            ).fetchone()
+
+    assert invisible is None

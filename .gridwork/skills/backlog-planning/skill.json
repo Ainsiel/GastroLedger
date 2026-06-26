@@ -1,0 +1,42 @@
+{
+  "kind": "gridwork.skill",
+  "id": "backlog-planning",
+  "name": "Backlog Planning",
+  "version": "0.1.0",
+  "description": "Turns SDD and architecture outputs into local GitHub issue drafts organized as vertical slices.",
+  "category": "planning",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "planner-agent",
+    "backlog-manager-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "intake-existing-code",
+    "backlog-management"
+  ],
+  "requiredInputs": [
+    "approved_sdd",
+    "architecture_outputs",
+    "label_catalog"
+  ],
+  "producedOutputs": [
+    "capability_dependency_map",
+    "issue_drafts",
+    "publish_plan",
+    "work_order_candidates"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/backlog/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/github-labels.json"
+  ],
+  "humanGates": [
+    "github_publish",
+    "afk_delegation"
+  ],
+  "permissionsInheritedOnly": true
+}

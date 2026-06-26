@@ -1,0 +1,80 @@
+name: reusable / integration
+
+on:
+  workflow_call:
+    inputs:
+      build_containers:
+        description: Build runtime container images.
+        required: false
+        type: boolean
+        default: false
+      run_e2e:
+        description: Run critical technical E2E smoke checks.
+        required: false
+        type: boolean
+        default: false
+      run_migrations:
+        description: Run the one-shot migration verification contract.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      API_PORT: "58000"
+      POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+      POSTGRES_PORT: "55432"
+      WEB_PORT: "53000"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Node.js command runner
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.13.1
+
+      - name: Validate supported Compose combinations
+        run: |
+          npm run compose:config
+          npm run compose:config:qa
+          npm run compose:config:production-like
+          npm run compose:config:integration
+
+      - name: Verify migration contract
+        if: ${{ inputs.run_migrations }}
+        run: npm run test:migrations
+
+      - name: Run PostgreSQL integration harness
+        run: npm run test:integration:postgres
+
+      - name: Build runtime containers
+        if: ${{ inputs.build_containers }}
+        run: npm run build:containers
+
+      - name: Start technical runtime
+        if: ${{ inputs.run_e2e }}
+        run: docker compose -p gastroledger-integration --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.integration.yaml up --detach --wait --no-build web api worker
+
+      - name: Run critical technical E2E smoke checks
+        if: ${{ inputs.run_e2e }}
+        env:
+          API_HEALTH_URL: http://127.0.0.1:58000/health
+          WEB_HEALTH_URL: http://127.0.0.1:53000/api/health
+        run: npm run test:e2e:critical
+
+      - name: Show Compose status on failure
+        if: ${{ failure() }}
+        run: docker compose -p gastroledger-integration --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.integration.yaml ps --all
+
+      - name: Clean isolated CI Compose resources
+        if: ${{ always() }}
+        run: docker compose -p gastroledger-integration --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.integration.yaml down --volumes --remove-orphans

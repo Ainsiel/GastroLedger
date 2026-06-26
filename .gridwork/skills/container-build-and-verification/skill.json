@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "container-build-and-verification",
+  "name": "Container Build And Verification",
+  "version": "0.2.0",
+  "description": "Builds, inspects and smoke-tests application containers without publishing or deploying by default.",
+  "category": "platform",
+  "allowedAgents": ["platform-engineer-agent", "verifier-agent"],
+  "allowedWorkflows": ["repository-bootstrap", "delivery-infrastructure", "verification-pr"],
+  "requiredInputs": ["container_contract", "quality_commands"],
+  "producedOutputs": ["container_verification_report"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/platform/"],
+  "humanGates": ["dependency_change", "deploy_enabled"],
+  "permissionsInheritedOnly": true
+}

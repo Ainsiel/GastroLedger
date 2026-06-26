@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "ubiquitous-language",
+  "name": "Ubiquitous Language",
+  "version": "0.1.0",
+  "description": "Extracts and governs precise domain terminology, aliases, relationships and ambiguities for DDD architecture.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["approved_sdd", "architecture_answers"],
+  "producedOutputs": ["ubiquitous_language", "ambiguity_report"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/domain/", "docs/architecture/domain/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["domain_term_decision"],
+  "permissionsInheritedOnly": true
+}

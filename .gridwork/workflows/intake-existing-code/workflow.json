@@ -1,0 +1,40 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "intake-existing-code",
+  "name": "Intake Existing Code",
+  "version": "0.1.0",
+  "description": "Transforms a bug, improvement or feature request in an existing project into clarified next steps.",
+  "mode": "interactive",
+  "primaryAgent": "intake-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "intake-agent",
+    "planner-agent"
+  ],
+  "allowedSkills": [
+    "diagnose-bug",
+    "github-issue-discovery",
+    "github-label-manager",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "user_request"
+  ],
+  "producedOutputs": [
+    "intake_summary",
+    "clarifying_questions",
+    "issue_draft_candidate",
+    "work_order_candidate",
+    "recommended_next_step"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/"
+  ],
+  "humanGates": [
+    "code_write",
+    "github_write",
+    "afk_delegation",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}

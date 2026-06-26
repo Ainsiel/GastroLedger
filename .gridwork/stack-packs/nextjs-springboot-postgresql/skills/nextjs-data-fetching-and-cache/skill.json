@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-data-fetching-and-cache",
+  "name": "Next.js Data Fetching And Cache",
+  "version": "0.1.0",
+  "description": "Designs and verifies Next.js server/client data fetching, mutations, freshness, invalidation and optimistic behavior.",
+  "category": "stack-frontend-data",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["frontend_state_strategy", "api_consumption_contract", "freshness_requirements", "confirmed_nextjs_project"],
+  "producedOutputs": ["nextjs_data_fetching_strategy", "cache_invalidation_map", "mutation_behavior"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack/nextjs/data/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["cache_semantics_decision", "dependency_change", "public_contract_decision"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

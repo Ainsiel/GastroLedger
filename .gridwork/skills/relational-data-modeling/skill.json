@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "relational-data-modeling",
+  "name": "Relational Data Modeling",
+  "version": "0.1.0",
+  "description": "Designs conceptual, logical and physical relational models from domain ownership, invariants and query needs.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["domain_model", "bounded_contexts", "data_requirements", "query_scenarios"],
+  "producedOutputs": ["conceptual_model", "logical_model", "physical_guidance", "migration_strategy"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/data/", "docs/architecture/data/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["data_ownership_decision", "retention_decision", "migration_decision"],
+  "permissionsInheritedOnly": true
+}

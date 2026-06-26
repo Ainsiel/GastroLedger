@@ -1,0 +1,48 @@
+name: develop
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: develop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    uses: ./.github/workflows/reusable-frontend.yml
+
+  backend:
+    uses: ./.github/workflows/reusable-backend.yml
+
+  integration:
+    uses: ./.github/workflows/reusable-integration.yml
+    with:
+      build_containers: true
+      run_e2e: true
+      run_migrations: true
+
+  integration-gate:
+    name: integration-gate
+    if: ${{ always() }}
+    needs:
+      - frontend
+      - backend
+      - integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every develop check
+        env:
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          INTEGRATION_RESULT: ${{ needs.integration.result }}
+        run: |
+          test "$FRONTEND_RESULT" = "success"
+          test "$BACKEND_RESULT" = "success"
+          test "$INTEGRATION_RESULT" = "success"
+

@@ -1,0 +1,2 @@
+"""Menu Engineering application boundary."""
+

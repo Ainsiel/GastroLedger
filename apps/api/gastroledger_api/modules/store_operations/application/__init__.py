@@ -1,0 +1,2 @@
+"""Store Operations application boundary."""
+

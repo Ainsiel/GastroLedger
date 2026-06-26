@@ -1,0 +1,38 @@
+{
+  "kind": "gridwork.skill",
+  "id": "springboot-backend-guidance",
+  "name": "Spring Boot Backend Guidance",
+  "version": "0.1.0",
+  "description": "Guidance for Spring Boot application, domain, controller and test boundaries.",
+  "category": "stack-guidance",
+  "allowedAgents": [
+    "software-architect",
+    "architecture-foundation-agent",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "architecture-foundation",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "confirmed_backend_path",
+    "work_order_or_architecture_question"
+  ],
+  "producedOutputs": [
+    "backend_guidance"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/stack-guidance/"
+  ],
+  "toolPolicyRefs": [
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "path_confirmation"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

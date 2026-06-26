@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gridwork.local/schemas/skill.schema.json",
+  "title": "Gridwork Skill Manifest",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "category",
+    "allowedAgents",
+    "allowedWorkflows",
+    "requiredInputs",
+    "producedOutputs",
+    "artifactPaths",
+    "humanGates",
+    "permissionsInheritedOnly"
+  ],
+  "properties": {
+    "kind": {
+      "const": "gridwork.skill"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "allowedAgents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedWorkflows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiredInputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "producedOutputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artifactPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "toolPolicyRefs": {
+      "type": "array"
+    },
+    "humanGates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissionsInheritedOnly": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

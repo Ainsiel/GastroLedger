@@ -1,0 +1,51 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "feature-pr-delivery",
+  "name": "Feature PR Delivery",
+  "version": "0.1.0",
+  "description": "Delivers one work order from a feature branch through CI, verifier approval and governed merge into develop.",
+  "mode": "hybrid",
+  "primaryAgent": "orchestrator",
+  "participatingAgents": ["orchestrator", "implementer-agent", "verifier-agent"],
+  "allowedSkills": [
+    "work-order-branch-lifecycle",
+    "pull-request-lifecycle",
+    "ci-status-evaluation",
+    "git-branch-management",
+    "github-cli",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "approved_work_order",
+    "feature_branch",
+    "implementation_summary",
+    "required_pr_checks"
+  ],
+  "producedOutputs": [
+    "feature_branch_record",
+    "pull_request_record",
+    "ci_evidence",
+    "verifier_decision",
+    "merge_to_develop_record",
+    "branch_cleanup_record"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/git/",
+    ".factory/runs/<run-id>/artifacts/github/",
+    ".factory/runs/<run-id>/artifacts/cicd/",
+    ".factory/runs/<run-id>/artifacts/verification/"
+  ],
+  "humanGates": [
+    "create_local_branch",
+    "stage_files",
+    "create_commit",
+    "push_branch",
+    "create_pr",
+    "github_pr_review",
+    "merge_to_develop",
+    "delete_feature_branch",
+    "unknown_command",
+    "github_write"
+  ],
+  "requiresWorkOrder": true
+}

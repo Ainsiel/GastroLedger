@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "frontend-testing-strategy",
+  "name": "Frontend Testing Strategy",
+  "version": "0.1.0",
+  "description": "Designs technology-agnostic frontend behavior, integration, contract, accessibility and end-to-end test coverage.",
+  "category": "testing",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["user_workflows", "frontend_boundaries", "risk_profile", "test_environment"],
+  "producedOutputs": ["frontend_test_strategy", "frontend_test_cases", "frontend_test_evidence_plan"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/testing/frontend/"],
+  "toolPolicyRefs": ["../../policies/tool-allowlist.md", "../../policies/tdd-evidence-policy.md"],
+  "humanGates": ["dependency_change", "shared_environment_access", "unknown_command"],
+  "permissionsInheritedOnly": true
+}

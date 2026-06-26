@@ -1,0 +1,42 @@
+{
+  "kind": "gridwork.skill",
+  "id": "fastapi-performance",
+  "name": "FastAPI Performance",
+  "version": "0.1.0",
+  "description": "Measures and improves FastAPI latency, throughput and resource use without speculative tuning.",
+  "category": "stack-performance",
+  "allowedAgents": [
+    "software-architect",
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "architecture-ddd",
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "confirmed_fastapi_project",
+    "measurable_performance_scenario",
+    "approved_measurement_commands"
+  ],
+  "producedOutputs": [
+    "fastapi_performance_analysis",
+    "fastapi_performance_evidence"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/performance/fastapi/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/quality-commands.json",
+    "../../../../policies/stack-skill-policy.md"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "load_test_shared_environment",
+    "unknown_command",
+    "secret_value_needed"
+  ],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

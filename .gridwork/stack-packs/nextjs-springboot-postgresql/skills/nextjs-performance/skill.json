@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-performance",
+  "name": "Next.js Performance",
+  "version": "0.1.0",
+  "description": "Measures and improves Next.js rendering, bundles, caching and Web Vitals without speculative optimization.",
+  "category": "stack-performance",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_frontend_path", "performance_scenario", "measurement_method"],
+  "producedOutputs": ["performance_baseline", "optimization_plan", "performance_evidence"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/frontend-performance/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "dependency_change", "cache_semantics_change"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

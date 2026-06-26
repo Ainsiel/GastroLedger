@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "release-promotion",
+  "name": "Release Promotion",
+  "version": "0.1.0",
+  "description": "Coordinates a governed release candidate from develop through full CI and merge into main.",
+  "category": "release",
+  "allowedAgents": ["release-manager-agent"],
+  "allowedWorkflows": ["release-promotion"],
+  "requiredInputs": ["develop_sha", "main_sha", "included_work_orders", "required_release_checks"],
+  "producedOutputs": ["release_plan", "release_notes", "release_decision", "promotion_record"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/release/"],
+  "toolPolicyRefs": ["../../policies/delivery-lifecycle-policy.md", "../../policies/github-cli-policy.md"],
+  "humanGates": ["create_release_pr", "merge_to_main", "production_approval"],
+  "permissionsInheritedOnly": true
+}

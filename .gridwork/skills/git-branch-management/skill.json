@@ -1,0 +1,49 @@
+{
+  "kind": "gridwork.skill",
+  "id": "git-branch-management",
+  "name": "Git Branch Management",
+  "version": "0.1.0",
+  "description": "Prepares and executes governed local Git actions while keeping push, PR and merge behind separate human gates.",
+  "category": "git",
+  "allowedAgents": [
+    "orchestrator",
+    "implementer-agent",
+    "verifier-agent",
+    "release-manager-agent"
+  ],
+  "allowedWorkflows": [
+    "tdd-implementation",
+    "verification-pr",
+    "feature-pr-delivery",
+    "release-promotion"
+  ],
+  "requiredInputs": [
+    "run_id",
+    "current_branch",
+    "base_branch",
+    "approved_scope",
+    "changed_files"
+  ],
+  "producedOutputs": [
+    "git_action_plan",
+    "git_read_summary",
+    "commit_summary",
+    "push_or_pr_plan"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/git/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/git-policy.md",
+    "../../policies/human-gates.md"
+  ],
+  "humanGates": [
+    "create_local_branch",
+    "stage_files",
+    "create_commit",
+    "push_branch",
+    "create_pr",
+    "merge"
+  ],
+  "permissionsInheritedOnly": true
+}

@@ -1,0 +1,45 @@
+{
+  "kind": "gridwork.skill",
+  "id": "tdd",
+  "name": "Test Driven Development",
+  "version": "0.1.0",
+  "description": "Guides controlled red-green-refactor cycles using behavior tests, public interfaces and vertical tracer bullets.",
+  "category": "implementation",
+  "allowedAgents": [
+    "implementer-agent",
+    "verifier-agent"
+  ],
+  "allowedWorkflows": [
+    "tdd-implementation",
+    "verification-pr"
+  ],
+  "requiredInputs": [
+    "approved_work_order",
+    "acceptance_criteria",
+    "test_command_allowlist",
+    "path_scopes"
+  ],
+  "producedOutputs": [
+    "tdd_plan",
+    "red_phase_evidence",
+    "green_phase_evidence",
+    "refactor_evidence",
+    "tdd_evidence"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/tdd/"
+  ],
+  "toolPolicyRefs": [
+    "../../policies/tdd-evidence-policy.md",
+    "../../policies/tool-allowlist.md",
+    "../../policies/work-order-policy.md"
+  ],
+  "humanGates": [
+    "missing_clear_red_phase",
+    "unknown_test_command",
+    "dependency_change",
+    "scope_change",
+    "explicitly_non_testable_exception"
+  ],
+  "permissionsInheritedOnly": true
+}

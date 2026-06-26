@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-ui-design",
+  "name": "Next.js UI Design",
+  "version": "0.1.0",
+  "description": "Designs polished, accessible and domain-appropriate Next.js interfaces and complete interaction states.",
+  "category": "stack-design",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_frontend_path", "user_workflow", "existing_design_system"],
+  "producedOutputs": ["ui_design_spec", "interaction_state_plan", "ui_review"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/frontend/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "dependency_change", "design_direction"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

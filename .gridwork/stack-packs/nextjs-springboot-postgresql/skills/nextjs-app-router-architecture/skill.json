@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "nextjs-app-router-architecture",
+  "name": "Next.js App Router Architecture",
+  "version": "0.1.0",
+  "description": "Designs, materializes and verifies Next.js App Router route groups, layouts, server/client boundaries and route states.",
+  "category": "stack-frontend-architecture",
+  "allowedAgents": ["software-architect", "architecture-foundation-agent", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "architecture-foundation", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_app_router_project", "frontend_architecture", "route_ownership_map"],
+  "producedOutputs": ["app_router_architecture", "server_client_boundary_map", "route_state_plan"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack/nextjs/app-router/"],
+  "toolPolicyRefs": ["../../policies/path-hints.md", "../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["router_migration", "frontend_boundary_decision", "path_confirmation"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

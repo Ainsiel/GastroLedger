@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture Diagram</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f5f7fa;
+      --surface: #ffffff;
+      --ink: #17202a;
+      --muted: #5d6d7e;
+      --line: #aab7b8;
+      --approved: #d5f5e3;
+      --proposed: #fcf3cf;
+      --external: #e8daef;
+      --risk: #fadbd8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 15px/1.5 system-ui, sans-serif;
+    }
+    header, main { width: min(1200px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 28px 0 16px; }
+    h1, h2 { margin: 0 0 8px; }
+    .meta, .legend, .diagram, section { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+    .meta, .legend, section { padding: 16px; margin-bottom: 16px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; }
+    .key { display: inline-flex; align-items: center; gap: 7px; }
+    .swatch { width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 3px; }
+    .approved { background: var(--approved); }
+    .proposed { background: var(--proposed); border-style: dashed; }
+    .external { background: var(--external); }
+    .risk { background: var(--risk); }
+    .diagram {
+      min-height: 420px;
+      padding: 24px;
+      margin-bottom: 16px;
+      overflow: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+      align-content: start;
+    }
+    .node { min-height: 120px; padding: 14px; border: 2px solid #566573; border-radius: 6px; }
+    .node h3 { margin: 0 0 6px; font-size: 16px; }
+    .node p { margin: 0; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #eaecee; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 640px) {
+      header, main { width: min(100% - 20px, 1200px); }
+      .diagram { grid-template-columns: 1fr; padding: 14px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Architecture Diagram Title</h1>
+    <p>State the question this diagram answers.</p>
+  </header>
+  <main>
+    <div class="meta">
+      <strong>Type:</strong> C4 context | container | component | ERD | sequence | state | other<br>
+      <strong>Status:</strong> proposed<br>
+      <strong>Scope:</strong> define included and excluded concerns<br>
+      <strong>Source:</strong> related SDD, architecture document and ADR references
+    </div>
+    <div class="legend" aria-label="Diagram legend">
+      <span class="key"><span class="swatch approved"></span>Approved</span>
+      <span class="key"><span class="swatch proposed"></span>Proposed</span>
+      <span class="key"><span class="swatch external"></span>External</span>
+      <span class="key"><span class="swatch risk"></span>Risk or unresolved</span>
+    </div>
+    <div class="diagram" role="img" aria-label="Replace with a concise textual diagram description">
+      <article class="node approved">
+        <h3>Element name</h3>
+        <p>Type, responsibility and owner.</p>
+      </article>
+      <article class="node external">
+        <h3>External element</h3>
+        <p>Contract and relationship purpose.</p>
+      </article>
+    </div>
+    <section>
+      <h2>Element Inventory</h2>
+      <table>
+        <thead><tr><th>Element</th><th>Type</th><th>Responsibility</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody><tr><td>Element name</td><td>Type</td><td>Responsibility</td><td>Owner</td><td>Approved</td></tr></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Relationship Inventory</h2>
+      <table>
+        <thead><tr><th>Source</th><th>Target</th><th>Purpose</th><th>Protocol or semantics</th></tr></thead>
+        <tbody><tr><td>Source</td><td>Target</td><td>Purpose</td><td>Contract</td></tr></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Assumptions And Open Questions</h2>
+      <ul><li>Replace with explicit assumptions and unresolved decisions.</li></ul>
+    </section>
+  </main>
+</body>
+</html>

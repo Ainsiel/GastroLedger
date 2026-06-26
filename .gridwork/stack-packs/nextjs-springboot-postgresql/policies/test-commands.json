@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "commands": [
+    {
+      "id": "frontend_test",
+      "purpose": "Run frontend tests when configured by the project.",
+      "commandHint": "npm test",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "frontend_lint",
+      "purpose": "Run frontend lint when configured by the project.",
+      "commandHint": "npm run lint",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "backend_test",
+      "purpose": "Run Spring Boot tests when configured by the project.",
+      "commandHint": "./mvnw test",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "backend_verify",
+      "purpose": "Run backend verification when configured by the project.",
+      "commandHint": "./mvnw verify",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "fastapi_test",
+      "purpose": "Run FastAPI/Python tests when configured by the project.",
+      "commandHint": "pytest",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "fastapi_integration_test",
+      "purpose": "Run the confirmed FastAPI integration test suite.",
+      "commandHint": "pytest tests/integration",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "docker_compose_config",
+      "purpose": "Validate an approved Docker Compose file combination.",
+      "commandHint": "docker compose config",
+      "requiresPathConfirmation": true
+    },
+    {
+      "id": "fastapi_test",
+      "purpose": "Run FastAPI tests when configured by the project.",
+      "commandHint": "pytest",
+      "requiresPathConfirmation": true
+    }
+  ],
+  "rules": [
+    "Commands are hints until copied into a project allowlist.",
+    "Agents must not invent commands.",
+    "Unknown commands require approval."
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "repository-bootstrap",
+  "name": "Repository Bootstrap",
+  "version": "0.2.0",
+  "description": "Creates approved monorepo boundaries, stack scaffolds and local delivery infrastructure before feature work.",
+  "mode": "hybrid",
+  "primaryAgent": "platform-engineer-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "software-architect",
+    "platform-engineer-agent",
+    "verifier-agent"
+  ],
+  "allowedSkills": [
+    "monorepo-layout-design",
+    "repository-bootstrap",
+    "quality-command-contract",
+    "docker-compose-environment-strategy",
+    "container-build-and-verification",
+    "docker-compose-local-guidance",
+    "nextjs-project-bootstrap",
+    "nextjs-container-build",
+    "nextjs-e2e-testing",
+    "springboot-project-bootstrap",
+    "springboot-migration-testing",
+    "springboot-container-build",
+    "springboot-integration-testing",
+    "fastapi-project-bootstrap",
+    "fastapi-migration-testing",
+    "fastapi-container-build",
+    "fastapi-integration-testing",
+    "postgres-test-environment",
+    "database-migration-verification",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "approved_architecture",
+    "selected_stack",
+    "approved_repository_layout",
+    "quality_expectations"
+  ],
+  "producedOutputs": [
+    "repository_bootstrap_report",
+    "root_quality_command_contract",
+    "compose_environment_contract",
+    "delivery_infrastructure_handoff"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/platform/",
+    "frontend/",
+    "backend/",
+    "tests/",
+    "infra/"
+  ],
+  "humanGates": [
+    "dependency_change",
+    "product_scaffold_write",
+    "unknown_command",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}

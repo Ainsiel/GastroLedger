@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "architecture-foundation-planning",
+  "name": "Architecture Foundation Planning",
+  "version": "0.1.0",
+  "description": "Turns approved architecture into an exact, minimal and reviewable foundation implementation plan.",
+  "category": "architecture-foundation",
+  "allowedAgents": ["architecture-foundation-agent"],
+  "allowedWorkflows": ["architecture-foundation"],
+  "requiredInputs": ["approved_architecture", "approved_adrs", "confirmed_stack", "confirmed_paths"],
+  "producedOutputs": ["foundation_plan", "materialization_traceability", "explicit_exclusions"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture-foundation/"],
+  "toolPolicyRefs": ["../../policies/architecture-foundation-policy.md"],
+  "humanGates": ["foundation_plan_approval", "architecture_decision", "scope_change"],
+  "permissionsInheritedOnly": true
+}

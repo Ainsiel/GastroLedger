@@ -1,0 +1,35 @@
+{
+  "kind": "gridwork.agent",
+  "id": "intake-agent",
+  "name": "Gridwork Intake Agent",
+  "version": "0.1.0",
+  "description": "Clarifies ambiguous ideas, bugs, improvements and feature requests before planning or implementation.",
+  "mode": "interactive",
+  "contract": "AGENT.md",
+  "allowedWorkflows": [
+    "intake-existing-code",
+    "ideation-from-zero"
+  ],
+  "allowedSkills": [
+    "sdd-requirements",
+    "diagnose-bug",
+    "handoff"
+  ],
+  "permissionProfile": "intake-hitl",
+  "pathScopes": [
+    "gridwork_factory_read",
+    "factory_runtime_write",
+    "project_context_readonly",
+    "docs_draft_write"
+  ],
+  "policyRefs": [
+    "../../policies/security-policy.md",
+    "../../policies/logging-policy.md",
+    "../../policies/path-scopes.md",
+    "../../policies/agent-permissions.md",
+    "../../policies/workspace-domains.md",
+    "../../policies/human-gates.md"
+  ],
+  "handoffPolicy": "required_on_agent_or_session_transfer"
+}
+

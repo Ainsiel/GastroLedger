@@ -1,0 +1,15 @@
+{
+  "kind": "gridwork.skill",
+  "id": "changed-scope-detection",
+  "name": "Changed Scope Detection",
+  "version": "0.2.0",
+  "description": "Maps changed monorepo paths to required CI components without weakening release regression coverage.",
+  "category": "cicd",
+  "allowedAgents": ["platform-engineer-agent", "verifier-agent"],
+  "allowedWorkflows": ["delivery-infrastructure", "ci-failure-repair", "verification-pr"],
+  "requiredInputs": ["component_ownership_map", "changed_paths"],
+  "producedOutputs": ["affected_components", "required_checks"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/ci/"],
+  "humanGates": [],
+  "permissionsInheritedOnly": true
+}

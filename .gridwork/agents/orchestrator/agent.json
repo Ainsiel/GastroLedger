@@ -1,0 +1,53 @@
+{
+  "kind": "gridwork.agent",
+  "id": "orchestrator",
+  "name": "Gridwork Orchestrator",
+  "version": "0.1.0",
+  "description": "Routes user requests to Gridwork workflows, delegates to agents and enforces full-v1 factory policies.",
+  "mode": "interactive",
+  "contract": "AGENT.md",
+  "prompt": "PROMPT.md",
+  "allowedWorkflows": [
+    "intake-existing-code",
+    "ideation-from-zero",
+    "architecture-ddd",
+    "architecture-foundation",
+    "backlog-management",
+    "backlog-task-delivery",
+    "feature-pr-delivery",
+    "tdd-implementation",
+    "verification-pr",
+    "release-promotion",
+    "repository-bootstrap",
+    "delivery-infrastructure",
+    "ci-failure-repair"
+  ],
+  "allowedSkills": [
+    "handoff",
+    "github-cli",
+    "github-issue-discovery",
+    "git-branch-management",
+    "work-order-branch-lifecycle",
+    "pull-request-lifecycle",
+    "ci-status-evaluation"
+  ],
+  "permissionProfile": "orchestrator-full-v1",
+  "pathScopes": [
+    "gridwork_factory",
+    "factory_runtime",
+    "project_context_readonly"
+  ],
+  "policyRefs": [
+    "../../policies/security-policy.md",
+    "../../policies/logging-policy.md",
+    "../../policies/github-cli-policy.md",
+    "../../policies/path-scopes.md",
+    "../../policies/agent-permissions.md",
+    "../../policies/workspace-domains.md",
+    "../../policies/human-gates.md",
+    "../../policies/policy-precedence.md",
+    "../../policies/git-policy.md",
+    "../../policies/frontend-delivery-policy.md"
+  ],
+  "handoffPolicy": "required_on_agent_or_session_transfer"
+}

@@ -1,0 +1,23 @@
+.factory/
+
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Runtime
+*.heartbeat
+
+# Local environment values
+.env
+.env.*
+!.env.example

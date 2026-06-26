@@ -1,0 +1,55 @@
+{
+  "kind": "gridwork.workflow",
+  "id": "backlog-management",
+  "name": "Backlog Management",
+  "version": "0.1.0",
+  "description": "Builds and manages a unified local and GitHub backlog view, selects ready tasks and prepares approved implementation handoffs.",
+  "mode": "interactive",
+  "primaryAgent": "backlog-manager-agent",
+  "participatingAgents": [
+    "orchestrator",
+    "backlog-manager-agent",
+    "planner-agent",
+    "implementer-agent"
+  ],
+  "allowedSkills": [
+    "backlog-management",
+    "backlog-planning",
+    "github-issue-discovery",
+    "github-issue-publisher",
+    "github-label-manager",
+    "github-cli",
+    "work-order-branch-lifecycle",
+    "frontend-architecture-design",
+    "frontend-state-strategy",
+    "frontend-api-contract-consumption",
+    "frontend-testing-strategy",
+    "nextjs-frontend-guidance",
+    "nextjs-ui-design",
+    "handoff"
+  ],
+  "requiredInputs": [
+    "backlog_question_or_task_request",
+    "confirmed_backlog_sources"
+  ],
+  "producedOutputs": [
+    "backlog_snapshot",
+    "readiness_report",
+    "missing_task_analysis",
+    "selected_task",
+    "work_order_candidate",
+    "implementation_handoff"
+  ],
+  "artifactPaths": [
+    ".factory/runs/<run-id>/artifacts/backlog-management/",
+    "docs/backlog/"
+  ],
+  "humanGates": [
+    "github_write",
+    "backlog_priority_change",
+    "work_order_approval",
+    "afk_delegation",
+    "secret_value_needed"
+  ],
+  "requiresWorkOrder": false
+}

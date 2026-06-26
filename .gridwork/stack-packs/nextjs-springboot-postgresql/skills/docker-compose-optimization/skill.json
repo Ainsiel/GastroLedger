@@ -1,0 +1,17 @@
+{
+  "kind": "gridwork.skill",
+  "id": "docker-compose-optimization",
+  "name": "Docker Compose Optimization",
+  "version": "0.1.0",
+  "description": "Improves Docker Compose build reuse, startup reliability, resource use and developer ergonomics.",
+  "category": "stack-infrastructure",
+  "allowedAgents": ["software-architect", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["confirmed_compose_path", "developer_workflow", "measured_compose_problem"],
+  "producedOutputs": ["compose_baseline", "compose_optimization_plan", "compose_validation_evidence"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/stack-guidance/docker/"],
+  "toolPolicyRefs": ["../../../../policies/stack-skill-policy.md"],
+  "humanGates": ["path_confirmation", "infra_file_write", "resource_policy_change"],
+  "permissionsInheritedOnly": true,
+  "generatesOnInit": false
+}

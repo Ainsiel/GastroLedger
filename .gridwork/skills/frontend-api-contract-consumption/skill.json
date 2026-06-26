@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "frontend-api-contract-consumption",
+  "name": "Frontend API Contract Consumption",
+  "version": "0.1.0",
+  "description": "Designs and verifies typed frontend consumption of backend contracts, errors, retries and compatibility.",
+  "category": "frontend-architecture",
+  "allowedAgents": ["software-architect", "architecture-foundation-agent", "implementer-agent", "verifier-agent"],
+  "allowedWorkflows": ["architecture-ddd", "architecture-foundation", "tdd-implementation", "verification-pr"],
+  "requiredInputs": ["backend_api_contracts", "frontend_consumers", "error_contract", "compatibility_constraints"],
+  "producedOutputs": ["frontend_api_consumption_contract", "dto_mapping_rules", "frontend_error_strategy"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/frontend/api/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["public_contract_decision", "compatibility_decision"],
+  "permissionsInheritedOnly": true
+}

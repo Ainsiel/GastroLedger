@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "deployment-verification",
+  "name": "Deployment Verification",
+  "version": "0.1.0",
+  "description": "Observes production deployment for the main SHA and records smoke-check or rollback evidence.",
+  "category": "deployment",
+  "allowedAgents": ["release-manager-agent", "platform-engineer-agent"],
+  "allowedWorkflows": ["release-promotion", "delivery-infrastructure"],
+  "requiredInputs": ["main_sha", "production_environment", "deployment_checks"],
+  "producedOutputs": ["deployment_status", "smoke_check_evidence", "rollback_recommendation"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/deployment/"],
+  "toolPolicyRefs": ["../../policies/github-cli-policy.md", "../../policies/delivery-lifecycle-policy.md"],
+  "humanGates": ["deploy", "rollback", "secret_value_needed"],
+  "permissionsInheritedOnly": true
+}

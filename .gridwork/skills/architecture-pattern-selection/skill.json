@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "architecture-pattern-selection",
+  "name": "Architecture Pattern Selection",
+  "version": "0.1.0",
+  "description": "Compares architectural styles against confirmed drivers and selects the simplest defensible system-level pattern.",
+  "category": "architecture",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["architecture_drivers", "bounded_contexts", "constraints"],
+  "producedOutputs": ["architecture_pattern_decision", "tradeoff_analysis"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/decisions/", "docs/architecture/"],
+  "toolPolicyRefs": ["../../policies/architecture-design-policy.md"],
+  "humanGates": ["architecture_pattern_decision"],
+  "permissionsInheritedOnly": true
+}

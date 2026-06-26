@@ -1,0 +1,16 @@
+{
+  "kind": "gridwork.skill",
+  "id": "erd-html-diagrams",
+  "name": "ERD HTML Diagrams",
+  "version": "0.1.0",
+  "description": "Creates optional self-contained HTML MER or ERD diagrams with entities, cardinality, ownership and constraints.",
+  "category": "architecture-diagram",
+  "allowedAgents": ["software-architect"],
+  "allowedWorkflows": ["architecture-ddd"],
+  "requiredInputs": ["diagram_goal", "approved_data_model", "model_level"],
+  "producedOutputs": ["erd_html_diagram", "diagram_notes"],
+  "artifactPaths": [".factory/runs/<run-id>/artifacts/architecture/diagrams/", "docs/architecture/diagrams/"],
+  "toolPolicyRefs": ["../../policies/diagram-html-policy.md"],
+  "humanGates": ["approved_architecture_publish"],
+  "permissionsInheritedOnly": true
+}

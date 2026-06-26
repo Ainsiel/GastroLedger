@@ -1,0 +1,15 @@
+.git
+.factory
+.gridwork
+.next
+**/.next
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/node_modules
+coverage
+dist
+.env
+.env.*
+!.env.example
+

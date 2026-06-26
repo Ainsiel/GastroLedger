@@ -1,0 +1,500 @@
+{
+  "kind": "gridwork.factory",
+  "id": "gridwork-full-v1",
+  "name": "Gridwork Full V1 Factory",
+  "version": "0.2.0",
+  "schemaVersion": "1.0.0",
+  "factoryProfile": "full-v1",
+  "description": "Full v1 installable Gridwork factory profile with orchestrator, agents, workflows, skills, policies, templates and stack guidance.",
+  "generatedProductCode": false,
+  "activation": {
+    "primaryPrompt": "agents/orchestrator/PROMPT.md",
+    "quickstart": "QUICKSTART.md"
+  },
+  "agents": [
+    {
+      "id": "orchestrator",
+      "manifest": "agents/orchestrator/agent.json",
+      "contract": "agents/orchestrator/AGENT.md",
+      "prompt": "agents/orchestrator/PROMPT.md"
+    },
+    {
+      "id": "intake-agent",
+      "manifest": "agents/intake-agent/agent.json",
+      "contract": "agents/intake-agent/AGENT.md"
+    },
+    {
+      "id": "software-architect",
+      "manifest": "agents/software-architect/agent.json",
+      "contract": "agents/software-architect/AGENT.md"
+    },
+    {
+      "id": "architecture-foundation-agent",
+      "manifest": "agents/architecture-foundation-agent/agent.json",
+      "contract": "agents/architecture-foundation-agent/AGENT.md"
+    },
+    {
+      "id": "planner-agent",
+      "manifest": "agents/planner-agent/agent.json",
+      "contract": "agents/planner-agent/AGENT.md"
+    },
+    {
+      "id": "backlog-manager-agent",
+      "manifest": "agents/backlog-manager-agent/agent.json",
+      "contract": "agents/backlog-manager-agent/AGENT.md"
+    },
+    {
+      "id": "implementer-agent",
+      "manifest": "agents/implementer-agent/agent.json",
+      "contract": "agents/implementer-agent/AGENT.md"
+    },
+    {
+      "id": "verifier-agent",
+      "manifest": "agents/verifier-agent/agent.json",
+      "contract": "agents/verifier-agent/AGENT.md"
+    },
+    {
+      "id": "release-manager-agent",
+      "manifest": "agents/release-manager-agent/agent.json",
+      "contract": "agents/release-manager-agent/AGENT.md"
+    },
+    {
+      "id": "platform-engineer-agent",
+      "manifest": "agents/platform-engineer-agent/agent.json",
+      "contract": "agents/platform-engineer-agent/AGENT.md"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "intake-existing-code",
+      "manifest": "workflows/intake-existing-code/workflow.json",
+      "contract": "workflows/intake-existing-code/WORKFLOW.md"
+    },
+    {
+      "id": "ideation-from-zero",
+      "manifest": "workflows/ideation-from-zero/workflow.json",
+      "contract": "workflows/ideation-from-zero/WORKFLOW.md"
+    },
+    {
+      "id": "architecture-ddd",
+      "manifest": "workflows/architecture-ddd/workflow.json",
+      "contract": "workflows/architecture-ddd/WORKFLOW.md"
+    },
+    {
+      "id": "architecture-foundation",
+      "manifest": "workflows/architecture-foundation/workflow.json",
+      "contract": "workflows/architecture-foundation/WORKFLOW.md"
+    },
+    {
+      "id": "backlog-management",
+      "manifest": "workflows/backlog-management/workflow.json",
+      "contract": "workflows/backlog-management/WORKFLOW.md"
+    },
+    {
+      "id": "backlog-task-delivery",
+      "manifest": "workflows/backlog-task-delivery/workflow.json",
+      "contract": "workflows/backlog-task-delivery/WORKFLOW.md"
+    },
+    {
+      "id": "tdd-implementation",
+      "manifest": "workflows/tdd-implementation/workflow.json",
+      "contract": "workflows/tdd-implementation/WORKFLOW.md"
+    },
+    {
+      "id": "verification-pr",
+      "manifest": "workflows/verification-pr/workflow.json",
+      "contract": "workflows/verification-pr/WORKFLOW.md"
+    },
+    {
+      "id": "feature-pr-delivery",
+      "manifest": "workflows/feature-pr-delivery/workflow.json",
+      "contract": "workflows/feature-pr-delivery/WORKFLOW.md"
+    },
+    {
+      "id": "release-promotion",
+      "manifest": "workflows/release-promotion/workflow.json",
+      "contract": "workflows/release-promotion/WORKFLOW.md"
+    },
+    {
+      "id": "repository-bootstrap",
+      "manifest": "workflows/repository-bootstrap/workflow.json",
+      "contract": "workflows/repository-bootstrap/WORKFLOW.md"
+    },
+    {
+      "id": "delivery-infrastructure",
+      "manifest": "workflows/delivery-infrastructure/workflow.json",
+      "contract": "workflows/delivery-infrastructure/WORKFLOW.md"
+    },
+    {
+      "id": "ci-failure-repair",
+      "manifest": "workflows/ci-failure-repair/workflow.json",
+      "contract": "workflows/ci-failure-repair/WORKFLOW.md"
+    }
+  ],
+  "skills": [
+    {
+      "id": "handoff",
+      "manifest": "skills/handoff/skill.json",
+      "contract": "skills/handoff/SKILL.md"
+    },
+    {
+      "id": "sdd-requirements",
+      "manifest": "skills/sdd-requirements/skill.json",
+      "contract": "skills/sdd-requirements/SKILL.md"
+    },
+    {
+      "id": "backlog-planning",
+      "manifest": "skills/backlog-planning/skill.json",
+      "contract": "skills/backlog-planning/SKILL.md"
+    },
+    {
+      "id": "backlog-management",
+      "manifest": "skills/backlog-management/skill.json",
+      "contract": "skills/backlog-management/SKILL.md"
+    },
+    {
+      "id": "architecture-foundation-planning",
+      "manifest": "skills/architecture-foundation-planning/skill.json",
+      "contract": "skills/architecture-foundation-planning/SKILL.md"
+    },
+    {
+      "id": "project-scaffolding",
+      "manifest": "skills/project-scaffolding/skill.json",
+      "contract": "skills/project-scaffolding/SKILL.md"
+    },
+    {
+      "id": "module-boundary-enforcement",
+      "manifest": "skills/module-boundary-enforcement/skill.json",
+      "contract": "skills/module-boundary-enforcement/SKILL.md"
+    },
+    {
+      "id": "contract-first-boundaries",
+      "manifest": "skills/contract-first-boundaries/skill.json",
+      "contract": "skills/contract-first-boundaries/SKILL.md"
+    },
+    {
+      "id": "composition-root-wiring",
+      "manifest": "skills/composition-root-wiring/skill.json",
+      "contract": "skills/composition-root-wiring/SKILL.md"
+    },
+    {
+      "id": "architecture-conformance-verification",
+      "manifest": "skills/architecture-conformance-verification/skill.json",
+      "contract": "skills/architecture-conformance-verification/SKILL.md"
+    },
+    {
+      "id": "frontend-architecture-design",
+      "manifest": "skills/frontend-architecture-design/skill.json",
+      "contract": "skills/frontend-architecture-design/SKILL.md"
+    },
+    {
+      "id": "frontend-state-strategy",
+      "manifest": "skills/frontend-state-strategy/skill.json",
+      "contract": "skills/frontend-state-strategy/SKILL.md"
+    },
+    {
+      "id": "frontend-api-contract-consumption",
+      "manifest": "skills/frontend-api-contract-consumption/skill.json",
+      "contract": "skills/frontend-api-contract-consumption/SKILL.md"
+    },
+    {
+      "id": "frontend-testing-strategy",
+      "manifest": "skills/frontend-testing-strategy/skill.json",
+      "contract": "skills/frontend-testing-strategy/SKILL.md"
+    },
+    {
+      "id": "work-order-branch-lifecycle",
+      "manifest": "skills/work-order-branch-lifecycle/skill.json",
+      "contract": "skills/work-order-branch-lifecycle/SKILL.md"
+    },
+    {
+      "id": "pull-request-lifecycle",
+      "manifest": "skills/pull-request-lifecycle/skill.json",
+      "contract": "skills/pull-request-lifecycle/SKILL.md"
+    },
+    {
+      "id": "ci-status-evaluation",
+      "manifest": "skills/ci-status-evaluation/skill.json",
+      "contract": "skills/ci-status-evaluation/SKILL.md"
+    },
+    {
+      "id": "release-promotion",
+      "manifest": "skills/release-promotion/skill.json",
+      "contract": "skills/release-promotion/SKILL.md"
+    },
+    {
+      "id": "deployment-verification",
+      "manifest": "skills/deployment-verification/skill.json",
+      "contract": "skills/deployment-verification/SKILL.md"
+    },
+    {
+      "id": "github-actions-cicd",
+      "manifest": "skills/github-actions-cicd/skill.json",
+      "contract": "skills/github-actions-cicd/SKILL.md"
+    },
+    {
+      "id": "github-cli",
+      "manifest": "skills/github-cli/skill.json",
+      "contract": "skills/github-cli/SKILL.md"
+    },
+    {
+      "id": "github-issue-publisher",
+      "manifest": "skills/github-issue-publisher/skill.json",
+      "contract": "skills/github-issue-publisher/SKILL.md"
+    },
+    {
+      "id": "github-issue-discovery",
+      "manifest": "skills/github-issue-discovery/skill.json",
+      "contract": "skills/github-issue-discovery/SKILL.md"
+    },
+    {
+      "id": "html-architecture-diagrams",
+      "manifest": "skills/html-architecture-diagrams/skill.json",
+      "contract": "skills/html-architecture-diagrams/SKILL.md"
+    },
+    {
+      "id": "architecture-grill-me",
+      "manifest": "skills/architecture-grill-me/skill.json",
+      "contract": "skills/architecture-grill-me/SKILL.md"
+    },
+    {
+      "id": "ubiquitous-language",
+      "manifest": "skills/ubiquitous-language/skill.json",
+      "contract": "skills/ubiquitous-language/SKILL.md"
+    },
+    {
+      "id": "domain-driven-design",
+      "manifest": "skills/domain-driven-design/skill.json",
+      "contract": "skills/domain-driven-design/SKILL.md"
+    },
+    {
+      "id": "clean-architecture",
+      "manifest": "skills/clean-architecture/skill.json",
+      "contract": "skills/clean-architecture/SKILL.md"
+    },
+    {
+      "id": "architecture-pattern-selection",
+      "manifest": "skills/architecture-pattern-selection/skill.json",
+      "contract": "skills/architecture-pattern-selection/SKILL.md"
+    },
+    {
+      "id": "design-pattern-selection",
+      "manifest": "skills/design-pattern-selection/skill.json",
+      "contract": "skills/design-pattern-selection/SKILL.md"
+    },
+    {
+      "id": "api-contract-design",
+      "manifest": "skills/api-contract-design/skill.json",
+      "contract": "skills/api-contract-design/SKILL.md"
+    },
+    {
+      "id": "relational-data-modeling",
+      "manifest": "skills/relational-data-modeling/skill.json",
+      "contract": "skills/relational-data-modeling/SKILL.md"
+    },
+    {
+      "id": "architecture-decision-records",
+      "manifest": "skills/architecture-decision-records/skill.json",
+      "contract": "skills/architecture-decision-records/SKILL.md"
+    },
+    {
+      "id": "c4-html-diagrams",
+      "manifest": "skills/c4-html-diagrams/skill.json",
+      "contract": "skills/c4-html-diagrams/SKILL.md"
+    },
+    {
+      "id": "erd-html-diagrams",
+      "manifest": "skills/erd-html-diagrams/skill.json",
+      "contract": "skills/erd-html-diagrams/SKILL.md"
+    },
+    {
+      "id": "uml-html-diagrams",
+      "manifest": "skills/uml-html-diagrams/skill.json",
+      "contract": "skills/uml-html-diagrams/SKILL.md"
+    },
+    {
+      "id": "diagnose-bug",
+      "manifest": "skills/diagnose-bug/skill.json",
+      "contract": "skills/diagnose-bug/SKILL.md"
+    },
+    {
+      "id": "tdd",
+      "manifest": "skills/tdd/skill.json",
+      "contract": "skills/tdd/SKILL.md"
+    },
+    {
+      "id": "integration-testing",
+      "manifest": "skills/integration-testing/skill.json",
+      "contract": "skills/integration-testing/SKILL.md"
+    },
+    {
+      "id": "integration-test-design",
+      "manifest": "skills/integration-test-design/skill.json",
+      "contract": "skills/integration-test-design/SKILL.md"
+    },
+    {
+      "id": "git-branch-management",
+      "manifest": "skills/git-branch-management/skill.json",
+      "contract": "skills/git-branch-management/SKILL.md"
+    },
+    {
+      "id": "github-label-manager",
+      "manifest": "skills/github-label-manager/skill.json",
+      "contract": "skills/github-label-manager/SKILL.md"
+    },
+    {
+      "id": "gridwork-release-publisher",
+      "manifest": "skills/gridwork-release-publisher/skill.json",
+      "contract": "skills/gridwork-release-publisher/SKILL.md"
+    },
+    {
+      "id": "monorepo-layout-design",
+      "manifest": "skills/monorepo-layout-design/skill.json",
+      "contract": "skills/monorepo-layout-design/SKILL.md"
+    },
+    {
+      "id": "repository-bootstrap",
+      "manifest": "skills/repository-bootstrap/skill.json",
+      "contract": "skills/repository-bootstrap/SKILL.md"
+    },
+    {
+      "id": "quality-command-contract",
+      "manifest": "skills/quality-command-contract/skill.json",
+      "contract": "skills/quality-command-contract/SKILL.md"
+    },
+    {
+      "id": "docker-compose-environment-strategy",
+      "manifest": "skills/docker-compose-environment-strategy/skill.json",
+      "contract": "skills/docker-compose-environment-strategy/SKILL.md"
+    },
+    {
+      "id": "github-actions-monorepo-ci",
+      "manifest": "skills/github-actions-monorepo-ci/skill.json",
+      "contract": "skills/github-actions-monorepo-ci/SKILL.md"
+    },
+    {
+      "id": "github-actions-reusable-workflows",
+      "manifest": "skills/github-actions-reusable-workflows/skill.json",
+      "contract": "skills/github-actions-reusable-workflows/SKILL.md"
+    },
+    {
+      "id": "changed-scope-detection",
+      "manifest": "skills/changed-scope-detection/skill.json",
+      "contract": "skills/changed-scope-detection/SKILL.md"
+    },
+    {
+      "id": "ci-failure-diagnosis",
+      "manifest": "skills/ci-failure-diagnosis/skill.json",
+      "contract": "skills/ci-failure-diagnosis/SKILL.md"
+    },
+    {
+      "id": "container-build-and-verification",
+      "manifest": "skills/container-build-and-verification/skill.json",
+      "contract": "skills/container-build-and-verification/SKILL.md"
+    },
+    {
+      "id": "github-rulesets-management",
+      "manifest": "skills/github-rulesets-management/skill.json",
+      "contract": "skills/github-rulesets-management/SKILL.md"
+    },
+    {
+      "id": "github-environments-management",
+      "manifest": "skills/github-environments-management/skill.json",
+      "contract": "skills/github-environments-management/SKILL.md"
+    },
+    {
+      "id": "rollback-planning",
+      "manifest": "skills/rollback-planning/skill.json",
+      "contract": "skills/rollback-planning/SKILL.md"
+    }
+  ],
+  "policies": [
+    "policies/security-policy.md",
+    "policies/logging-policy.md",
+    "policies/github-cli-policy.md",
+    "policies/path-scopes.md",
+    "policies/agent-permissions.md",
+    "policies/workspace-domains.md",
+    "policies/human-gates.md",
+    "policies/policy-precedence.md",
+    "policies/security-secrets-redaction.md",
+    "policies/github-labels.json",
+    "policies/tdd-evidence-policy.md",
+    "policies/git-policy.md",
+    "policies/work-order-policy.md",
+    "policies/tool-allowlist.md",
+    "policies/architecture-design-policy.md",
+    "policies/architecture-foundation-policy.md",
+    "policies/delivery-lifecycle-policy.md",
+    "policies/frontend-delivery-policy.md",
+    "policies/diagram-html-policy.md",
+    "policies/stack-skill-policy.md",
+    "policies/delivery-infrastructure-policy.md"
+  ],
+  "schemas": [
+    "schemas/factory.schema.json",
+    "schemas/agent.schema.json",
+    "schemas/workflow.schema.json",
+    "schemas/skill.schema.json",
+    "schemas/lockfile.schema.json"
+  ],
+  "templates": [
+    "templates/init-report.md",
+    "templates/source-resolution-report.md",
+    "templates/validation-report.md",
+    "templates/compatibility-report.md",
+    "templates/lockfile-report.md",
+    "templates/conflicts.md",
+    "templates/apply-plan.md",
+    "templates/work-order-afk.md",
+    "templates/run-summary.md",
+    "templates/run-state.json",
+    "templates/event.jsonl",
+    "templates/metrics.json",
+    "templates/tdd-evidence.md",
+    "templates/verifier-report.md",
+    "templates/github-pr-comment.md",
+    "templates/handoff.md",
+    "templates/github-issue-draft.md",
+    "templates/github-issue-publish-plan.md",
+    "templates/tdd-plan.md",
+    "templates/implementation-summary.md",
+    "templates/git-action-plan.md",
+    "templates/github-label-plan.md",
+    "templates/backlog-snapshot.md",
+    "templates/task-selection.md",
+    "templates/integration-test-strategy.md",
+    "templates/integration-test-evidence.md",
+    "templates/architecture-questionnaire.md",
+    "templates/architecture-overview.md",
+    "templates/architecture-foundation-plan.md",
+    "templates/architecture-conformance-report.md",
+    "templates/ci-failure-handoff.md",
+    "templates/release-promotion-report.md",
+    "templates/github-actions-feature-pr-ci.yml",
+    "templates/github-actions-release-pr-ci.yml",
+    "templates/github-actions-deploy-production.yml",
+    "templates/github-rulesets-plan.md",
+    "templates/bounded-context-canvas.md",
+    "templates/adr.md",
+    "templates/pattern-decision.md",
+    "templates/api-design.md",
+    "templates/data-model-design.md",
+    "templates/diagram-notes.md",
+    "templates/architecture-diagram.html",
+    "templates/quality-command-contract.md",
+    "templates/compose-environment-plan.md",
+    "templates/github-actions-develop-ci.yml",
+    "templates/github-actions-reusable-frontend-ci.yml",
+    "templates/github-actions-reusable-backend-ci.yml",
+    "templates/github-actions-reusable-integration-ci.yml"
+  ],
+  "stackPacks": [
+    {
+      "id": "nextjs-springboot-postgresql",
+      "manifest": "stack-packs/nextjs-springboot-postgresql/stack-pack.json",
+      "contract": "stack-packs/nextjs-springboot-postgresql/STACK.md",
+      "generatesProductCode": false
+    }
+  ]
+}
