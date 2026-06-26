@@ -49,6 +49,8 @@ def test_production_workflow_deploys_to_ec2_after_smoke() -> None:
         "sudo docker buildx version",
         "docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.linux-$BUILDX_ARCH",
         "/usr/local/lib/docker/cli-plugins",
+        "/usr/libexec/docker/cli-plugins",
+        "/usr/lib/docker/cli-plugins",
         "docker/compose/releases/latest/download/docker-compose-linux-$COMPOSE_ARCH",
         "ssh-keyscan",
         "git reset --hard origin/main",

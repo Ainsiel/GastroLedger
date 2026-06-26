@@ -54,7 +54,7 @@ case "$ARCH" in
     ;;
   *) echo "Unsupported architecture for Docker plugins: $ARCH" >&2; exit 1 ;;
 esac
-sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo mkdir -p /usr/local/lib/docker/cli-plugins /usr/libexec/docker/cli-plugins /usr/lib/docker/cli-plugins
 
 download_plugin() {
   url="$1"
@@ -76,6 +76,8 @@ BUILDX_VERSION="v0.17.1"
 BUILDX_URL="https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.linux-$BUILDX_ARCH"
 download_plugin "$BUILDX_URL" /usr/local/lib/docker/cli-plugins/docker-buildx
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+sudo install -m 0755 /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx
+sudo install -m 0755 /usr/local/lib/docker/cli-plugins/docker-buildx /usr/lib/docker/cli-plugins/docker-buildx
 ```
 
 Cierra y vuelve a entrar por SSH para tomar el grupo `docker`, luego valida:
