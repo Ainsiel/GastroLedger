@@ -73,11 +73,21 @@ jobs:
             VERSION_ID=""
           fi
 
-          if [ "$ID" = "amzn" ] && [ "${VERSION_ID%%.*}" = "2023" ]; then
-            sudo dnf update -y
-            sudo dnf install -y git docker nginx python3
+          if [ "$ID" = "ubuntu" ] || [ "$ID" = "debian" ]; then
+            sudo apt-get update
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+              ca-certificates \
+              curl \
+              docker.io \
+              git \
+              nginx \
+              python3
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-buildx docker-compose-v2 || true
             sudo systemctl enable --now docker
             sudo systemctl enable --now nginx
+          else
+            echo "Unsupported EC2 operating system: ${PRETTY_NAME:-unknown}" >&2
+            exit 1
           fi
 
           if ! command -v git >/dev/null 2>&1; then

@@ -11,7 +11,7 @@ levantan `web`, `api`, `worker` y PostgreSQL con Docker Compose.
 - Rama productiva: `main`.
 - Evento: `push` a `main`, normalmente generado por merge de `develop` a `main`.
 - Workflow: `.github/workflows/production.yml`.
-- Host: una instancia EC2 con Docker Engine y Docker Compose plugin.
+- Host: una instancia EC2 Ubuntu Server 26.04 LTS x86_64 con Docker Engine y Docker Compose plugin.
 - App dir recomendado: `/opt/gastroledger`.
 - Runtime: `infra/compose/compose.yaml` + `infra/compose/compose.production-like.yaml`.
 - Base de datos: PostgreSQL en Compose con volumen persistente `postgres-data`.
@@ -22,11 +22,12 @@ No abras PostgreSQL ni la API directamente a Internet.
 
 ## 1. Preparar EC2
 
-Recomendado:
+Recomendado para empezar desde cero:
 
-- Amazon Linux 2023.
-- 2 vCPU y 4 GB RAM como minimo para build local de contenedores.
-- Volumen EBS con espacio suficiente para Docker images, PostgreSQL y backups.
+- AMI: Ubuntu Server 26.04 LTS (HVM), EBS General Purpose SSD.
+- Tipo de instancia: `t3.small` x86_64, 2 vCPU y 2 GiB RAM.
+- Volumen EBS: minimo 30 GiB `gp3` para Docker images, PostgreSQL y backups.
+- Usuario SSH default: `ubuntu`.
 - Security Group:
   - `22/tcp` solo desde IPs administrativas o desde el rango de salida que uses para CI.
   - `80/tcp` y `443/tcp` publicos si Nginx termina HTTP/HTTPS.
@@ -36,11 +37,18 @@ Instala dependencias base:
 
 ```bash
 cat /etc/os-release
-sudo dnf update -y
-sudo dnf install -y git docker nginx python3
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  ca-certificates \
+  curl \
+  docker.io \
+  git \
+  nginx \
+  python3
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-buildx docker-compose-v2 || true
 sudo systemctl enable --now docker
 sudo systemctl enable --now nginx
-sudo usermod -aG docker ec2-user
+sudo usermod -aG docker ubuntu
 
 ARCH="$(uname -m)"
 case "$ARCH" in
@@ -80,7 +88,10 @@ sudo install -m 0755 /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexe
 sudo install -m 0755 /usr/local/lib/docker/cli-plugins/docker-buildx /usr/lib/docker/cli-plugins/docker-buildx
 ```
 
-Cierra y vuelve a entrar por SSH para tomar el grupo `docker`, luego valida:
+El bloque de descarga manual de Compose y Buildx es intencional: en algunas AMI
+los paquetes `docker-compose-v2` o `docker-buildx` pueden no existir o venir
+viejos. Cierra y vuelve a entrar por SSH para tomar el grupo `docker`, luego
+valida:
 
 ```bash
 docker version
@@ -130,7 +141,7 @@ chmod 600 ~/.ssh/authorized_keys
 En GitHub, crea estos secrets del repositorio:
 
 - `AWS_EC2_HOST`: DNS publico o IP publica del EC2.
-- `AWS_EC2_USER`: usuario SSH, para Amazon Linux 2023 normalmente `ec2-user`.
+- `AWS_EC2_USER`: usuario SSH, para Ubuntu normalmente `ubuntu`.
 - `AWS_EC2_SSH_PRIVATE_KEY`: contenido completo de `gastroledger_ec2_actions`.
 - `AWS_EC2_PORT`: opcional; si queda vacio el workflow usa `22`.
 
