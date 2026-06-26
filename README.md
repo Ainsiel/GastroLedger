@@ -164,6 +164,21 @@ Detener:
 docker compose --env-file infra/compose/.env.example -f infra/compose/compose.yaml -f infra/compose/compose.production-like.yaml down
 ```
 
+### Seed
+
+La seed idempotente crea el tenant administrador y datos de demostracion para
+las features implementadas. Se ejecuta automaticamente al levantar `api` o
+`worker`, y tambien puede correrse manualmente:
+
+```powershell
+npm run seed:database
+npm run seed:database:qa
+npm run seed:database:production-like
+```
+
+En local, `.env.example` usa `admin@gastroledger.local` con un hash scrypt de
+desarrollo. En produccion configura `SEED_ADMIN_PASSWORD_HASH` con un hash propio.
+
 ## Validación Y Pruebas
 
 Validaciones principales:
@@ -207,6 +222,12 @@ El smoke usa web `http://127.0.0.1:53000` y API
 - Los release PR van desde `develop` hacia `main`.
 - No se permiten pushes directos a `develop` ni `main`.
 - Los feature PR usan squash merge; los release PR usan merge commit.
+
+## Despliegue AWS EC2
+
+La guia completa de configuracion de EC2, SSH, GitHub secrets, Docker Compose,
+migrations, seed y pipeline productiva esta en
+`docs/operations/aws-ec2-production-deploy.md`.
 
 Antes de implementar comportamiento:
 

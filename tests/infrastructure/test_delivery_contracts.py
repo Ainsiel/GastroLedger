@@ -22,7 +22,7 @@ def test_required_aggregate_checks_are_stable() -> None:
 
 def test_workflows_use_read_only_permissions_and_no_secrets() -> None:
     violations: list[str] = []
-    forbidden = ("contents: write", "write-all", "secrets.", "GH_TOKEN", "GITHUB_TOKEN")
+    forbidden = ("contents: write", "write-all", "GH_TOKEN", "GITHUB_TOKEN")
     for path in WORKFLOWS.glob("*.yml"):
         content = path.read_text(encoding="utf-8")
         if "contents: read" not in content:
@@ -30,14 +30,30 @@ def test_workflows_use_read_only_permissions_and_no_secrets() -> None:
         violations.extend(
             f"{path.name} contains {marker}" for marker in forbidden if marker in content
         )
+        if path.name != "production.yml" and "secrets." in content:
+            violations.append(f"{path.name} contains secrets outside production deploy")
     assert not violations, "\n".join(violations)
 
 
-def test_production_workflow_is_provider_neutral_and_has_no_deploy_step() -> None:
-    content = workflow("production.yml").lower()
-    forbidden = ("kubectl", "helm ", "aws ", "azure", "gcloud", "terraform", "pulumi", "deploy:")
-    assert not [marker for marker in forbidden if marker in content]
-    assert "performs no deploy" in content
+def test_production_workflow_deploys_to_ec2_after_smoke() -> None:
+    content = workflow("production.yml")
+    required = (
+        "branches:\n      - main",
+        "name: deploy-ec2",
+        "needs:\n      - artifact-smoke",
+        "AWS_EC2_SSH_PRIVATE_KEY",
+        "sudo dnf install -y curl git docker nginx python3",
+        "sudo docker compose version",
+        "/usr/local/lib/docker/cli-plugins",
+        "docker/compose/releases/latest/download/docker-compose-linux-$ARCH",
+        "ssh-keyscan",
+        "git reset --hard origin/main",
+        "COMPOSE=\"sudo docker compose",
+        "run --rm migrate",
+        "run --rm seed",
+        "up --detach --wait web api worker",
+    )
+    assert all(marker in content for marker in required)
 
 
 def test_release_contract_enables_full_suite() -> None:
@@ -49,7 +65,7 @@ def test_release_contract_enables_full_suite() -> None:
 
 def test_compose_declares_only_approved_services() -> None:
     content = (ROOT / "infra" / "compose" / "compose.yaml").read_text(encoding="utf-8")
-    for service in ("web", "api", "worker", "postgres", "migrate"):
+    for service in ("web", "api", "worker", "postgres", "migrate", "seed"):
         assert f"  {service}:" in content
     for forbidden in ("redis:", "broker:", "rabbitmq:", "kafka:", "external-api:"):
         assert forbidden not in content.lower()

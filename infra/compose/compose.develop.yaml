@@ -1,4 +1,8 @@
 services:
+  seed:
+    environment:
+      GL_ENVIRONMENT: development
+
   api:
     build:
       target: development

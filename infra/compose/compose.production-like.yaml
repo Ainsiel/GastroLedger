@@ -20,3 +20,7 @@ services:
   migrate:
     environment:
       GL_ENVIRONMENT: production-like
+
+  seed:
+    environment:
+      GL_ENVIRONMENT: production-like

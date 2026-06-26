@@ -39,6 +39,31 @@ services:
     volumes:
       - ../migrations:/migrations:ro
 
+  seed:
+    image: postgres:17-alpine
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      GL_ENVIRONMENT: base
+      PGDATABASE: ${POSTGRES_DB}
+      PGHOST: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGUSER: ${POSTGRES_USER}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}
+      SEED_ADMIN_PASSWORD_HASH: ${SEED_ADMIN_PASSWORD_HASH}
+      SEED_TENANT_NAME: ${SEED_TENANT_NAME}
+      SEED_TENANT_SLUG: ${SEED_TENANT_SLUG}
+    command:
+      [
+        "sh",
+        "-c",
+        "for seed in /seeds/*.sql; do psql --set ON_ERROR_STOP=1 --set seed_environment=\"$${GL_ENVIRONMENT}\" --set seed_tenant_slug=\"$${SEED_TENANT_SLUG}\" --set seed_tenant_name=\"$${SEED_TENANT_NAME}\" --set seed_admin_email=\"$${SEED_ADMIN_EMAIL}\" --set seed_admin_password_hash=\"$${SEED_ADMIN_PASSWORD_HASH}\" --file \"$${seed}\"; done",
+      ]
+    restart: "no"
+    volumes:
+      - ../seeds:/seeds:ro
+
   api:
     image: gastroledger/api:local
     build:
@@ -46,7 +71,7 @@ services:
       dockerfile: infra/containers/api.Dockerfile
       target: runtime
     depends_on:
-      migrate:
+      seed:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_RUNTIME_USER}:${POSTGRES_RUNTIME_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -72,7 +97,7 @@ services:
       dockerfile: infra/containers/worker.Dockerfile
       target: runtime
     depends_on:
-      migrate:
+      seed:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_RUNTIME_USER}:${POSTGRES_RUNTIME_PASSWORD}@postgres:5432/${POSTGRES_DB}

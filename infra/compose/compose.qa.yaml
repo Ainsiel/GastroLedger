@@ -3,6 +3,10 @@ services:
     environment:
       GL_ENVIRONMENT: qa
 
+  seed:
+    environment:
+      GL_ENVIRONMENT: qa
+
   api:
     environment:
       GL_ENVIRONMENT: qa
