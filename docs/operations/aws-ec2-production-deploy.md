@@ -44,23 +44,38 @@ sudo usermod -aG docker ec2-user
 
 ARCH="$(uname -m)"
 case "$ARCH" in
-  x86_64|aarch64) ;;
-  *) echo "Unsupported architecture for Docker Compose: $ARCH" >&2; exit 1 ;;
+  x86_64)
+    COMPOSE_ARCH="x86_64"
+    BUILDX_ARCH="amd64"
+    ;;
+  aarch64)
+    COMPOSE_ARCH="aarch64"
+    BUILDX_ARCH="arm64"
+    ;;
+  *) echo "Unsupported architecture for Docker plugins: $ARCH" >&2; exit 1 ;;
 esac
 sudo mkdir -p /usr/local/lib/docker/cli-plugins
-COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$ARCH"
-if command -v curl >/dev/null 2>&1; then
-  sudo curl -SL "$COMPOSE_URL" -o /usr/local/lib/docker/cli-plugins/docker-compose
-else
-  python3 - "$COMPOSE_URL" <<'PY'
-import sys
-import urllib.request
 
-urllib.request.urlretrieve(sys.argv[1], "/tmp/docker-compose")
-PY
-  sudo mv /tmp/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
-fi
+download_plugin() {
+  url="$1"
+  target="$2"
+  if command -v curl >/dev/null 2>&1; then
+    sudo curl -fsSL "$url" -o "$target"
+  else
+    tmp_file="$(mktemp)"
+    python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' "$url" "$tmp_file"
+    sudo mv "$tmp_file" "$target"
+  fi
+}
+
+COMPOSE_URL="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$COMPOSE_ARCH"
+download_plugin "$COMPOSE_URL" /usr/local/lib/docker/cli-plugins/docker-compose
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+BUILDX_VERSION="v0.17.1"
+BUILDX_URL="https://github.com/docker/buildx/releases/download/$BUILDX_VERSION/buildx-$BUILDX_VERSION.linux-$BUILDX_ARCH"
+download_plugin "$BUILDX_URL" /usr/local/lib/docker/cli-plugins/docker-buildx
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
 ```
 
 Cierra y vuelve a entrar por SSH para tomar el grupo `docker`, luego valida:
@@ -68,11 +83,13 @@ Cierra y vuelve a entrar por SSH para tomar el grupo `docker`, luego valida:
 ```bash
 docker version
 docker compose version
+docker buildx version
 git --version
 nginx -v
 ```
 
-Si `docker compose version` falla, valida con `sudo docker compose version`.
+Si `docker compose version` o `docker buildx version` fallan, valida con
+`sudo docker compose version` y `sudo docker buildx version`.
 La pipeline usa `sudo docker compose`, asi que no depende de que el grupo
 `docker` ya este aplicado en la sesion de GitHub Actions.
 
