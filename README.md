@@ -7,7 +7,7 @@ costo y rentabilidad por sucursal.
 
 El repositorio contiene actualmente el scaffold ejecutable, los límites
 arquitectónicos y la infraestructura de entrega. Todavía no implementa casos de uso
-funcionales
+funcionales.
 
 ## Propuesta De Valor
 
