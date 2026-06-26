@@ -117,8 +117,17 @@ En GitHub, crea estos secrets del repositorio:
 
 ## 4. Acceso Del EC2 A GitHub
 
-El workflow entra al EC2 y ejecuta `git clone` o `git fetch`. Si el repositorio es
-privado, configura una deploy key de solo lectura en GitHub.
+El workflow entra al EC2 y ejecuta `git clone` o `git fetch`.
+
+Como `https://github.com/Ainsiel/GastroLedger` es publico, no necesitas deploy
+key para que el EC2 lea el repositorio. La pipeline usa por defecto:
+
+```text
+https://github.com/Ainsiel/GastroLedger.git
+```
+
+Solo si cambias el repositorio a privado, configura una deploy key de solo
+lectura en GitHub.
 
 En EC2:
 
@@ -145,8 +154,9 @@ ssh-keyscan github.com >> ~/.ssh/known_hosts
 ssh -T git@github.com || true
 ```
 
-Si quieres usar una URL distinta a `git@github.com:<owner>/<repo>.git`, crea la
-variable de repositorio `EC2_REPOSITORY_URL`.
+Si quieres usar una URL distinta a
+`https://github.com/Ainsiel/GastroLedger.git`, crea la variable de repositorio
+`EC2_REPOSITORY_URL`.
 
 ## 5. Variables Y Secretos De Produccion
 
@@ -206,7 +216,7 @@ que usaste para generar el hash.
 Opcionalmente define GitHub repository variables:
 
 - `EC2_APP_DIR`: default `/opt/gastroledger`.
-- `EC2_REPOSITORY_URL`: default `git@github.com:<owner>/<repo>.git`.
+- `EC2_REPOSITORY_URL`: default `https://github.com/Ainsiel/GastroLedger.git`.
 
 ## 6. Seed Incluida
 
@@ -243,7 +253,7 @@ Puedes validar el EC2 antes de activar el workflow:
 
 ```bash
 cd /opt/gastroledger
-git clone --branch main git@github.com:<owner>/<repo>.git .
+git clone --branch main https://github.com/Ainsiel/GastroLedger.git .
 cat > infra/compose/.env.production <<'EOF'
 # pega aqui el mismo contenido de EC2_PRODUCTION_ENV
 EOF

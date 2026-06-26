@@ -28,13 +28,13 @@ jobs:
     timeout-minutes: 30
     environment: production
     env:
-      APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/gastroledger' }}
+      APP_DIR: ${{ vars.EC2_APP_DIR }}
       EC2_HOST: ${{ secrets.AWS_EC2_HOST }}
       EC2_PORT: ${{ secrets.AWS_EC2_PORT }}
       EC2_PRODUCTION_ENV: ${{ secrets.EC2_PRODUCTION_ENV }}
       EC2_SSH_KEY: ${{ secrets.AWS_EC2_SSH_PRIVATE_KEY }}
       EC2_USER: ${{ secrets.AWS_EC2_USER }}
-      REPOSITORY_URL: ${{ vars.EC2_REPOSITORY_URL || format('git@github.com:{0}.git', github.repository) }}
+      REPOSITORY_URL: ${{ vars.EC2_REPOSITORY_URL }}
     steps:
       - name: Validate deployment inputs
         run: |
@@ -42,6 +42,15 @@ jobs:
           test -n "$EC2_SSH_KEY"
           test -n "$EC2_USER"
           test -n "$EC2_PRODUCTION_ENV"
+
+      - name: Resolve deployment defaults
+        run: |
+          if [ -z "$APP_DIR" ]; then
+            echo "APP_DIR=/opt/gastroledger" >> "$GITHUB_ENV"
+          fi
+          if [ -z "$REPOSITORY_URL" ]; then
+            echo "REPOSITORY_URL=https://github.com/Ainsiel/GastroLedger.git" >> "$GITHUB_ENV"
+          fi
 
       - name: Configure SSH client
         run: |
@@ -91,11 +100,11 @@ jobs:
               sudo curl -SL "$COMPOSE_URL" -o /usr/local/lib/docker/cli-plugins/docker-compose
             else
               python3 - "$COMPOSE_URL" <<'PY'
-import sys
-import urllib.request
+          import sys
+          import urllib.request
 
-urllib.request.urlretrieve(sys.argv[1], "/tmp/docker-compose")
-PY
+          urllib.request.urlretrieve(sys.argv[1], "/tmp/docker-compose")
+          PY
               sudo mv /tmp/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
             fi
             sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose

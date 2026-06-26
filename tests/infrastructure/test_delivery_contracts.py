@@ -42,6 +42,7 @@ def test_production_workflow_deploys_to_ec2_after_smoke() -> None:
         "name: deploy-ec2",
         "needs:\n      - artifact-smoke",
         "AWS_EC2_SSH_PRIVATE_KEY",
+        "REPOSITORY_URL=https://github.com/Ainsiel/GastroLedger.git",
         "sudo dnf install -y git docker nginx python3",
         "COMPOSE_URL=",
         "sudo docker compose version",
