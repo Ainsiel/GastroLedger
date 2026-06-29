@@ -33,7 +33,35 @@ Recomendado para empezar desde cero:
   - `80/tcp` y `443/tcp` publicos si Nginx termina HTTP/HTTPS.
   - No exponer `5432`, `8000` ni `3000`.
 
-Instala dependencias base:
+Pasos en AWS Console:
+
+1. EC2, Launch instance.
+2. Name: `gastroledger-production`.
+3. AMI: Ubuntu Server 26.04 LTS (HVM), SSD Volume Type, arquitectura `x86_64`.
+4. Instance type: `t3.small`.
+5. Key pair: crea o selecciona una llave `.pem` para tu acceso administrativo.
+6. Network settings:
+   - permitir SSH `22` solo desde tu IP;
+   - permitir HTTP `80` desde Internet;
+   - permitir HTTPS `443` desde Internet si vas a configurar TLS.
+7. Storage: minimo 30 GiB `gp3`.
+8. Launch instance.
+
+Desde Windows, conecta con el usuario `ubuntu`:
+
+```powershell
+ssh -i "C:\ruta\a\tu-key.pem" ubuntu@<EC2_PUBLIC_DNS>
+```
+
+Si Windows muestra `UNPROTECTED PRIVATE KEY FILE`, corrige permisos del `.pem`
+en PowerShell:
+
+```powershell
+icacls "C:\ruta\a\tu-key.pem" /inheritance:r
+icacls "C:\ruta\a\tu-key.pem" /grant:r "$env:USERNAME:R"
+```
+
+En la EC2, instala dependencias base:
 
 ```bash
 cat /etc/os-release
@@ -106,6 +134,18 @@ Si `docker compose version` o `docker buildx version` fallan, valida con
 La pipeline usa `sudo docker compose`, asi que no depende de que el grupo
 `docker` ya este aplicado en la sesion de GitHub Actions.
 
+En una `t3.small`, el build local puede consumir bastante memoria. Si el deploy
+se queda sin memoria, crea swap:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+free -h
+```
+
 ## 2. Preparar El Directorio De La App
 
 En EC2:
@@ -129,13 +169,24 @@ Genera una llave dedicada para que GitHub Actions entre al EC2:
 ssh-keygen -t ed25519 -C "github-actions-gastroledger-production" -f ./gastroledger_ec2_actions
 ```
 
-En EC2, agrega la llave publica:
+Este comando crea dos archivos:
+
+- `gastroledger_ec2_actions`: llave privada. Copia todo su contenido en GitHub secret `AWS_EC2_SSH_PRIVATE_KEY`.
+- `gastroledger_ec2_actions.pub`: llave publica. Esta se agrega al EC2.
+
+En EC2, agrega la llave publica al usuario `ubuntu`:
 
 ```bash
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 cat gastroledger_ec2_actions.pub >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
+```
+
+Prueba desde tu maquina antes de usar GitHub Actions:
+
+```powershell
+ssh -i ".\gastroledger_ec2_actions" ubuntu@<EC2_PUBLIC_DNS>
 ```
 
 En GitHub, crea estos secrets del repositorio:
@@ -192,6 +243,10 @@ Si quieres usar una URL distinta a
 
 El workflow sube un archivo `infra/compose/.env.production` al EC2 usando el
 secret multilinea `EC2_PRODUCTION_ENV`.
+
+En GitHub, crea un repository secret llamado `EC2_PRODUCTION_ENV`. Su valor debe
+ser el contenido completo del `.env.production`, linea por linea. No lo subas al
+repositorio.
 
 Ejemplo de contenido:
 
@@ -300,12 +355,17 @@ $COMPOSE ps
 No uses `down --volumes` en produccion salvo que quieras destruir la base de
 datos.
 
+Si solo quieres preparar el servidor y dejar que GitHub Actions haga el primer
+deploy, omite este paso manual. La pipeline clona el repo, sube
+`.env.production`, construye imagenes, ejecuta migrations y ejecuta seed.
+
 ## 8. Nginx Para Exponer El Front
 
-Ejemplo minimo:
+Ejemplo minimo para Ubuntu:
 
 ```bash
-sudo tee /etc/nginx/conf.d/gastroledger.conf >/dev/null <<'EOF'
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo tee /etc/nginx/sites-available/gastroledger >/dev/null <<'EOF'
 server {
   listen 80;
   server_name app.example.com;
@@ -320,12 +380,13 @@ server {
   }
 }
 EOF
+sudo ln -sf /etc/nginx/sites-available/gastroledger /etc/nginx/sites-enabled/gastroledger
 sudo nginx -t
 sudo systemctl enable --now nginx
 sudo systemctl reload nginx
 ```
 
-Para HTTPS usa Certbot o termina TLS en un ALB. Mantén `WEB_PORT=3000` local y
+Para HTTPS usa Certbot o termina TLS en un ALB. Manten `WEB_PORT=3000` local y
 proxy hacia `127.0.0.1:3000`.
 
 ## 9. Flujo Normal De Produccion
